@@ -4,6 +4,7 @@ const Catalog = preload("res://scripts/catalog.gd")
 const AI = preload("res://scripts/ai.gd")
 const CardView = preload("res://scripts/card_view.gd")
 const Arena = preload("res://scripts/arena.gd")
+const AceCutin = preload("res://scripts/ace_cutin.gd")
 const Effects = preload("res://scripts/effects.gd")
 const DeckStore = preload("res://scripts/deck_store.gd")
 const Gallery = preload("res://scripts/gallery.gd")
@@ -51,6 +52,12 @@ var result_title: Label
 var result_description: Label
 var fx
 var music: AudioStreamPlayer
+var urgency_music: AudioStreamPlayer
+var music_slider: HSlider
+var music_tween: Tween
+var music_targets: Array = []
+var ace_seen: Dictionary = {}
+var ace_active_until: float = 0.0
 var sfx: Array[AudioStreamPlayer] = []
 var sound_streams: Dictionary = {}
 var context_label: Label
@@ -100,6 +107,7 @@ var coin_tween: Tween
 
 
 func _ready() -> void:
+	CardView.allow_art_motion = true
 	var app_theme := Theme.new()
 	var ui_font := SystemFont.new()
 	ui_font.font_names = PackedStringArray(["Segoe UI", "Arial"])
@@ -260,6 +268,15 @@ func _build_ui() -> void:
 	_button(self,"BUKA LOG DUEL",Rect2(1028,570,216,41),_toggle_log)
 	audio_button = _button(self,"AUDIO: ON",Rect2(1028,633,216,40),_toggle_audio)
 	audio_button.add_theme_font_size_override("font_size",14)
+	_label(self,"BGM",Rect2(1028,678,39,22),12,MUTED)
+	music_slider = HSlider.new()
+	music_slider.min_value = 0
+	music_slider.max_value = 100
+	music_slider.step = 1
+	music_slider.value = collection_store.music_gain*100
+	music_slider.tooltip_text = "Volume musik. Efek suara tetap terpisah."
+	_place(music_slider,self,Rect2(1075,680,169,20))
+	music_slider.value_changed.connect(_music_volume_changed)
 	log_panel = _panel(self,Rect2(1010,80,252,624),Color("#9b855a"))
 	_label(log_panel,"RIWAYAT DUEL",Rect2(16,16,220,28),17,GOLD)
 	log_view = RichTextLabel.new()
@@ -323,7 +340,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.9 / GERHANA / TRAP & TAKTIK",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.10 / ASTRAL DRIVE / DUEL SOLO",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -352,19 +369,29 @@ func _build_result() -> void:
 func _build_audio() -> void:
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	var stream: AudioStreamWAV = load("res://assets/audio/astral_theme.wav")
+	var stream: AudioStreamWAV = load("res://assets/audio/first_light_battle.wav")
 	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	stream.loop_begin = 0
 	stream.loop_end = stream.data.size() / 4
 	music.stream = stream
-	music.volume_db = -17
+	music.volume_db = -20
+	urgency_music = AudioStreamPlayer.new()
+	add_child(urgency_music)
+	var layer: AudioStreamWAV = load("res://assets/audio/first_light_urgency.wav")
+	layer.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	layer.loop_begin = 0
+	layer.loop_end = layer.data.size() / 4
+	urgency_music.stream = layer
+	urgency_music.volume_db = -80
 	music.play()
+	urgency_music.play()
+	_sync_music(true)
 	for i in range(5):
 		var player := AudioStreamPlayer.new()
 		player.volume_db = -12
 		add_child(player)
 		sfx.append(player)
-	for name_value in ["click","draw","summon","attack","spell","heal","win","lose"]:
+	for name_value in ["click","draw","summon","attack","spell","heal","win","lose","ace_summon","heavy_impact","trap_reveal"]:
 		sound_streams[name_value] = load("res://assets/audio/%s.wav" % name_value)
 
 func _sound(name_value: String) -> void:
@@ -381,6 +408,7 @@ func _sound(name_value: String) -> void:
 func _toggle_audio() -> void:
 	muted = not muted
 	music.stream_paused = muted
+	urgency_music.stream_paused = muted
 	for player in sfx:
 		if muted:
 			player.stop()
@@ -418,6 +446,7 @@ func _start_from_menu() -> void:
 	coin_result.text = "Koin sedang dilempar..."
 	coin_continue.disabled = true
 	coin_layer.show()
+	_sync_music()
 	if coin_tween and coin_tween.is_valid():
 		coin_tween.kill()
 	var outcome: int = randi_range(0,1)
@@ -476,6 +505,7 @@ func _open_menu() -> void:
 	result_layer.hide()
 	help_layer.hide()
 	menu_layer.show()
+	_sync_music()
 
 func _clear_children(node: Node) -> void:
 	for child in node.get_children():
@@ -525,7 +555,7 @@ func _render() -> void:
 		back.custom_minimum_size = Vector2(22,14)
 		enemy_hand.add_child(back)
 	hand_label.text = "TANGAN: %d KARTU / LAWAN: %d" % [duel.hands[0].size(),duel.hands[1].size()]
-	var active: bool = duel.turn == 0 and not duel.over and duel.chain.is_empty() and not trap_presenting
+	var active: bool = duel.turn == 0 and not duel.over and duel.chain.is_empty() and not trap_presenting and not _ace_active()
 	battle_button.visible = duel.phase == "MAIN"
 	battle_button.disabled = not active or duel.turn_number == 1
 	direct_button.visible = duel.phase == "BATTLE"
@@ -543,6 +573,7 @@ func _render() -> void:
 	_update_context()
 	_render_backrows()
 	_sync_response()
+	_sync_music()
 
 func _inspect(card: Dictionary) -> void:
 	if card.is_empty():
@@ -568,7 +599,7 @@ func _zone_hover(side: int, zone: int) -> void:
 		_queue_hover(card)
 
 func _can_input() -> bool:
-	return not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
+	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -670,7 +701,7 @@ func _run_ai(token: int) -> void:
 	await get_tree().create_timer(0.8).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible:
+		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -792,6 +823,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _exit_tree() -> void:
 	session += 1
+	if music_tween and music_tween.is_valid(): music_tween.kill()
+	if is_instance_valid(urgency_music):
+		urgency_music.stop()
+		urgency_music.stream = null
 	if is_instance_valid(music):
 		music.stop()
 		music.stream = null
@@ -909,6 +944,8 @@ func _reset_visuals() -> void:
 	delayed_shields.clear()
 	delayed_card_cues.clear()
 	impact_until = 0
+	ace_seen.clear()
+	ace_active_until = 0
 	_hide_hover()
 	for side in range(2):
 		if lp_tweens[side] != null and lp_tweens[side].is_valid():
@@ -919,7 +956,7 @@ func _reset_visuals() -> void:
 		for view in zone_views[side]:
 			view.self_modulate = Color.WHITE
 	for child in fx.get_children():
-		if child != combat_notice and child != fx.painter:
+		if child != combat_notice and child != fx.painter and child != fx.glow_painter:
 			fx.remove_child(child)
 			child.queue_free()
 	fx.clear_all()
@@ -929,6 +966,7 @@ func _reset_visuals() -> void:
 
 func _animate_summon(side: int, zone: int) -> void:
 	var card: Dictionary = duel.fields[side][zone]
+	if not card.is_empty(): _show_ace_intro(card,side)
 	if card.is_empty() or fx.reduced_motion:
 		return
 	var ghost := CardView.new()
@@ -986,7 +1024,9 @@ func _animate_attack(report: Dictionary) -> void:
 	var target: Vector2 = _zone_center(1-side,report["target"]) if report["target"] >= 0 else _profile_effect_point(1-side)
 	var delay: float = fx.impact_delay(card_id,"attack")
 	impact_until = Time.get_ticks_msec()/1000.0+delay
-	fx.play_card(card_id,"attack",source,target)
+	var shatter: bool = not report["direct"] and not report.get("target_card",{}).get("shield",false) and (int(report["difference"]) > 0 or (int(report["difference"]) == 0 and not report["defending"]))
+	fx.play_card(card_id,"attack",source,target,{"shatter":shatter})
+	if int(report["attack"]) >= 2000: _delayed_sound("heavy_impact",delay,session)
 	if fx.reduced_motion:
 		return
 	var ghost := CardView.new()
@@ -1109,6 +1149,8 @@ func _shield_at_impact(side: int, zone: int) -> void:
 func _toggle_effect_mode() -> void:
 	_hide_hover()
 	fx.reduced_motion = not fx.reduced_motion
+	CardView.allow_art_motion = not fx.reduced_motion
+	ace_active_until = 0
 	fx.clear_all()
 	for child in fx.get_children():
 		if child.get_meta("card_visual",false):
@@ -1119,6 +1161,7 @@ func _toggle_effect_mode() -> void:
 			view.self_modulate = Color.WHITE
 	impact_until = 0
 	effects_button.text = "EFEK: RINGKAS" if fx.reduced_motion else "EFEK: NORMAL"
+	_render()
 
 func _effects_obscured() -> bool:
 	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer]:
@@ -1333,7 +1376,7 @@ func _play_trap_visuals(token: int) -> void:
 		var source := Vector2(948,355+49*slot) if side == 0 else Vector2(342,186+49*slot)
 		var target := Vector2(645,309) if cue["id"] == "seal" else _zone_center(cue["target_side"],maxi(0,int(cue["target_zone"])))
 		fx.play_card(cue["id"],"cancel" if cancelled else "cast",source,target)
-		_sound("spell")
+		_sound("trap_reveal")
 		await get_tree().create_timer(0.38 if fx.reduced_motion else 1.15).timeout
 		if token != session: return
 		if is_instance_valid(ghost): ghost.queue_free()
@@ -1354,3 +1397,59 @@ func _play_trap_visuals(token: int) -> void:
 	delayed_shields.clear()
 	for shield in shields: _shield_at_impact(shield[0],shield[1])
 	_render()
+
+func _show_ace_intro(card: Dictionary, side: int) -> void:
+	if fx.reduced_motion or int(card["level"]) <= 4: return
+	var key: String = "%d:%s" % [side,card["id"]]
+	if ace_seen.has(key): return
+	ace_seen[key] = true
+	ace_active_until = Time.get_ticks_msec()/1000.0+1.05
+	_finish_ace(session)
+	var cutin := AceCutin.new()
+	cutin.card = card.duplicate(true)
+	cutin.owner_text = "KAMU" if side == 0 else "NYX"
+	cutin.accent = Effects.PROFILES[card["id"]]["color"]
+	cutin.occlusion_check = _effects_obscured
+	cutin.z_index = 3
+	cutin.set_meta("card_visual",true)
+	cutin.set_meta("ace_cutin",true)
+	_place(cutin,fx,Rect2(296,174,696,240))
+	_sound("ace_summon")
+
+func _delayed_sound(name_value: String, delay: float, token: int) -> void:
+	await get_tree().create_timer(delay).timeout
+	if token == session: _sound(name_value)
+
+func _music_volume_changed(value: float) -> void:
+	collection_store.music_gain = value/100.0
+	_sync_music()
+	_save_preferences()
+
+func _sync_music(immediate: bool = false) -> void:
+	if not is_instance_valid(music) or not is_instance_valid(urgency_music): return
+	var duel_active: bool = not menu_layer.visible and not coin_layer.visible and not duel.over
+	var gain: float = collection_store.music_gain
+	var offset: float = linear_to_db(maxf(gain,0.0001))
+	var main_db: float = (-11.0 if duel_active else -19.0)+offset if gain > 0 else -80.0
+	var urgency_db: float = -80.0
+	if duel_active and gain > 0:
+		if mini(duel.lp[0],duel.lp[1]) <= 1500: urgency_db = -13.0+offset
+		elif duel.phase == "BATTLE": urgency_db = -22.0+offset
+	var targets: Array = [main_db,urgency_db]
+	if targets == music_targets and not immediate: return
+	music_targets = targets
+	if music_tween and music_tween.is_valid(): music_tween.kill()
+	if immediate:
+		music.volume_db = main_db
+		urgency_music.volume_db = urgency_db
+	else:
+		music_tween = create_tween().set_parallel(true)
+		music_tween.tween_property(music,"volume_db",main_db,0.7)
+		music_tween.tween_property(urgency_music,"volume_db",urgency_db,0.7)
+
+func _ace_active() -> bool:
+	return Time.get_ticks_msec()/1000.0 < ace_active_until
+
+func _finish_ace(token: int) -> void:
+	await get_tree().create_timer(1.08).timeout
+	if token == session: _render()

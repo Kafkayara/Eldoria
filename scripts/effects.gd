@@ -30,13 +30,23 @@ var reduced_motion: bool = false
 var elapsed: float = 0.0
 var last_cue: Dictionary = {}
 var painter
+var glow_painter
 var occlusion_check: Callable
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glow_painter = Painter.new()
+	glow_painter.effect_source = self
+	glow_painter.glow_pass = true
+	glow_painter.z_index = 1
+	glow_painter.size = Vector2(1280,720)
+	var additive := CanvasItemMaterial.new()
+	additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	glow_painter.material = additive
+	add_child(glow_painter)
 	painter = Painter.new()
 	painter.effect_source = self
-	painter.z_index = 1
+	painter.z_index = 2
 	painter.size = Vector2(1280,720)
 	add_child(painter)
 	set_process(false)
@@ -48,7 +58,7 @@ func impact_delay(card_id: String, action: String) -> float:
 		return 0.42
 	return float(PROFILES.get(card_id,PROFILES["dawn"])["impact"])
 
-func play_card(card_id: String, action: String, source: Vector2, target: Vector2) -> Dictionary:
+func play_card(card_id: String, action: String, source: Vector2, target: Vector2, details: Dictionary = {}) -> Dictionary:
 	if not PROFILES.has(card_id):
 		return {}
 	var profile: Dictionary = PROFILES[card_id]
@@ -60,6 +70,7 @@ func play_card(card_id: String, action: String, source: Vector2, target: Vector2
 		"duration":0.32 if reduced_motion else float(profile["duration"]),
 		"color":profile["color"],"light":profile["light"],"simple":reduced_motion
 	}
+	event.merge(details)
 	if events.size() >= MAX_EVENTS:
 		events.pop_front()
 	events.append(event)
@@ -112,6 +123,8 @@ func _rays(point: Vector2, radius: float, color: Color, count: int, rotation_val
 func redraw_effects() -> void:
 	if is_instance_valid(painter):
 		painter.queue_redraw()
+	if is_instance_valid(glow_painter):
+		glow_painter.queue_redraw()
 
 func paint_effects() -> void:
 	if occlusion_check.is_valid() and occlusion_check.call():
@@ -134,6 +147,7 @@ func _draw_event(event: Dictionary) -> void:
 	if event["simple"]:
 		Sigils.draw(painter,event["card_id"],b,18+_phase(t,0,duration)*5,color,0,2)
 		return
+	_draw_cinema(event,a,b,color,light,travel,after,hit)
 	if event["action"] == "cancel":
 		var half: float = 17+travel*12
 		painter.draw_line(b-Vector2(half,half),b+Vector2(half,half),_color(Color("#c7a8b2"),fade),3,true)
@@ -158,6 +172,9 @@ func _draw_event(event: Dictionary) -> void:
 		else:
 			painter.draw_arc(b,20+after*30,-PI*0.75,PI*0.5,40,light,3*(1-after)+1,true)
 			painter.draw_line(b+Vector2(-30,25),b+Vector2(30,-25),color,3,true)
+		return
+	if event["card_id"] in ["owl","witch","noctis","hourglass"]:
+		_draw_lunar(event,a,b,color,light,travel,after,hit)
 		return
 	if event["card_id"] in ["sentinel","owl","witch","noctis","mirror","seal","thorns","hourglass"]:
 		var center: Vector2 = b if hit else a.lerp(b,travel)
@@ -410,3 +427,92 @@ func _draw_trap(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: 
 						painter.draw_line(position,position+Vector2.from_angle(angle+0.6)*9,light,2,true)
 				painter.draw_polyline(points,color,2,true)
 			Sigils.draw(painter,"thorns",b,19,light,0,2)
+
+func paint_glow() -> void:
+	if reduced_motion or (occlusion_check.is_valid() and occlusion_check.call()): return
+	for event in events:
+		if event["simple"] or event["action"] == "cancel": continue
+		var t: float = event["time"]
+		var impact: float = event["impact"]
+		var flash: float = exp(-pow((t-impact)/0.12,2.0))
+		var charging: float = sin(minf(1.0,t/impact)*PI)*0.25 if t < impact else 0.0
+		var point: Vector2 = event["to"] if t >= impact*0.70 or event["action"] == "enter" else event["from"]
+		var radius: float = minf(53.0,point.y-144.0)
+		if radius <= 2: continue
+		for layer in range(5):
+			var size_value: float = radius*(1.0-layer*0.15)
+			glow_painter.draw_circle(point,size_value,_color(event["color"],(flash*0.13+charging*0.07)*(0.7+layer*0.08)))
+
+func _draw_cinema(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: Color, travel: float, after: float, hit: bool) -> void:
+	if event["action"] == "cancel": return
+	var entering: bool = event["action"] == "enter"
+	var center: Vector2 = b if entering or hit else a
+	var weight: float = 1.35 if event["card_id"] in ["ember","noctis"] else 1.0
+	var ceiling: float = maxf(8.0,minf(62.0,center.y-144.0))
+	if not hit:
+		var radius: float = minf(ceiling,weight*(15+travel*30))
+		var portal := PackedVector2Array()
+		for step in range(49):
+			var angle: float = step*TAU/48
+			portal.append(center+Vector2(cos(angle)*radius,sin(angle)*radius*(0.38 if entering else 1.0)))
+		painter.draw_polyline(portal,_color(color,0.55),2,true)
+		for i in range(6):
+			var angle: float = i*TAU/6+event["time"]*2
+			var point: Vector2 = center+Vector2.from_angle(angle)*radius
+			painter.draw_line(point,point+Vector2.from_angle(angle+PI/2)*7,_color(light,0.8),1.5,true)
+		if entering:
+			for i in range(9):
+				var x: float = sin(i*2.7)*radius
+				var height: float = fmod(i*11.0+event["time"]*70.0,52.0)
+				painter.draw_line(b+Vector2(x,20-height),b+Vector2(x,12-height),_color(color,0.45),2,true)
+	else:
+		var expansion: float = 16+after*53*weight
+		var radius: float = minf(ceiling,expansion)
+		painter.draw_arc(b,radius,0,TAU,48,_color(color,(1-after)*0.7),2,true)
+		var count: int = 14 if weight > 1 else 9
+		for i in range(count):
+			var angle: float = i*TAU/count+0.31
+			var direction := Vector2.from_angle(angle)
+			var distance_value: float = minf(ceiling,10+after*(42+i%3*9))
+			var point: Vector2 = b+direction*distance_value
+			painter.draw_line(point,point+direction*(6+weight*4)*(1-after),_color(light,1-after),1.7,true)
+		if event.get("shatter",false):
+			for i in range(6):
+				var angle: float = i*2.4
+				var point: Vector2 = b+Vector2.from_angle(angle)*after*48
+				var radius_value: float = 4*(1-after)+1
+				var shard := Sigils.points([Vector2(0,-1),Vector2(0.65,0.3),Vector2(-0.5,0.7)],point,radius_value,angle+after)
+				painter.draw_colored_polygon(shard,_color(color,1-after))
+
+func _draw_lunar(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: Color, travel: float, after: float, hit: bool) -> void:
+	var id: String = event["card_id"]
+	var head: Vector2 = b if hit else a.lerp(b,travel)
+	match id:
+		"owl":
+			for wing in [-1,1]:
+				for i in range(5):
+					var spread: float = (18+i*6)*(1+after)
+					var point: Vector2 = head+Vector2(wing*spread,-9+i*5)
+					painter.draw_line(head+Vector2(wing*8,8),point,color,3*(1-after)+1,true)
+					painter.draw_line(point,point+Vector2(wing*6,-9),light,1.5,true)
+		"witch":
+			for i in range(4):
+				var point: Vector2 = head+Vector2.from_angle(i*PI/2+event["time"]*2)*(12+after*23)
+				var poly := Sigils.points([Vector2(0,-1),Vector2(0.7,0),Vector2(0,1),Vector2(-0.7,0),Vector2(0,-1)],point,9,event["time"])
+				painter.draw_polyline(poly,color,2,true)
+			Sigils.draw(painter,"witch",head,15,light)
+		"noctis":
+			painter.draw_arc(head,23+after*20,-PI*0.8,PI*0.8,40,color,5*(1-after)+1,true)
+			for strand in [-1,1]:
+				var path := PackedVector2Array()
+				for i in range(20):
+					var t: float = maxf(0,travel-i*0.018)
+					path.append(a.lerp(b,t)+Vector2(sin(t*TAU)*strand*18,cos(t*PI)*strand*8))
+				painter.draw_polyline(path,_color(light,0.7),2.5,true)
+			Sigils.draw(painter,"noctis",head,19,color,0,2.5)
+		"hourglass":
+			for i in range(16):
+				var angle: float = i*TAU/16+event["time"]*2
+				var point: Vector2 = b+Vector2.from_angle(angle)*(20+after*20)
+				painter.draw_circle(point,1.6,light)
+			Sigils.draw(painter,"hourglass",b,25,color,0,2.5)

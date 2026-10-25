@@ -7,6 +7,7 @@ var active: String = "fajar"
 var enemy: String = "gerhana"
 var difficulty: String = "normal"
 var load_notice: String = ""
+var music_gain: float = 0.70
 
 func entries() -> Dictionary:
 	var result: Dictionary = Catalog.PRESETS.duplicate(true)
@@ -28,6 +29,8 @@ func load_data() -> void:
 		if not parsed is Dictionary or parsed.get("version",0) != 1:
 			if FileAccess.file_exists(path): load_notice = "Simpanan tidak terbaca. Deck bawaan tetap tersedia."
 			return
+	var saved_gain = parsed.get("music_gain",0.70)
+	if saved_gain is float or saved_gain is int: music_gain = clampf(float(saved_gain),0,1)
 	var saved = parsed.get("decks",{})
 	if saved is Dictionary:
 		for key in saved:
@@ -46,7 +49,7 @@ func save_data() -> Error:
 	var temporary: String = path+".tmp"
 	var file := FileAccess.open(temporary,FileAccess.WRITE)
 	if file == null: return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version":1,"decks":customs,"active":active,"enemy":enemy,"difficulty":difficulty},"  "))
+	file.store_string(JSON.stringify({"version":1,"decks":customs,"active":active,"enemy":enemy,"difficulty":difficulty,"music_gain":music_gain},"  "))
 	file.flush()
 	file.close()
 	# On Windows rename-over-existing is not guaranteed. Preserve a recoverable

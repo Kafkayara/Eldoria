@@ -3,6 +3,8 @@ const Art = preload("res://scripts/card_art.gd")
 const Sigils = preload("res://scripts/sigils.gd")
 const ATLAS = Art.ATLAS
 signal inspect_requested(card_data: Dictionary)
+static var allow_art_motion: bool = true
+var art_offset := Vector2.ZERO
 var data: Dictionary = {}
 var selected: bool = false
 var back: bool = false
@@ -14,13 +16,16 @@ func _ready() -> void:
 	font = get_theme_font("font")
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	mouse_entered.connect(queue_redraw)
-	mouse_exited.connect(queue_redraw)
+	mouse_exited.connect(func(): art_offset = Vector2.ZERO; queue_redraw())
 	focus_entered.connect(queue_redraw)
 	focus_exited.connect(queue_redraw)
 	resized.connect(queue_redraw)
 	gui_input.connect(_inspect_input)
 
 func _inspect_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and allow_art_motion:
+		art_offset = Vector2(clampf(event.position.x/maxf(1,size.x)*2-1,-1,1),clampf(event.position.y/maxf(1,size.y)*2-1,-1,1))
+		queue_redraw()
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT and not data.is_empty():
 		inspect_requested.emit(data.duplicate(true))
 		accept_event()
@@ -118,6 +123,10 @@ func _draw() -> void:
 		var focus: float = Art.focus_for(data)
 		region.position.y += clampf(cell.y*focus-height/2,0,cell.y-height)
 		region.size.y = height
+	if hover and allow_art_motion:
+		var margin: Vector2 = region.size*0.025
+		region.position += margin+art_offset*margin*0.70
+		region.size -= margin*2
 	draw_texture_rect_region(art_texture,art_rect,region,Color(0.72,0.73,0.70) if spent else Color(0.96,0.94,0.89))
 	draw_rect(art_rect,edge.darkened(0.4),false,1)
 	if size.x >= 100:

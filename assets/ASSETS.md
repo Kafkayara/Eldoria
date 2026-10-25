@@ -31,3 +31,10 @@ Sumber pembuat audio yang dapat dijalankan ulang ada di `tools/generate_audio.py
 ## Gerhana (versi 0.8)
 
 Atlas orisinal baru dibuat dengan tool imagegen bawaan dan disimpan di `C:/Users/Kafka/Documents/anime-card-duel/assets/art/gerhana_atlas.png`. Grid 4 kolom × 2 baris dipakai langsung oleh Godot: Penjaga Senja, Burung Hantu Perak, Penyihir Cermin, Naga Noctis, Cermin Pembalasan, Segel Hening, Belenggu Spektral, Jam Pasir Astral. Kartu lama tidak diganti. Total koleksi sekarang 18 ilustrasi berbeda. Prompt final lengkap ada di `assets/prompts/gerhana_atlas.txt`; tidak memakai CLI atau API key.
+
+
+## Musik Astral Drive (versi 0.10)
+
+Komposisi orisinal proyek, dibuat dengan `tools/generate_duel_score.py` tanpa rekaman atau sampel game lain. `first_light_battle.wav` dan `first_light_urgency.wav` adalah dua stem stereo 44,1 kHz 16-bit, masing-masing 32 bar pada 144 BPM (53,33 detik). Metadata teknis ada di `first_light_score.json`. File ambient lama dipertahankan sebagai aset historis; runtime memakai komposisi baru.
+
+Aksen baru: `ace_summon.wav`, `heavy_impact.wav`, `trap_reveal.wav`, seluruhnya sintesis orisinal dari generator yang sama. Preview 20 detik tersedia di output chat.

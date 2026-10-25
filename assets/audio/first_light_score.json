@@ -1,0 +1,22 @@
+{
+  "title": "First Light / Astral Drive",
+  "composer": "Original procedural composition for Eldoria",
+  "bpm": 144,
+  "key": "E minor",
+  "bars": 32,
+  "seconds": 53.333333333333336,
+  "sample_rate": 44100,
+  "loop_frames": 2352000,
+  "stems": {
+    "battle": {
+      "peak": 0.8799999952316284,
+      "rms": 0.18105381727218628,
+      "boundary_step": 0.0
+    },
+    "urgency": {
+      "peak": 0.6800000071525574,
+      "rms": 0.0791701078414917,
+      "boundary_step": 0.0
+    }
+  }
+}

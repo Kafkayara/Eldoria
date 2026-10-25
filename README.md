@@ -11,6 +11,17 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.10 — Astral Drive
+
+- Portal summon, glow additive berlapis, partikel pengisian, gelombang benturan, dan pecahan target yang dihancurkan, dengan identitas 18 kartu tetap berbeda.
+- Sorotan ilustrasi singkat untuk Naga Bara / Naga Noctis pada summon pertama tiap pihak per duel. Mode Ringkas melewatinya; input dan AI menunggu sorotan selesai.
+- Gerak halus pada ilustrasi saat hover; teks tetap diam. Burung Hantu, Penyihir Cermin, Noctis, dan Jam Pasir kini memakai bentuk serangan/aktivasi khusus.
+- Backsound orisinal **First Light / Astral Drive**: 144 BPM, loop 53,33 detik, aransemen synth/electro-fantasi dengan drum, bass, melodi utama dan arpeggio.
+- Dua lapisan audio tersinkron: menu lebih tenang, Battle Phase menambah lapisan, dan LP rendah menaikkan intensitas. Volume BGM terpisah dari SFX dan disimpan lokal; Audio OFF menjeda kedua lapisan.
+- Aksen suara baru untuk summon monster andalan, benturan besar, dan pembukaan trap.
+- Riset dan detail implementasi ada di `docs/presentation-research.md`. Komposisi dapat dibuat ulang melalui `tools/generate_duel_score.py` (numpy + scipy).
+- Tes khusus `tests/test_presentation.gd` memeriksa presentasi dan audio di Godot native. Tetap memakai dua deck bawaan; editor deck masih dinonaktifkan.
+
 ## Versi 0.9 — Trap lebih jelas, Gerhana diperbarui
 
 - Duel sementara hanya menggunakan **Fajar** dan **Gerhana**. Tombol dan akses deck builder dinonaktifkan; deck kustom lama tidak ditawarkan atau digunakan. Galeri koleksi tetap tersedia. Berkas editor dan data lama dipertahankan untuk pengembangan berikutnya.
