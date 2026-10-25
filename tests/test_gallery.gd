@@ -134,7 +134,7 @@ func _run() -> void:
 	check(g.visible_ids.size() == 10 and g.query.is_empty() and g.category.is_empty(),"Reopen resets filters")
 	g.closed.emit()
 	check(not g.visible,"Back button closes gallery")
-	board._start_from_menu()
+	board._begin_duel(0)
 	check(not g.visible and not board.menu_layer.visible and board.duel.turn_number == 1,"Duel starts normally after browsing")
 	board._open_menu()
 	board.queue_free()

@@ -59,7 +59,7 @@ func _run() -> void:
 	root.content_scale_size = Vector2i(1280,720)
 	board = load("res://main.tscn").instantiate()
 	root.add_child(board)
-	board._start_from_menu()
+	board._begin_duel(0)
 	var seen: Dictionary = {}
 	for id in Catalog.CARDS:
 		check(Effects.PROFILES.has(id),"Profile exists: "+id)
@@ -172,11 +172,11 @@ func _run() -> void:
 	check(board.duel.over and not board.result_layer.visible,"Lethal action waits for impact before results")
 	await create_timer(0.95).timeout
 	check(board.result_layer.visible and roundi(board.displayed_lp[1]) == 0,"LP reaches zero before victory presentation")
-	board._start_from_menu()
+	board._begin_duel(0)
 	# A pending result screen must not survive a restart.
 	board.duel.over = true
 	board._finished(0)
-	board._start_from_menu()
+	board._begin_duel(0)
 	await create_timer(0.6).timeout
 	check(not board.result_layer.visible and not board.duel.over,"Restart cancels pending result presentation")
 	board._open_menu()

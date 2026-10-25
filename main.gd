@@ -30,6 +30,7 @@ var hand_scroll: ScrollContainer
 var enemy_hand: HBoxContainer
 var detail_card
 var detail_type: Label
+var detail_lore: RichTextLabel
 var detail_desc: RichTextLabel
 var phase_label: Label
 var status_label: Label
@@ -58,6 +59,7 @@ var zoom_card
 var zoom_title: Label
 var zoom_type: Label
 var zoom_stats: Label
+var zoom_lore: RichTextLabel
 var zoom_description: RichTextLabel
 var zoom_close_button: Button
 var zoom_hint: Label
@@ -73,6 +75,12 @@ var lp_tweens: Array = [null,null]
 var gallery
 var effects_button: Button
 var impact_until: float = 0.0
+var coin_layer: Control
+var coin_face
+var coin_result: Label
+var coin_continue: Button
+var coin_side: int = -1
+var coin_tween: Tween
 
 
 func _ready() -> void:
@@ -160,12 +168,15 @@ func _build_ui() -> void:
 	detail_card.large = true
 	detail_card.disabled = true
 	detail_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_place(detail_card,self,Rect2(32,136,232,270))
-	detail_type = _label(self,"",Rect2(34,421,226,23),14,CYAN)
+	_place(detail_card,self,Rect2(32,136,232,230))
+	detail_type = _label(self,"",Rect2(34,377,226,23),14,CYAN)
+	_label(self,"EFEK KARTU",Rect2(34,409,226,22),14,CYAN)
 	detail_desc = RichTextLabel.new()
 	detail_desc.add_theme_font_size_override("normal_font_size",17)
 	detail_desc.add_theme_color_override("default_color",LIGHT)
-	_place(detail_desc,self,Rect2(34,458,226,151))
+	_place(detail_desc,self,Rect2(34,435,226,91))
+	_label(self,"CERITA",Rect2(34,530,226,22),14,GOLD)
+	detail_lore = _reading_text(self,Rect2(34,558,226,61),15,MUTED)
 	_button(self,"PERBESAR KARTU",Rect2(34,625,226,40),func(): _open_card_zoom(inspected_card))
 	_label(self,"Klik kanan / E untuk detail besar.",Rect2(34,674,226,21),12,MUTED)
 	for side in range(2):
@@ -260,6 +271,7 @@ func _build_ui() -> void:
 	_build_result()
 	_build_gallery()
 	_build_zoom()
+	_build_coin()
 
 func _overlay() -> Control:
 	var node := Control.new()
@@ -353,7 +365,7 @@ func _toggle_audio() -> void:
 			player.stop()
 	audio_button.text = "AUDIO: OFF" if muted else "AUDIO: ON"
 
-func _new_duel() -> void:
+func _new_duel(first_side: int = 0) -> void:
 	session += 1
 	_reset_visuals()
 	gallery.hide()
@@ -365,21 +377,73 @@ func _new_duel() -> void:
 	summon_defense = false
 	result_layer.hide()
 	starting = true
-	duel.start()
+	duel.start(-1,first_side)
 	starting = false
 	_inspect(Catalog.card("dawn"))
 	_render()
 
 func _start_from_menu() -> void:
-	help_layer.hide()
-	menu_layer.hide()
-	result_layer.hide()
-	_new_duel()
+	session += 1
+	_reset_visuals()
+	_hide_hover()
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery]:
+		layer.hide()
+	coin_side = -1
+	coin_face.face = -1
+	coin_face.queue_redraw()
+	coin_result.text = "Koin sedang dilempar..."
+	coin_continue.disabled = true
+	coin_layer.show()
+	if coin_tween and coin_tween.is_valid():
+		coin_tween.kill()
+	var outcome: int = randi_range(0,1)
+	var token: int = session
+	coin_face.pivot_offset = coin_face.size / 2.0
+	coin_face.scale = Vector2.ONE
+	coin_tween = create_tween()
+	if not fx.reduced_motion:
+		for i in range(7):
+			coin_tween.tween_property(coin_face,"scale:x",0.06,0.08)
+			coin_tween.tween_callback(_coin_frame.bind(i % 2))
+			coin_tween.tween_property(coin_face,"scale:x",1.0,0.09)
+	else:
+		coin_tween.tween_interval(0.25)
+	coin_tween.tween_callback(_reveal_coin.bind(outcome,token))
+
+func _coin_frame(side: int) -> void:
+	coin_face.face = side
+	coin_face.queue_redraw()
+
+func _reveal_coin(side: int, token: int) -> void:
+	if token != session or not coin_layer.visible:
+		return
+	coin_side = side
+	_coin_frame(side)
+	coin_result.text = "GAMBAR / KAMU BERGERAK PERTAMA" if side == 0 else "ANGKA / NYX BERGERAK PERTAMA"
+	coin_continue.disabled = false
 	_sound("summon")
-	_banner("DUEL DIMULAI",GOLD)
+
+func _confirm_coin() -> void:
+	if coin_side < 0 or coin_continue.disabled or not coin_layer.visible:
+		return
+	_begin_duel(coin_side)
+
+func _begin_duel(first_side: int) -> void:
+	if coin_tween and coin_tween.is_valid():
+		coin_tween.kill()
+	coin_layer.hide()
+	menu_layer.hide()
+	help_layer.hide()
+	_new_duel(first_side)
+	_banner("GILIRANMU" if first_side == 0 else "GILIRAN NYX",GOLD)
+	if first_side == 1:
+		_run_ai(session)
 
 func _open_menu() -> void:
 	session += 1
+	coin_layer.hide()
+	if coin_tween and coin_tween.is_valid():
+		coin_tween.kill()
 	gallery.hide()
 	_hide_hover()
 	zoom_layer.hide()
@@ -460,6 +524,9 @@ func _inspect(card: Dictionary) -> void:
 	detail_card.queue_redraw()
 	detail_type.text = "SPELL / MAGI AKTIF" if card["kind"] == "spell" else "%s / LEVEL %d" % [card["element"],card["level"]]
 	detail_desc.text = card["text"]
+	detail_desc.scroll_to_line(0)
+	detail_lore.text = card.get("lore", "")
+	detail_lore.scroll_to_line(0)
 
 func _hand_hover(index: int) -> void:
 	if index >= 0 and index < duel.hands[0].size():
@@ -473,7 +540,7 @@ func _zone_hover(side: int, zone: int) -> void:
 		_queue_hover(card)
 
 func _can_input() -> bool:
-	return duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
+	return not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -659,6 +726,11 @@ func _attacker_ready() -> bool:
 	return not monster.is_empty() and not monster["defending"] and not monster["attacked"]
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if coin_layer.visible:
+		if event.is_action_pressed("ui_cancel"):
+			_open_menu()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E:
 		if gallery.visible:
 			gallery.inspect_selected()
@@ -700,11 +772,14 @@ func _build_zoom() -> void:
 	zoom_title = _label(zoom_layer,"",Rect2(566,119,454,83),32,LIGHT)
 	zoom_type = _label(zoom_layer,"",Rect2(566,210,454,28),17,CYAN)
 	zoom_stats = _label(zoom_layer,"",Rect2(566,255,454,44),26,GOLD)
+	_label(zoom_layer,"EFEK KARTU",Rect2(566,318,454,25),16,CYAN)
 	zoom_description = RichTextLabel.new()
-	zoom_description.add_theme_font_size_override("normal_font_size",22)
+	zoom_description.add_theme_font_size_override("normal_font_size",20)
 	zoom_description.add_theme_color_override("default_color",LIGHT)
-	_place(zoom_description,zoom_layer,Rect2(566,323,454,181))
-	zoom_hint = _label(zoom_layer,"Klik kiri untuk bermain. Klik kanan atau E untuk detail.",Rect2(566,523,454,45),15,MUTED)
+	_place(zoom_description,zoom_layer,Rect2(566,350,454,118))
+	_label(zoom_layer,"CERITA",Rect2(566,471,454,25),16,GOLD)
+	zoom_lore = _reading_text(zoom_layer,Rect2(566,501,454,58),18,MUTED)
+	zoom_hint = _label(zoom_layer,"Klik kiri untuk bermain. Klik kanan atau E untuk detail.",Rect2(566,562,454,24),15,MUTED)
 	zoom_close_button = _button(zoom_layer,"KEMBALI KE DUEL",Rect2(566,592,454,45),func(): zoom_layer.hide(),true)
 	_label(zoom_layer,"Esc menutup tampilan ini.",Rect2(253,586,280,38),15,MUTED)
 	zoom_layer.hide()
@@ -720,6 +795,9 @@ func _open_card_zoom(card: Dictionary) -> void:
 	zoom_type.text = "SPELL / MAGI AKTIF" if card["kind"] == "spell" else "%s / LEVEL %d" % [card["element"],card["level"]]
 	zoom_stats.text = "ATK %d   /   DEF %d" % [card["atk"],card["def"]] if card["kind"] == "monster" else "KARTU SPELL"
 	zoom_description.text = card["text"]
+	zoom_description.scroll_to_line(0)
+	zoom_lore.text = card.get("lore", "")
+	zoom_lore.scroll_to_line(0)
 	zoom_close_button.text = "KEMBALI KE GALERI" if gallery.visible else "KEMBALI KE DUEL"
 	zoom_hint.text = "Pelajari statistik dan efeknya sebelum memasuki arena." if gallery.visible else "Klik kiri untuk bermain. Klik kanan atau E untuk detail."
 	zoom_layer.show()
@@ -978,7 +1056,33 @@ func _toggle_effect_mode() -> void:
 	effects_button.text = "EFEK: RINGKAS" if fx.reduced_motion else "EFEK: NORMAL"
 
 func _effects_obscured() -> bool:
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer]:
 		if is_instance_valid(layer) and layer.visible:
 			return true
 	return false
+
+func _reading_text(parent: Node, rect: Rect2, fs: int, color: Color) -> RichTextLabel:
+	var node := RichTextLabel.new()
+	node.add_theme_font_size_override("normal_font_size",fs)
+	node.add_theme_color_override("default_color",color)
+	_place(node,parent,rect)
+	return node
+
+func _build_coin() -> void:
+	coin_layer = _overlay()
+	_panel(coin_layer,Rect2(330,70,620,580),GOLD)
+	var title := _label(coin_layer,"TAKDIR PERTAMA",Rect2(370,98,540,47),32,GOLD)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var rule := _label(coin_layer,"Gambar: kamu mulai  /  Angka: Nyx mulai",Rect2(370,156,540,32),19,LIGHT)
+	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	coin_face = preload("res://scripts/coin.gd").new()
+	_place(coin_face,coin_layer,Rect2(545,214,190,190))
+	coin_result = _label(coin_layer,"",Rect2(360,430,560,56),22,GOLD)
+	coin_result.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var note := _label(coin_layer,"Kedua pihak mendapat 4 kartu awal.",Rect2(365,490,550,28),17,MUTED)
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var first_rule := _label(coin_layer,"Giliran pertama: belum boleh menyerang.",Rect2(365,523,550,28),17,MUTED)
+	first_rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	coin_continue = _button(coin_layer,"MASUK ARENA",Rect2(405,563,470,42),_confirm_coin,true)
+	_button(coin_layer,"Kembali",Rect2(405,614,470,27),_open_menu)
+	coin_layer.hide()

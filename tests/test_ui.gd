@@ -42,7 +42,7 @@ func _run() -> void:
 	root.add_child(narrow)
 	await process_frame
 	narrow.queue_free()
-	board._start_from_menu()
+	board._begin_duel(0)
 	board.duel.hands[0] = [Catalog.card("dawn"),Catalog.card("blessing"),Catalog.card("blessing"),Catalog.card("storm"),Catalog.card("ember")]
 	board.duel.hands[1] = [Catalog.card("fenrir"),Catalog.card("oracle"),Catalog.card("sanctuary")]
 	board.duel.decks[1] = [Catalog.card("dawn"),Catalog.card("blessing")]
@@ -129,11 +129,11 @@ func _run() -> void:
 	var turn_before: int = board.duel.turn_number
 	await create_timer(1.1).timeout
 	check(board.duel.turn_number == turn_before,"Menu cancels pending AI")
-	board._start_from_menu()
+	board._begin_duel(0)
 	check(board.duel.turn == 0 and board.duel.turn_number == 1,"Restart resets duel")
 	board.duel._damage(0,700)
 	board._render()
-	board._start_from_menu()
+	board._begin_duel(0)
 	await create_timer(0.85).timeout
 	check(roundi(board.displayed_lp[0]) == 4000 and board.duel.lp[0] == 4000,"Restart cancels stale LP tween")
 	check(not board.combat_notice.visible and not board.hover_card.visible,"Restart clears previews and combat notice")

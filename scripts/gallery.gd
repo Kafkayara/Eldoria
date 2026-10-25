@@ -19,6 +19,7 @@ var filter_buttons: Dictionary = {}
 var summary: Label
 var preview
 var card_type: Label
+var lore: RichTextLabel
 var description: RichTextLabel
 var detail_button: Button
 var scroll: ScrollContainer
@@ -90,12 +91,18 @@ func _build() -> void:
 	preview.disabled = true
 	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview.empty_caption = "PILIH KARTU"
-	_place(preview,self,Rect2(42,151,240,309))
-	card_type = _label(self,"",Rect2(42,475,240,28),15,CYAN)
+	_place(preview,self,Rect2(42,145,240,245))
+	card_type = _label(self,"",Rect2(42,399,240,28),15,CYAN)
+	_label(self,"EFEK KARTU",Rect2(42,433,240,23),14,CYAN)
 	description = RichTextLabel.new()
 	description.add_theme_font_size_override("normal_font_size",18)
 	description.add_theme_color_override("default_color",LIGHT)
-	_place(description,self,Rect2(42,514,240,114))
+	_place(description,self,Rect2(42,460,240,81))
+	_label(self,"CERITA",Rect2(42,551,240,23),14,GOLD)
+	lore = RichTextLabel.new()
+	lore.add_theme_font_size_override("normal_font_size",15)
+	lore.add_theme_color_override("default_color",MUTED)
+	_place(lore,self,Rect2(42,574,240,64))
 	detail_button = _button(self,"BUKA DETAIL / E",Rect2(42,644,240,38),inspect_selected)
 	search_box = LineEdit.new()
 	search_box.placeholder_text = "Cari nama, elemen, atau efek..."
@@ -187,6 +194,7 @@ func _refresh_cards() -> void:
 		preview.queue_redraw()
 		card_type.text = "TIDAK ADA HASIL"
 		description.text = "Coba kata kunci lain, atau pilih kategori Semua."
+		lore.text = ""
 		detail_button.disabled = true
 		return
 	var chosen_id: String = str(selected_card.get("id",""))
@@ -200,6 +208,9 @@ func select_card(id: String) -> void:
 	preview.queue_redraw()
 	card_type.text = "SPELL / MAGI AKTIF" if selected_card["kind"] == "spell" else "%s / LEVEL %d" % [selected_card["element"],selected_card["level"]]
 	description.text = selected_card["text"]
+	description.scroll_to_line(0)
+	lore.text = selected_card.get("lore", "")
+	lore.scroll_to_line(0)
 	detail_button.disabled = false
 	for key in tiles:
 		tiles[key].selected = key == id

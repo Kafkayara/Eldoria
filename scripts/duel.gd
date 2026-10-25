@@ -22,7 +22,7 @@ var over: bool = false
 var winner: int = -1
 var rng := RandomNumberGenerator.new()
 
-func start(seed_value: int = -1) -> void:
+func start(seed_value: int = -1, first_side: int = 0) -> void:
 	if seed_value < 0:
 		rng.randomize()
 	else:
@@ -33,7 +33,7 @@ func start(seed_value: int = -1) -> void:
 	graves = [[], []]
 	lp = [4000, 4000]
 	skill_used = [false, false]
-	turn = 0
+	turn = clampi(first_side, 0, 1)
 	turn_number = 1
 	phase = "MAIN"
 	summoned = false
@@ -47,7 +47,7 @@ func start(seed_value: int = -1) -> void:
 			decks[side][j] = temp
 		for i in range(4):
 			_draw(side)
-	message.emit("Duel dimulai. Kamu bergerak lebih dulu. Serangan dibuka mulai giliran kedua.")
+	message.emit("Duel dimulai. %s bergerak lebih dulu. Serangan dibuka mulai giliran kedua." % who(turn))
 	changed.emit()
 
 func _draw(side: int) -> bool:

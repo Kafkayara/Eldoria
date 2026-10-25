@@ -11,6 +11,15 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Pembaruan: lempar koin dan teks kartu
+
+- **Mulai Duel** dan **Duel Lagi** membuka lempar koin acak dengan dua hasil berpeluang sama: gambar matahari berarti kamu mulai; angka I berarti Nyx mulai.
+- Hasil ditampilkan sebelum tombol **Masuk Arena** aktif. Nyx otomatis bermain jika mendapat giliran pertama.
+- Kedua pihak mendapat empat kartu awal. Pihak pertama tidak menarik kartu tambahan atau menyerang di giliran pertama; pihak kedua menarik kartu saat gilirannya dimulai.
+- Esc atau Kembali membatalkan lempar koin. Mode Efek Ringkas menampilkan hasil tanpa animasi putaran.
+- Semua kartu memiliki **Efek Kartu** dan **Cerita** di area terpisah pada panel duel, galeri, dan detail besar. Area teks dapat digulir bila panjang.
+- Pengujian tambahan: `tests/test_coin.gd` mencakup kedua hasil, pembatalan, bot mulai, mode ringkas, dan teks sepuluh kartu.
+
 ## Pembaruan versi 0.6 — Observatorium
 
 - Arah visual meja duel observatorium: batu tulis matte, ukiran statis, tepi kuningan, dan kartu cetak gading/hijau pucat.
