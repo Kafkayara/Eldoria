@@ -5,6 +5,7 @@ signal changed
 signal message(text: String)
 signal visual(kind: String, side: int, zone: int, amount: int)
 signal finished(winner: int)
+signal combat(report: Dictionary)
 
 var decks: Array = [[], []]
 var hands: Array = [[], []]
@@ -194,6 +195,7 @@ func attack(attacker: int, target: int = -1) -> bool:
 	source["attacked"] = true
 	visual.emit("attack", turn, attacker, 0)
 	if target == -1:
+		combat.emit({"attack":source["atk"],"power":0,"difference":source["atk"],"defending":false,"direct":true,"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
 		message.emit("%s menyerang langsung: %d!" % [source["name"], source["atk"]])
 		_damage(other, int(source["atk"]))
 	else:
@@ -201,6 +203,7 @@ func attack(attacker: int, target: int = -1) -> bool:
 		var defending: bool = enemy["defending"]
 		var power: int = int(enemy["def"]) if defending else int(enemy["atk"])
 		var difference: int = int(source["atk"]) - power
+		combat.emit({"attack":source["atk"],"power":power,"difference":difference,"defending":defending,"direct":false,"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
 		message.emit("%s menyerang %s." % [source["name"], enemy["name"]])
 		if difference > 0:
 			_destroy_battle(other, target)

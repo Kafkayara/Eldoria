@@ -9,9 +9,23 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 3. Pilih **Mulai Duel**. Tombol **Panduan** menjelaskan aturan di dalam game.
 4. Simpan perubahan di editor dan pilih Reload jika Godot mendeteksi file berubah.
 
-Resolusi desain 1600×900; jendela awal 1280×720 dengan proporsi tetap. Antarmuka dibangun oleh `main.gd` saat game berjalan.
+Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
-## Fitur versi 0.3
+## Pembaruan versi 0.4
+
+- Tata letak asli 1280×720: ukuran teks tidak lagi diperkecil dari desain 1600×900.
+- Nama kartu dua baris bila perlu, angka ATK/DEF terpisah, kontras teks ditingkatkan, dan posisi gambar disesuaikan agar karakter tetap terlihat.
+- Pratinjau kartu besar setelah kursor berada di kartu selama 0,38 detik.
+- Detail penuh lewat klik kanan, tombol E, atau tombol Perbesar Kartu; Esc menutupnya.
+- AI menunggu saat detail kartu atau panduan dibuka.
+- Log duel dapat dibuka/tutup sebagai panel di kanan, dengan teks lebih besar.
+- Animasi kartu berpindah dari tangan ke zona saat summon dan gerakan maju saat menyerang.
+- LP dihitung bertahap selama 0,7 detik, termasuk penanganan pembaruan berurutan dan restart.
+- Target serangan dan spell yang sesuai disorot.
+- Penjelasan hitungan serangan memiliki area tersendiri di bawah papan.
+- Tombol serang langsung dan ubah posisi menyesuaikan kesiapan monster.
+
+## Fondasi duel
 
 - Menu utama, arena animasi, panel detail, log duel, dan layar kemenangan/kekalahan.
 - Duel offline melawan **Nyx**, dengan jeda tindakan yang bisa diikuti.
@@ -31,7 +45,9 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 
 ## Cara mengontrol
 
-- Klik kartu di tangan untuk memilih. Klik lagi untuk membatalkan.
+- Arahkan kursor untuk melihat pratinjau lebih besar.
+- Klik kanan kartu, tekan **E**, atau klik **Perbesar Kartu** untuk membuka detail penuh.
+- Klik kiri kartu di tangan untuk memilih. Klik lagi untuk membatalkan.
 - Monster: pilih mode summon, lalu klik zona pemain.
 - Naga Bara: klik zona kosong untuk tribute otomatis monster dengan ATK terendah; atau klik zona monster yang ingin dikorbankan.
 - Badai Aether dan Suaka Surya: klik untuk mengaktifkan langsung.
@@ -40,7 +56,7 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 - Battle: pilih monster milikmu, lalu monster lawan. Jika papan lawan kosong, pilih **Serang Langsung**.
 - Gunakan **Ubah Posisi** pada Main Phase, mulai giliran setelah summon.
 - Klik **Akhiri Giliran** untuk memberi giliran kepada Nyx.
-- **Esc** membuka menu; progres duel tidak disimpan ketika memulai duel baru.
+- **Esc** menutup detail, panduan, atau log terlebih dahulu; setelah itu membuka menu. Progres duel tidak disimpan ketika memulai duel baru.
 
 ## Struktur proyek
 
@@ -53,7 +69,7 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 - `assets/art/`: atlas enam ilustrasi.
 - `assets/audio/`: musik dan efek suara yang dibuat khusus.
 - `tests/test_duel.gd`: pengujian aturan dan 100 duel otomatis.
-- `tests/test_ui.gd`: pengujian alur antarmuka, giliran AI, audio, dan restart.
+- `tests/test_ui.gd`: pengujian alur antarmuka, zoom/hover kartu, giliran dan jeda AI, animasi LP, log, audio, dan restart.
 - `card.tscn`, `card.gd`: contoh kartu dari tahap belajar sebelumnya; tampilan baru menggunakan `scripts/card_view.gd`.
 - `backups/`: salinan lokal sebelum perubahan; tidak diunggah ke Git.
 
