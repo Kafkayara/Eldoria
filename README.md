@@ -11,6 +11,17 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.9 — Trap lebih jelas, Gerhana diperbarui
+
+- Duel sementara hanya menggunakan **Fajar** dan **Gerhana**. Tombol dan akses deck builder dinonaktifkan; deck kustom lama tidak ditawarkan atau digunakan. Galeri koleksi tetap tersedia. Berkas editor dan data lama dipertahankan untuk pengembangan berikutnya.
+- Memilih trap di tangan menyorot zona kosong milikmu dengan warna emas dan tulisan **PASANG DI SINI**. Zona yang tidak sah tidak dapat dipilih. Instruksi di kanan papan menjelaskan lokasi pemasangan.
+- Trap yang baru dipasang menampilkan **MENUNGGU**; mulai giliran berikutnya menampilkan **SIAP**. Respons muncul otomatis saat syarat terpenuhi; pemain memilih trap atau Lewati.
+- Gerhana kini 20 kartu: **12 monster + 4 spell + 4 trap**. Komposisi trap: Cermin Pembalasan ×2, Segel Hening ×1, Belenggu Spektral ×1. Dukungan spell: Jam Pasir Astral, Berkah Fajar, Badai Aether, dan Retakan Langit, masing-masing satu.
+- **Penjaga Senja**: sekali per duel untuk masing-masing pihak, saat summon, memasang satu Cermin Pembalasan dari deck ke zona spell/trap kosong. Trap itu tetap menunggu sampai giliran berikutnya. Efek tidak terpakai jika zona penuh atau Cermin tidak ada di deck.
+- Efek summon/serangan Penjaga Senja memakai tombak bulan. Cermin memakai pantulan perak, Segel rantai ungu, dan Belenggu sulur biru pada target.
+- Setiap trap mendapat animasi buka kartu dan panel penjelasan. Rantai banyak trap ditampilkan berurutan, termasuk trap yang dibatalkan. Serangan lanjutan, angka damage, LP, dan kemenangan menunggu presentasi trap.
+- `tests/test_trap_clarity.gd` menguji klik mouse nyata pada zona, status menunggu/siap, Sentinel sekali per duel, deck bawaan saja, ketiga animasi trap, respons berantai, kemenangan dan restart. `tests/test_strategy_ui.gd` menjalankan alur ini sebagai pengganti pengujian editor yang sedang dinonaktifkan.
+
 ## Versi 0.8 — Gerhana, respons, dan deck builder
 
 - **Dua deck siap pakai**: Fajar / Serangan dan Gerhana / Kontrol. Pilih deck kamu, deck Nyx, dan kesulitan Santai / Normal / Sulit di menu utama.

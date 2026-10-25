@@ -26,6 +26,7 @@ var priority: int = -1
 var passes: int = 0
 var difficulty: String = "normal"
 var next_uid: int = 0
+var sentinel_used: Array = [false,false]
 var rng := RandomNumberGenerator.new()
 
 func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalog.DECK, enemy_ids: Array = Catalog.DECK) -> void:
@@ -39,6 +40,7 @@ func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalo
 	priority = -1
 	passes = 0
 	next_uid = 0
+	sentinel_used = [false,false]
 	hands = [[], []]
 	fields = [[{}, {}, {}], [{}, {}, {}]]
 	graves = [[], []]
@@ -132,6 +134,8 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	message.emit("%s summon %s dalam posisi %s." % [who(turn), monster["name"], "bertahan" if defending else "menyerang"])
 	card_cue.emit({"id":monster["id"],"action":"enter","side":turn,"target_side":turn,"target_zone":target})
 	visual.emit("summon", turn, target, 0)
+	if monster["effect"] == "twilight_setup":
+		_sentinel_setup(turn)
 	if monster["effect"] in ["burn","heal","draw"]:
 		_queue({"action":"summon","side":turn,"card":monster.duplicate(true)})
 	_check_end()
@@ -395,7 +399,7 @@ func respond(side: int, slot: int = -1) -> bool:
 		backrows[side][slot] = {}
 		graves[side].append(card)
 		message.emit("Respons %s: %s (rantai %d)." % [who(side),card["name"],chain.size()+1])
-		chain.append({"action":"trap","side":side,"card":card,"negates":chain.size()-1})
+		chain.append({"action":"trap","side":side,"card":card,"source_slot":slot,"negates":chain.size()-1})
 		passes = 0
 	priority = 1-side
 	if passes >= 2:
@@ -412,6 +416,10 @@ func _resolve_chain() -> void:
 		var action: String = event["action"]
 		var card: Dictionary = event["card"]
 		var side: int = event["side"]
+		if action == "trap":
+			var original: Dictionary = chain[event["negates"]]
+			var target_zone: int = int(original.get("zone",-1)) if original["action"] == "attack" else -1
+			card_cue.emit({"id":card["id"],"action":"cast","side":side,"source_slot":event.get("source_slot",0),"target_side":1-side,"target_zone":target_zone,"target_card":fields[1-side][target_zone].duplicate(true) if target_zone >= 0 else {},"cancelled":event.get("cancelled",false)})
 		if not event.get("cancelled",false) and not over:
 			message.emit("Selesaikan: %s." % card["name"])
 			match action:
@@ -422,7 +430,6 @@ func _resolve_chain() -> void:
 						"heal": _heal(side,400)
 						"draw": _draw(side)
 				"trap":
-					card_cue.emit({"id":card["id"],"action":"cast","side":side,"target_side":1-side,"target_zone":-1,"target_card":{}})
 					var previous: Dictionary = chain[event["negates"]]
 					match card["effect"]:
 						"negate": previous["cancelled"] = true
@@ -448,3 +455,23 @@ func _resolve_chain() -> void:
 		_check_end()
 	chain.clear()
 	passes = 0
+
+func _sentinel_setup(side: int) -> void:
+	if sentinel_used[side]:
+		message.emit("Penjaga Senja: efek pemasangan sudah dipakai pada duel ini.")
+		return
+	var slot: int = empty_backrow(side)
+	if slot < 0:
+		message.emit("Penjaga Senja: zona spell/trap penuh; efek tidak terpakai.")
+		return
+	for index in range(decks[side].size()):
+		if decks[side][index]["id"] != "mirror": continue
+		var card: Dictionary = decks[side].pop_at(index)
+		card["set_turn"] = turn_number
+		card["faceup"] = false
+		backrows[side][slot] = card
+		sentinel_used[side] = true
+		message.emit("Penjaga Senja memasang Cermin Pembalasan dari deck di zona %d. Aktif mulai giliran berikutnya." % (slot+1))
+		visual.emit("trap_set",side,slot,0)
+		return
+	message.emit("Penjaga Senja: tidak ada Cermin Pembalasan di deck; efek tidak terpakai.")

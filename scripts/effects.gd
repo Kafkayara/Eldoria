@@ -134,11 +134,30 @@ func _draw_event(event: Dictionary) -> void:
 	if event["simple"]:
 		Sigils.draw(painter,event["card_id"],b,18+_phase(t,0,duration)*5,color,0,2)
 		return
+	if event["action"] == "cancel":
+		var half: float = 17+travel*12
+		painter.draw_line(b-Vector2(half,half),b+Vector2(half,half),_color(Color("#c7a8b2"),fade),3,true)
+		painter.draw_line(b+Vector2(-half,half),b+Vector2(half,-half),_color(Color("#c7a8b2"),fade),3,true)
+		return
+	if event["card_id"] in ["mirror","seal","thorns"]:
+		_draw_trap(event,a,b,color,light,travel,after,hit)
+		return
 	if event["action"] == "enter":
 		_draw_entry(event,b,color,light,travel,after,hit)
 		return
 	if event["action"] == "guard":
 		_draw_guard(b,color,light,_phase(t,0,duration),true)
+		return
+	if event["card_id"] == "sentinel":
+		var direction: Vector2 = (b-a).normalized()
+		var point: Vector2 = a.lerp(b,travel)
+		if not hit:
+			painter.draw_line(point-direction*42,point+direction*13,light,3,true)
+			painter.draw_line(point+direction*13,point-direction.rotated(0.5)*8,color,2,true)
+			painter.draw_line(point+direction*13,point-direction.rotated(-0.5)*8,color,2,true)
+		else:
+			painter.draw_arc(b,20+after*30,-PI*0.75,PI*0.5,40,light,3*(1-after)+1,true)
+			painter.draw_line(b+Vector2(-30,25),b+Vector2(30,-25),color,3,true)
 		return
 	if event["card_id"] in ["sentinel","owl","witch","noctis","mirror","seal","thorns","hourglass"]:
 		var center: Vector2 = b if hit else a.lerp(b,travel)
@@ -247,6 +266,11 @@ func _draw_event(event: Dictionary) -> void:
 func _draw_entry(event: Dictionary, point: Vector2, color: Color, light: Color, growth: float, after: float, hit: bool) -> void:
 	var progress: float = growth if not hit else 1.0
 	match event["card_id"]:
+		"sentinel":
+			painter.draw_arc(point,18+progress*17,-PI*0.8,PI*0.5,32,color,2,true)
+			Sigils.draw(painter,"sentinel",point,18+progress*9,light,0,2)
+			for x in [-24,24]:
+				painter.draw_line(point+Vector2(x,31),point+Vector2(x,31-55*progress),color,1.5,true)
 		"dawn":
 			Sigils.draw(painter,"dawn",point,26*progress,light,-0.35,2)
 			_rays(point,35*progress,color,8,PI/8)
@@ -346,3 +370,43 @@ func _ribbon(path: PackedVector2Array, width: float, color: Color) -> void:
 		lower.insert(0,path[i]-normal*radius)
 	upper.append_array(lower)
 	painter.draw_colored_polygon(upper,color)
+
+func _draw_trap(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: Color, travel: float, after: float, hit: bool) -> void:
+	var point: Vector2 = a.lerp(b,travel)
+	match event["card_id"]:
+		"mirror":
+			# A silver reflector opens at the attacker, then sends light back.
+			var radius: float = 15+travel*28
+			painter.draw_arc(b,radius,-PI*0.8,PI*0.8,48,color,3,true)
+			painter.draw_arc(b,radius*0.75,-PI*0.8,PI*0.8,48,light,1,true)
+			if not hit:
+				painter.draw_line(point-Vector2(17,0),point+Vector2(17,0),light,3,true)
+			else:
+				for i in range(5):
+					var angle: float = i*TAU/5
+					var ray := Vector2.from_angle(angle)
+					painter.draw_line(b+ray*(22+after*13),b+ray*(38+after*37),light,2,true)
+		"seal":
+			# Violet chains cross and lock an opposing spell at the center rune.
+			var radius: float = 24+travel*19
+			painter.draw_arc(b,radius,0,TAU,48,color,2.5,true)
+			for diagonal in [-1,1]:
+				for i in range(7):
+					var t: float = (i-3)*12.0*travel
+					var center: Vector2 = b+Vector2(t,t*diagonal)
+					painter.draw_arc(center,7,0,TAU,16,light,1.5,true)
+			Sigils.draw(painter,"seal",b,16+after*7,color,0,2.5)
+		"thorns":
+			# Three blue vine paths close around the attacking monster.
+			for strand in range(3):
+				var points := PackedVector2Array()
+				for i in range(19):
+					var t: float = i/18.0
+					var angle: float = t*TAU+strand*TAU/3
+					var radius: float = (51-21*travel)+sin(t*PI)*5
+					var position: Vector2 = b+Vector2.from_angle(angle)*radius
+					points.append(position)
+					if i%4 == 0:
+						painter.draw_line(position,position+Vector2.from_angle(angle+0.6)*9,light,2,true)
+				painter.draw_polyline(points,color,2,true)
+			Sigils.draw(painter,"thorns",b,19,light,0,2)

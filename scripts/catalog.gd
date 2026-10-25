@@ -12,7 +12,7 @@ const CARDS = {
 	"sanctuary": {"id":"sanctuary", "name":"Suaka Surya", "kind":"spell", "element":"SPELL", "atk":0, "def":0, "level":0, "art":5, "effect":"restore", "lore":"Di balik reruntuhan kuil, matahari masih menyinari tempat para penjaga beristirahat.", "text":"Aktifkan dari tangan: pulihkan 700 LP, hingga maksimal 4000 LP."},
 	"blessing": {"id":"blessing", "name":"Berkah Fajar", "kind":"spell", "element":"SPELL", "atk":0, "def":0, "level":0, "art":5, "art_file":"res://assets/art/berkah_fajar.png", "art_focus":0.46, "effect":"buff", "lore":"Sayap fajar menyelimuti sebilah pedang, membawa harapan untuk pertempuran berikutnya.", "text":"Pilih 1 monster milikmu: tambah 400 ATK dan 400 DEF selama monster itu berada di papan."},
 	"eclipse": {"id":"eclipse", "name":"Retakan Langit", "kind":"spell", "element":"SPELL", "atk":0, "def":0, "level":0, "art":4, "art_file":"res://assets/art/retakan_langit.png", "art_focus":0.4, "effect":"destroy", "lore":"Langit yang retak memperlihatkan kehampaan di balik cahaya bintang.", "text":"Pilih dan hancurkan 1 monster lawan dengan ATK 1800 atau kurang. Perlindungan Aegis tidak mencegah efek ini."},
-	"sentinel": {"id":"sentinel","name":"Penjaga Senja","kind":"monster","element":"BULAN","atk":1700,"def":1300,"level":4,"art":0,"night_art":0,"effect":"","lore":"Ia menjaga tangga observatorium ketika cahaya terakhir menghilang.","text":"Monster normal tanpa efek khusus."},
+	"sentinel": {"id":"sentinel","name":"Penjaga Senja","kind":"monster","element":"BULAN","atk":1700,"def":1300,"level":4,"art":0,"night_art":0,"effect":"twilight_setup","lore":"Ia menjaga tangga observatorium ketika cahaya terakhir menghilang.","text":"Sekali per duel, saat summon: pasang 1 Cermin Pembalasan dari deck ke zona spell/trap kosong. Trap baru aktif mulai giliran berikutnya."},
 	"owl": {"id":"owl","name":"Burung Hantu Perak","kind":"monster","element":"BULAN","atk":1100,"def":2000,"level":4,"art":0,"night_art":1,"effect":"","lore":"Sayap peraknya meredam suara di antara pepohonan malam.","text":"Monster normal tanpa efek khusus."},
 	"witch": {"id":"witch","name":"Penyihir Cermin","kind":"monster","element":"BULAN","atk":1400,"def":1400,"level":3,"art":0,"night_art":2,"effect":"draw","lore":"Di setiap serpihan cermin ia melihat satu kemungkinan masa depan.","text":"Saat summon: ambil 1 kartu dari deck."},
 	"noctis": {"id":"noctis","name":"Naga Noctis","kind":"monster","element":"BULAN","atk":2300,"def":1900,"level":6,"art":0,"night_art":3,"effect":"shield","lore":"Naga obsidian bangkit setiap kali bulan menelan matahari.","text":"Tribute: korbankan 1 monster. Sekali di papan, bertahan dari kehancuran akibat serangan; kerusakan LP tetap berlaku."},
@@ -26,7 +26,7 @@ const DECK = ["dawn","dawn","dawn","ember","ember","oracle","oracle","fenrir","f
 static func card(id: String) -> Dictionary:
 	return CARDS[id].duplicate(true)
 
-const GERHANA = ["sentinel","sentinel","sentinel","owl","owl","owl","witch","witch","noctis","noctis","oracle","sprite","mirror","mirror","seal","seal","thorns","thorns","hourglass","hourglass"]
+const GERHANA = ["sentinel","sentinel","sentinel","owl","owl","witch","witch","noctis","noctis","oracle","sprite","sprite","mirror","mirror","seal","thorns","hourglass","blessing","storm","eclipse"]
 const PRESETS = {"fajar":{"name":"Fajar / Serangan","cards":DECK},"gerhana":{"name":"Gerhana / Kontrol","cards":GERHANA}}
 
 static func type_text(c: Dictionary) -> String:

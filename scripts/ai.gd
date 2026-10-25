@@ -31,6 +31,8 @@ static func main_action(duel) -> Dictionary:
 					value -= weakest / 2
 			if c["effect"] == "draw":
 				value += 350
+			if c["effect"] == "twilight_setup" and not duel.sentinel_used[side] and duel.empty_backrow(side) >= 0:
+				value += 250
 			if value > score:
 				score = value
 				best = i

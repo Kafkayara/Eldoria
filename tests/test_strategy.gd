@@ -122,11 +122,12 @@ func run() -> void:
 	# Mix both archetypes, both first players, all three AI settings.
 	var complete := 0
 	var responses := 0
+	var wins := {"fajar":0,"gerhana":0}
 	for difficulty in ["easy","normal","hard"]:
 		for seed_value in range(80):
 			d = Duel.new()
 			d.difficulty = difficulty
-			d.start(seed_value,seed_value%2,Catalog.DECK if seed_value%2 == 0 else Catalog.GERHANA,Catalog.GERHANA if seed_value%2 == 0 else Catalog.DECK)
+			d.start(seed_value,floori(seed_value/2.0)%2,Catalog.DECK if seed_value%2 == 0 else Catalog.GERHANA,Catalog.GERHANA if seed_value%2 == 0 else Catalog.DECK)
 			var steps := 0
 			while not d.over and steps < 1200:
 				steps += 1
@@ -144,6 +145,10 @@ func run() -> void:
 					check(total == 20,"Card conservation with backrow and chains")
 					check(d.lp[side] >= 0 and d.lp[side] <= 4000,"Valid LP")
 			check(d.over,"Duel terminates: %s %d" % [difficulty,seed_value])
-			if d.over: complete += 1
+			if d.over:
+				complete += 1
+				var player_fajar: bool = seed_value%2 == 0
+				wins["fajar" if (d.winner == 0) == player_fajar else "gerhana"] += 1
 	print("STRATEGY CHECKS: %d / FAILURES: %d / COMPLETE DUELS: %d / RESPONSES: %d" % [checks,failures,complete,responses])
+	print("ARCHETYPE WINS (three AI levels, both starting orders): ",wins)
 	quit(0 if failures == 0 else 1)

@@ -1,6 +1,6 @@
-# Eldoria 0.8: deck dan respons
+# Eldoria 0.9: deck bawaan dan respons
 
-Fajar menggunakan monster agresif, damage langsung, dan buff. Gerhana memakai 12 monster, 6 trap, dan 2 spell untuk mengendalikan serangan dan mempertahankan sumber daya. Keduanya punya 20 kartu; pemain bebas mencampur kartu melalui deck builder.
+Fajar menggunakan monster agresif, damage langsung, dan buff. Gerhana memakai 12 monster, 4 trap, dan 4 spell untuk mengendalikan serangan dan mempertahankan sumber daya. Keduanya punya 20 kartu; untuk sementara pemain memilih deck bawaan dan tidak dapat mengedit susunan kartu.
 
 ## Aturan zona
 
@@ -19,11 +19,19 @@ Contoh: serangan Nyx → Cermin pemain → Segel Nyx → Segel pemain. Segel pem
 - Segel Hening: membalas spell atau trap lawan yang terakhir diaktifkan; membatalkan efek, bukan pemasangan/summon atau biaya tribute.
 - Efek summon, perisai, dan skill tetap berjalan; tiga trap ini tidak memenuhi syarat untuk merespons efek tersebut. Ini merupakan subset aturan Eldoria, bukan implementasi seluruh aturan Yu-Gi-Oh.
 
-## Koleksi dan simpanan
+## Koleksi dan pilihan deck
 
-Semua 18 jenis kartu tersedia sebanyak maksimal tiga salinan per deck; belum ada pembelian, pembukaan paket, atau progres membuka kartu. Buka Koleksi & Deck Builder, pilih deck dasar, klik ganda koleksi untuk menambah atau isi deck untuk mengurangi. Panel tengah membedakan Efek Kartu dan Cerita. Deck valid harus tepat 20 kartu, maksimal 3 salinan per jenis, minimal 8 monster.
+Galeri tetap menampilkan seluruh 18 jenis kartu dengan cerita dan efek terpisah. Deck builder sedang dinonaktifkan: tidak ada tombol editor, layar editor tidak dibuat di runtime, dan pilihan deck serta susunan yang benar-benar masuk duel hanya berasal dari dua preset. Data deck kustom lama tidak dihapus, tetapi tidak dapat dipilih untuk duel saat ini. Pilihan deck bawaan, deck Nyx, dan kesulitan tetap disimpan lokal.
 
-Simpan & Gunakan membuat salinan kustom dari preset; menyimpan deck kustom memperbaruinya. Preset asli tetap tersedia. Deck aktif dan pilihan Nyx/kesulitan disimpan di user://eldoria_collection_v1.json. Penyimpanan membuat berkas sementara dan cadangan; simpanan rusak dipulihkan dari cadangan jika memungkinkan, lalu preset menjadi fallback. Progres duel tidak disimpan. Pengujian menggunakan nama berkas terpisah dari profil pemain.
+Gerhana terdiri dari Penjaga Senja ×3, Burung Hantu Perak ×2, Penyihir Cermin ×2, Naga Noctis ×2, Oracle Rembulan ×1, Peri Astral ×2; Cermin Pembalasan ×2, Segel Hening ×1, Belenggu Spektral ×1; serta Jam Pasir Astral, Berkah Fajar, Badai Aether, dan Retakan Langit masing-masing satu.
+
+Penjaga Senja memasang satu Cermin dari deck sekali per duel per pihak. Marker hanya dikonsumsi jika Cermin berhasil dipindahkan ke zona kosong. Pemasangan tidak mengambil kartu dari luar deck, tidak mengabaikan waktu tunggu trap, dan tetap menghitung konservasi 20 kartu.
+
+## Keterbacaan trap
+
+Pilih trap dari tangan pada Main Phase: zona kosong milikmu di kanan papan akan berwarna emas dan bertuliskan PASANG DI SINI. Tombol zona salah dinonaktifkan selama memilih trap. Klik satu zona untuk memasang; status MENUNGGU berubah menjadi SIAP pada giliran berikutnya. Saat ada pemicu yang sah, panel respons muncul otomatis, termasuk pada giliran Nyx.
+
+Trap yang diselesaikan tampil satu per satu: kartu dibuka di area tangan, panel menerangkan nama/pemilik/efek, dan geometri khas menuju target. Trap yang dibatalkan juga ditampilkan dengan tanda silang. Cermin menampilkan bidang pemantul dan sinar balik; Segel membentuk rantai silang pada rune tengah; Belenggu melingkari penyerang dengan sulur berduri. Serangan yang masih sah, angka damage, LP, dan hasil duel ditunda sampai presentasi trap selesai. Semua antrean dibersihkan saat duel diulang.
 
 ## Kesulitan Nyx
 
@@ -31,4 +39,4 @@ Santai memilih monster secara sederhana, tidak memakai skill, dan kadang melewat
 
 ## Verifikasi
 
-Test strategi menjalankan kedua urutan pembuka, dua arketipe, dan tiga kesulitan; memeriksa konservasi 20 kartu termasuk zona spell/trap, LP, dan duel selesai. Tes unit mencakup timing trap, respons berantai, pembatalan, penurunan ATK sebelum damage, slot penuh, deck-out, validasi deck, simpan/muat, dan pemulihan cadangan. Tes UI menggunakan deck kustom asli lalu menjalankan rantai empat link melalui panel pemain dan respons otomatis Nyx. Galeri memeriksa keunikan piksel ilustrasi seluruh 18 kartu. Efek visual diuji dengan renderer native Godot.
+Test strategi menjalankan kedua urutan pembuka, dua arketipe, dan tiga kesulitan; memeriksa konservasi 20 kartu termasuk zona spell/trap, LP, dan duel selesai. Tes unit mencakup timing trap, respons berantai, pembatalan, penurunan ATK sebelum damage, slot penuh, deck-out, validasi deck, simpan/muat, dan pemulihan cadangan. Tes UI memakai deck bawaan, memverifikasi klik nyata ke zona emas, dan menjalankan rantai empat link melalui panel pemain dan respons otomatis Nyx. Galeri memeriksa keunikan piksel ilustrasi seluruh 18 kartu. Efek visual diuji dengan renderer native Godot.

@@ -6,7 +6,6 @@ const CardView = preload("res://scripts/card_view.gd")
 const Arena = preload("res://scripts/arena.gd")
 const Effects = preload("res://scripts/effects.gd")
 const DeckStore = preload("res://scripts/deck_store.gd")
-const DeckBuilder = preload("res://scripts/deck_builder.gd")
 const Gallery = preload("res://scripts/gallery.gd")
 
 const GOLD = Color("#c6ae7d")
@@ -78,7 +77,6 @@ var gallery
 var effects_button: Button
 var impact_until: float = 0.0
 var collection_store = DeckStore.new()
-var builder
 var deck_select: OptionButton
 var enemy_select: OptionButton
 var ai_select: OptionButton
@@ -87,6 +85,12 @@ var response_layer: Control
 var response_text: RichTextLabel
 var response_buttons: Array = []
 var response_pending: bool = false
+var trap_presenting: bool = false
+var trap_visuals: Array = []
+var delayed_combats: Array = []
+var delayed_health: Array = []
+var delayed_shields: Array = []
+var delayed_card_cues: Array = []
 var coin_layer: Control
 var coin_face
 var coin_result: Label
@@ -103,6 +107,7 @@ func _ready() -> void:
 	app_theme.default_font_size = 17
 	theme = app_theme
 	collection_store.load_data()
+	if not Catalog.PRESETS.has(collection_store.active): collection_store.active = "fajar"
 	_build_ui()
 	_build_audio()
 	duel.changed.connect(_render)
@@ -317,8 +322,8 @@ func _build_menu() -> void:
 	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_from_menu,true)
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
-	_button(menu_layer,"KOLEKSI & DECK BUILDER",Rect2(99,604,508,31),_open_builder)
-	_label(menu_layer,"VERSI 0.8 / GERHANA / DECK & RESPONS",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
+	_label(menu_layer,"VERSI 0.9 / GERHANA / TRAP & TAKTIK",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -329,7 +334,7 @@ func _build_help() -> void:
 	body.add_theme_color_override("default_color",LIGHT)
 	body.bbcode_enabled = true
 	body.text = "[color=#dfbf81]01  MEMBACA KARTU[/color]\nArahkan kursor untuk pratinjau besar. Klik kanan kartu, tekan E, atau pilih Perbesar Kartu untuk membaca efek lengkap. Klik kiri dipakai untuk bermain.\n\n[color=#dfbf81]02  MAIN PHASE[/color]\nPilih monster di tangan, pilih mode menyerang / bertahan, lalu klik zona tujuan yang menyala. Satu normal summon per giliran. Naga Bara perlu satu tribute.\n\n[color=#dfbf81]03  SPELL[/color]\nBadai Aether dan Suaka Surya aktif langsung. Berkah Fajar menargetkan monstermu; Retakan Langit menargetkan monster lawan dengan ATK 1800 atau kurang.\n\n[color=#dfbf81]04  BATTLE PHASE[/color]\nKlik Masuk Battle, pilih monstermu yang bisa menyerang, lalu klik monster lawan yang menyala. Jika papan lawan kosong, pilih Serang Langsung. Satu serangan per monster. Pemain pertama tidak menyerang pada giliran pertama.\n\n[color=#dfbf81]05  DAMAGE & STRATEGI[/color]\nLawan posisi menyerang: selisih ATK mengurangi LP. Lawan bertahan memakai DEF; menang tidak memberi kerusakan LP. Penjelasan hitungan muncul saat serangan. Ubah posisi mulai giliran setelah summon. Skill memulihkan 800 LP sekali saat LP 2500 atau kurang.\n\n[color=#dfbf81]06  MENANG[/color]\nTurunkan LP lawan ke 0 atau buat lawan kehabisan deck saat draw. Buka Log Duel untuk membaca riwayat. Esc menutup detail / panduan atau membuka menu."
-	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan deck Fajar (serangan) dan Gerhana (kontrol). Koleksi & Deck Builder menyimpan deck lokal: tepat 20 kartu, maksimal 3 salinan per jenis, minimal 8 monster. Semua kartu terbuka. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
+	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan deck Fajar (serangan) dan Gerhana (kontrol). Untuk saat ini duel hanya memakai dua deck bawaan. Koleksi tetap dapat dibaca di Galeri Kartu; editor deck dinonaktifkan. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
@@ -396,7 +401,7 @@ func _new_duel(first_side: int = 0) -> void:
 	result_layer.hide()
 	starting = true
 	duel.difficulty = collection_store.difficulty
-	duel.start(-1,first_side,collection_store.cards(collection_store.active),collection_store.cards(collection_store.enemy))
+	duel.start(-1,first_side,Catalog.PRESETS.get(collection_store.active,Catalog.PRESETS["fajar"])["cards"],Catalog.PRESETS.get(collection_store.enemy,Catalog.PRESETS["gerhana"])["cards"])
 	starting = false
 	_inspect(Catalog.card("dawn"))
 	_render()
@@ -405,7 +410,7 @@ func _start_from_menu() -> void:
 	session += 1
 	_reset_visuals()
 	_hide_hover()
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,builder,response_layer]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,response_layer]:
 		layer.hide()
 	coin_side = -1
 	coin_face.face = -1
@@ -462,7 +467,6 @@ func _open_menu() -> void:
 	session += 1
 	coin_layer.hide()
 	response_layer.hide()
-	builder.hide()
 	response_pending = false
 	if coin_tween and coin_tween.is_valid():
 		coin_tween.kill()
@@ -521,7 +525,7 @@ func _render() -> void:
 		back.custom_minimum_size = Vector2(22,14)
 		enemy_hand.add_child(back)
 	hand_label.text = "TANGAN: %d KARTU / LAWAN: %d" % [duel.hands[0].size(),duel.hands[1].size()]
-	var active: bool = duel.turn == 0 and not duel.over and duel.chain.is_empty()
+	var active: bool = duel.turn == 0 and not duel.over and duel.chain.is_empty() and not trap_presenting
 	battle_button.visible = duel.phase == "MAIN"
 	battle_button.disabled = not active or duel.turn_number == 1
 	direct_button.visible = duel.phase == "BATTLE"
@@ -564,7 +568,7 @@ func _zone_hover(side: int, zone: int) -> void:
 		_queue_hover(card)
 
 func _can_input() -> bool:
-	return not builder.visible and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
+	return not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -581,7 +585,7 @@ func _hand_clicked(index: int) -> void:
 	if selected_hand < 0:
 		_message("Pilihan kartu dibatalkan.")
 	elif card["kind"] == "trap":
-		_message("Klik zona spell/trap milikmu untuk memasang jebakan tertutup.")
+		_message("Klik PASANG DI SINI di kanan papanmu. Aktif mulai giliran berikutnya." if duel.empty_backrow(0) >= 0 else "Ketiga zona spell/trap penuh. Jebakan ini belum dapat dipasang.")
 	elif card["kind"] == "spell" and card["effect"] not in ["buff","destroy"]:
 		if duel.play(index):
 			selected_hand = -1
@@ -666,7 +670,7 @@ func _run_ai(token: int) -> void:
 	await get_tree().create_timer(0.8).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible:
+		if trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -706,6 +710,8 @@ func _visual(kind: String, side: int, zone: int, amount: int) -> void:
 		"summon":
 			_animate_summon(side,zone)
 			_sound("summon")
+		"trap_set":
+			_float_text("TRAP DIPASANG",Vector2(800,400) if side == 0 else Vector2(300,200),GOLD)
 		"spell": _sound("spell")
 		"attack": _sound("attack")
 		"damage": _health_change(side,amount,false)
@@ -735,6 +741,9 @@ func _finished(winning_side: int) -> void:
 	selected_hand = -1
 	selected_zone = -1
 	var token: int = session
+	while trap_presenting and token == session:
+		await get_tree().create_timer(0.1).timeout
+	if token != session: return
 	var delay: float = maxf(0.12,impact_until-Time.get_ticks_msec()/1000.0+(0.30 if fx.reduced_motion else 0.65))
 	await get_tree().create_timer(delay).timeout
 	if token != session:
@@ -752,11 +761,6 @@ func _attacker_ready() -> bool:
 	return not monster.is_empty() and not monster["defending"] and not monster["attacked"]
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if builder.visible and not zoom_layer.visible:
-		if event.is_action_pressed("ui_cancel"):
-			builder.hide()
-		get_viewport().set_input_as_handled()
-		return
 	if response_layer.visible and not zoom_layer.visible:
 		if event.is_action_pressed("ui_cancel"):
 			_message("Pilih jebakan atau Lewati untuk menyelesaikan respons.")
@@ -834,7 +838,7 @@ func _open_card_zoom(card: Dictionary) -> void:
 	zoom_description.scroll_to_line(0)
 	zoom_lore.text = card.get("lore", "")
 	zoom_lore.scroll_to_line(0)
-	zoom_close_button.text = "KEMBALI KE KOLEKSI" if builder.visible else ("KEMBALI KE GALERI" if gallery.visible else "KEMBALI KE DUEL")
+	zoom_close_button.text = "KEMBALI KE GALERI" if gallery.visible else "KEMBALI KE DUEL"
 	zoom_hint.text = "Pelajari statistik dan efeknya sebelum memasuki arena." if gallery.visible else "Klik kiri untuk bermain. Klik kanan atau E untuk detail."
 	zoom_layer.show()
 
@@ -869,7 +873,7 @@ func _update_context() -> void:
 		context_label.text = "Giliran Nyx.\nAmati kartu dan strategi lawan."
 	elif selected_hand >= 0 and selected_hand < duel.hands[0].size():
 		var card: Dictionary = duel.hands[0][selected_hand]
-		context_label.text = "%s\nPilih zona yang menyala." % card["name"]
+		context_label.text = "%s\n%s" % [card["name"],"Pasang di zona emas di kanan papanmu." if card["kind"] == "trap" else "Pilih zona yang menyala."]
 	elif duel.phase == "BATTLE":
 		context_label.text = "Battle Phase\nPilih monstermu, lalu target lawan."
 	elif duel.turn_number == 1:
@@ -883,6 +887,7 @@ func _set_lp_value(value: float, side: int) -> void:
 	profile_bars[side].value = value
 
 func _update_lp(side: int) -> void:
+	if trap_presenting: return
 	var target: int = int(duel.lp[side])
 	if lp_targets[side] == target:
 		return
@@ -897,6 +902,12 @@ func _update_lp(side: int) -> void:
 	tween.tween_method(_set_lp_value.bind(side),float(displayed_lp[side]),float(target),0.18 if fx.reduced_motion else 0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _reset_visuals() -> void:
+	trap_presenting = false
+	trap_visuals.clear()
+	delayed_combats.clear()
+	delayed_health.clear()
+	delayed_shields.clear()
+	delayed_card_cues.clear()
 	impact_until = 0
 	_hide_hover()
 	for side in range(2):
@@ -939,6 +950,9 @@ func _animate_summon(side: int, zone: int) -> void:
 	tween.tween_callback(ghost.queue_free)
 
 func _combat_explained(report: Dictionary) -> void:
+	if trap_presenting:
+		delayed_combats.append(report.duplicate(true))
+		return
 	_hide_hover()
 	combat_serial += 1
 	var token: int = combat_serial
@@ -1020,6 +1034,15 @@ func _profile_effect_point(side: int) -> Vector2:
 func _card_visual(cue: Dictionary) -> void:
 	if starting:
 		return
+	if Catalog.CARDS[cue["id"]]["kind"] == "trap":
+		trap_visuals.append(cue.duplicate(true))
+		if not trap_presenting:
+			trap_presenting = true
+			_play_trap_visuals(session)
+		return
+	if trap_presenting:
+		delayed_card_cues.append(cue.duplicate(true))
+		return
 	var card_id: String = cue["id"]
 	var side: int = cue["side"]
 	var action: String = cue["action"]
@@ -1057,6 +1080,9 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float) -> void:
 	tween.tween_callback(ghost.queue_free)
 
 func _health_change(side: int, amount: int, healing: bool) -> void:
+	if trap_presenting:
+		delayed_health.append([side,amount,healing])
+		return
 	var token: int = session
 	var delay: float = maxf(0,impact_until-Time.get_ticks_msec()/1000.0)
 	if delay > 0:
@@ -1069,6 +1095,9 @@ func _health_change(side: int, amount: int, healing: bool) -> void:
 		_sound("heal")
 
 func _shield_at_impact(side: int, zone: int) -> void:
+	if trap_presenting:
+		delayed_shields.append([side,zone])
+		return
 	var token: int = session
 	var delay: float = maxf(0,impact_until-Time.get_ticks_msec()/1000.0)
 	if delay > 0:
@@ -1092,7 +1121,7 @@ func _toggle_effect_mode() -> void:
 	effects_button.text = "EFEK: RINGKAS" if fx.reduced_motion else "EFEK: NORMAL"
 
 func _effects_obscured() -> bool:
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,builder,response_layer]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer]:
 		if is_instance_valid(layer) and layer.visible:
 			return true
 	return false
@@ -1158,12 +1187,6 @@ func _build_strategy_ui() -> void:
 	# Backrow controls belong below modal layers in the scene tree.
 	for side in range(2):
 		for button in backrow_views[side]: move_child(button,menu_layer.get_index())
-	builder = DeckBuilder.new()
-	_place(builder,self,Rect2(0,0,1280,720))
-	builder.closed.connect(func(): builder.hide())
-	builder.saved.connect(_refresh_deck_choices)
-	builder.inspect_requested.connect(_open_card_zoom)
-	move_child(zoom_layer,get_child_count()-1)
 	response_layer = _overlay()
 	_panel(response_layer,Rect2(315,105,650,510),GOLD)
 	_label(response_layer,"KESEMPATAN MERESPONS",Rect2(350,132,580,40),28,GOLD)
@@ -1183,7 +1206,7 @@ func _save_preferences() -> void:
 
 func _refresh_deck_choices() -> void:
 	deck_select.clear()
-	var all: Dictionary = collection_store.entries()
+	var all: Dictionary = Catalog.PRESETS
 	for key in all:
 		deck_select.add_item(all[key]["name"])
 		deck_select.set_item_metadata(deck_select.item_count-1,key)
@@ -1194,25 +1217,31 @@ func _refresh_deck_choices() -> void:
 		enemy_select.set_item_metadata(enemy_select.item_count-1,key)
 		if key == collection_store.enemy: enemy_select.select(enemy_select.item_count-1)
 
-func _open_builder() -> void:
-	_hide_hover()
-	builder.show_builder(collection_store)
-
 func _render_backrows() -> void:
 	if not is_instance_valid(response_layer): return
+	var choosing: bool = selected_hand >= 0 and selected_hand < duel.hands[0].size() and duel.hands[0][selected_hand]["kind"] == "trap" and _can_input() and duel.phase == "MAIN"
 	for side in range(2):
 		for z in range(3):
 			var card: Dictionary = duel.backrows[side][z]
 			var button: Button = backrow_views[side][z]
+			var legal: bool = choosing and side == 0 and card.is_empty()
+			button.set_meta("valid_trap_target",legal)
+			button.add_theme_stylebox_override("normal",_style(Color("#374738") if legal else Color("#142937"),GOLD if legal else Color("#3c5966")))
+			button.add_theme_color_override("font_color",Color("#fff0c9") if legal else LIGHT)
+			button.disabled = choosing and not legal
 			if card.is_empty():
-				button.text = "S/T %d\nKOSONG" % (z+1)
-				button.tooltip_text = "Klik untuk memasang jebakan dari tangan."
+				button.text = "PASANG\nDI SINI" if legal else "S/T %d\nKOSONG" % (z+1)
+				button.tooltip_text = "Klik untuk memasang jebakan yang dipilih."
 			elif side == 1 and not card.get("faceup",false):
 				button.text = "TERTUTUP"
 				button.tooltip_text = "Kartu tertutup Nyx. Identitas tidak terlihat."
+			elif card["kind"] == "spell":
+				button.text = card["name"]+"\nAKTIF"
+				button.tooltip_text = card["text"]
 			else:
-				button.text = card["name"]
-				button.tooltip_text = card["text"]+" (Aktif mulai giliran berikutnya.)"
+				var ready: bool = int(card.get("set_turn",duel.turn_number)) < duel.turn_number
+				button.text = card["name"]+ ("\nSIAP" if ready else "\nMENUNGGU")
+				button.tooltip_text = card["text"]+ (" Respons akan muncul otomatis saat syaratnya terpenuhi." if ready else " Belum aktif pada giliran dipasang. Aktif mulai giliran berikutnya.")
 
 func _backrow_hover(side: int, z: int) -> void:
 	var card: Dictionary = duel.backrows[side][z]
@@ -1276,3 +1305,52 @@ func _bot_response(token: int) -> void:
 	response_pending = false
 	if duel.priority == 1 and not duel.chain.is_empty():
 		duel.respond(1,AI.response(duel,1))
+
+func _play_trap_visuals(token: int) -> void:
+	# Let the response overlay close before presenting each revealed card.
+	await get_tree().process_frame
+	while token == session and not trap_visuals.is_empty():
+		var cue: Dictionary = trap_visuals.pop_front()
+		var card: Dictionary = Catalog.card(cue["id"])
+		var side: int = cue["side"]
+		var cancelled: bool = cue.get("cancelled",false)
+		var ghost := CardView.new()
+		ghost.data = card
+		ghost.disabled = true
+		ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ghost.set_meta("card_visual",true)
+		_place(ghost,fx,Rect2(412,538,132,169))
+		ghost.pivot_offset = ghost.size/2.0
+		if not fx.reduced_motion:
+			ghost.scale.x = 0.05
+			ghost.create_tween().tween_property(ghost,"scale:x",1.0,0.18)
+		var note := _panel(fx,Rect2(555,548,436,145),GOLD)
+		note.set_meta("card_visual",true)
+		_label(note,("DIBATALKAN / " if cancelled else "TRAP AKTIF / ")+duel.who(side),Rect2(12,8,410,23),15,GOLD)
+		_label(note,card["name"],Rect2(12,34,410,28),22,LIGHT)
+		_label(note,"Efek dibatalkan oleh respons lawan." if cancelled else card["text"],Rect2(12,69,410,67),16,MUTED)
+		var slot: int = cue.get("source_slot",0)
+		var source := Vector2(948,355+49*slot) if side == 0 else Vector2(342,186+49*slot)
+		var target := Vector2(645,309) if cue["id"] == "seal" else _zone_center(cue["target_side"],maxi(0,int(cue["target_zone"])))
+		fx.play_card(cue["id"],"cancel" if cancelled else "cast",source,target)
+		_sound("spell")
+		await get_tree().create_timer(0.38 if fx.reduced_motion else 1.15).timeout
+		if token != session: return
+		if is_instance_valid(ghost): ghost.queue_free()
+		if is_instance_valid(note): note.queue_free()
+	if token != session: return
+	trap_presenting = false
+	impact_until = Time.get_ticks_msec()/1000.0
+	var cues: Array = delayed_card_cues.duplicate(true)
+	delayed_card_cues.clear()
+	for cue in cues: _card_visual(cue)
+	var combats: Array = delayed_combats.duplicate(true)
+	delayed_combats.clear()
+	for report in combats: _combat_explained(report)
+	var health: Array = delayed_health.duplicate(true)
+	delayed_health.clear()
+	for change in health: _health_change(change[0],change[1],change[2])
+	var shields: Array = delayed_shields.duplicate(true)
+	delayed_shields.clear()
+	for shield in shields: _shield_at_impact(shield[0],shield[1])
+	_render()
