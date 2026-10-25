@@ -38,3 +38,10 @@ Atlas orisinal baru dibuat dengan tool imagegen bawaan dan disimpan di `C:/Users
 Komposisi orisinal proyek, dibuat dengan `tools/generate_duel_score.py` tanpa rekaman atau sampel game lain. `first_light_battle.wav` dan `first_light_urgency.wav` adalah dua stem stereo 44,1 kHz 16-bit, masing-masing 32 bar pada 144 BPM (53,33 detik). Metadata teknis ada di `first_light_score.json`. File ambient lama dipertahankan sebagai aset historis; runtime memakai komposisi baru.
 
 Aksen baru: `ace_summon.wav`, `heavy_impact.wav`, `trap_reveal.wav`, seluruhnya sintesis orisinal dari generator yang sama. Preview 20 detik tersedia di output chat.
+
+
+## Jejak Fajar (versi 0.11, musik runtime saat ini)
+
+`path_of_dawn.ogg` dan `path_of_dawn_strings.ogg` menggantikan Astral Drive sebagai musik runtime. Komposisi orisinal berdurasi 160 detik, 96 BPM, D minor, 64 bar. Menggunakan instrumen berbasis sampel GeneralUser GS 2.0.3 oleh S. Christian Collins, dirender dengan FluidSynth 2.6.1. Lisensi penuh tersedia di `assets/audio/GeneralUser-LICENSE.txt`; sumber: https://github.com/mrbumpy409/GeneralUser-GS dan https://www.schristiancollins.com/ . Musik tidak memakai melodi atau rekaman anime lain.
+
+Source komposisi dan renderer: `tools/compose_anime_score.py`. Metadata audio terdekode ada di `path_of_dawn_score.json`. SoundFont dan binary renderer hanya digunakan sebagai alat pengembangan lokal, tidak dibundel di runtime. Aksen SFX versi sebelumnya tetap digunakan.

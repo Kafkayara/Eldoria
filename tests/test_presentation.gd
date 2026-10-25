@@ -37,7 +37,7 @@ func run() -> void:
 	await process_frame
 	board.collection_store.path = "user://eldoria_test_presentation.json"
 	check(board.music.stream != null and board.urgency_music.stream != null,"Both musical stems loaded")
-	check(board.music.stream.mix_rate == 44100 and board.music.stream.loop_end == board.urgency_music.stream.loop_end,"Music uses aligned 44.1 kHz loops")
+	check(board.music.stream.loop and board.urgency_music.stream.loop and absf(board.music.stream.get_length()-board.urgency_music.stream.get_length()) < 0.001 and board.music.stream.get_length() >= 159.9,"Music uses aligned full-length 160-second loops")
 	check(board.sound_streams.has("ace_summon") and board.sound_streams.has("heavy_impact") and board.sound_streams.has("trap_reveal"),"New action accents loaded")
 	check(CardView.allow_art_motion,"Normal mode enables subtle art motion")
 	var card_view = CardView.new()
@@ -79,7 +79,7 @@ func run() -> void:
 	board.duel.lp[0] = 1200
 	board._render()
 	await create_timer(0.8).timeout
-	check(board.urgency_music.volume_db > -30,"Low LP adds musical urgency layer")
+	check(board.urgency_music.volume_db > -40 and board.urgency_music.volume_db < board.music.volume_db,"Low LP adds musical urgency layer")
 	check(absf(board.music.get_playback_position()-board.urgency_music.get_playback_position()) < 0.12,"Stems stay synchronized")
 	board._toggle_audio()
 	check(board.music.stream_paused and board.urgency_music.stream_paused,"Mute pauses both stems")

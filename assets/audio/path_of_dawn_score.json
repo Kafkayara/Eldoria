@@ -1,0 +1,28 @@
+{
+  "title": "Jejak Fajar / Path of Dawn",
+  "bpm": 96,
+  "bars": 64,
+  "key": "D minor",
+  "seconds": 160,
+  "method": "Original composition, GeneralUser GS 2.0.3 acoustic sample instruments, FluidSynth 2.6.1",
+  "stems": {
+    "main": {
+      "frames": 7056000,
+      "seconds": 160.0,
+      "peak": 0.8044973015785217,
+      "rms": 0.10809164494276047,
+      "boundary_step": 0.002629809081554413,
+      "boundary_rms_ratio": 1.2239646437648546,
+      "bytes": 2018066
+    },
+    "strings": {
+      "frames": 7056000,
+      "seconds": 160.0,
+      "peak": 0.5799627304077148,
+      "rms": 0.09397734701633453,
+      "boundary_step": 0.009487682953476906,
+      "boundary_rms_ratio": 1.676248284382832,
+      "bytes": 2591058
+    }
+  }
+}

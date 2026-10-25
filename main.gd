@@ -39,6 +39,9 @@ var status_label: Label
 var hand_label: Label
 var log_view: RichTextLabel
 var battle_button: Button
+var undo_button: Button
+var response_undo_button: Button
+var result_undo_button: Button
 var end_button: Button
 var direct_button: Button
 var position_button: Button
@@ -118,6 +121,8 @@ func _ready() -> void:
 	if not Catalog.PRESETS.has(collection_store.active): collection_store.active = "fajar"
 	_build_ui()
 	_build_audio()
+	duel.checkpoint_created.connect(_capture_undo_ui)
+	duel.undone.connect(_restore_undo_ui)
 	duel.changed.connect(_render)
 	duel.message.connect(_message)
 	duel.visual.connect(_visual)
@@ -264,7 +269,8 @@ func _build_ui() -> void:
 	skill_button = _button(self,"Kebangkitan Fajar",Rect2(1028,375,216,47),_skill)
 	skill_button.tooltip_text = "Sekali per duel: pulihkan 800 LP saat LP 2500 atau kurang."
 	end_button = _button(self,"AKHIRI GILIRAN",Rect2(1028,438,216,52),_end_turn,true)
-	_label(self,"Klik monster untuk memilih.\nTarget yang valid akan menyala.",Rect2(1028,509,216,45),14,MUTED)
+	undo_button = _button(self,"UNDO / Ctrl+Z",Rect2(1028,509,216,43),_undo_action)
+	undo_button.tooltip_text = "Batalkan langkah pemain. Tersedia sampai Akhiri Giliran ditekan."
 	_button(self,"BUKA LOG DUEL",Rect2(1028,570,216,41),_toggle_log)
 	audio_button = _button(self,"AUDIO: ON",Rect2(1028,633,216,40),_toggle_audio)
 	audio_button.add_theme_font_size_override("font_size",14)
@@ -340,7 +346,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.10 / ASTRAL DRIVE / DUEL SOLO",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.11 / JEJAK FAJAR / UNDO",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -352,35 +358,35 @@ func _build_help() -> void:
 	body.bbcode_enabled = true
 	body.text = "[color=#dfbf81]01  MEMBACA KARTU[/color]\nArahkan kursor untuk pratinjau besar. Klik kanan kartu, tekan E, atau pilih Perbesar Kartu untuk membaca efek lengkap. Klik kiri dipakai untuk bermain.\n\n[color=#dfbf81]02  MAIN PHASE[/color]\nPilih monster di tangan, pilih mode menyerang / bertahan, lalu klik zona tujuan yang menyala. Satu normal summon per giliran. Naga Bara perlu satu tribute.\n\n[color=#dfbf81]03  SPELL[/color]\nBadai Aether dan Suaka Surya aktif langsung. Berkah Fajar menargetkan monstermu; Retakan Langit menargetkan monster lawan dengan ATK 1800 atau kurang.\n\n[color=#dfbf81]04  BATTLE PHASE[/color]\nKlik Masuk Battle, pilih monstermu yang bisa menyerang, lalu klik monster lawan yang menyala. Jika papan lawan kosong, pilih Serang Langsung. Satu serangan per monster. Pemain pertama tidak menyerang pada giliran pertama.\n\n[color=#dfbf81]05  DAMAGE & STRATEGI[/color]\nLawan posisi menyerang: selisih ATK mengurangi LP. Lawan bertahan memakai DEF; menang tidak memberi kerusakan LP. Penjelasan hitungan muncul saat serangan. Ubah posisi mulai giliran setelah summon. Skill memulihkan 800 LP sekali saat LP 2500 atau kurang.\n\n[color=#dfbf81]06  MENANG[/color]\nTurunkan LP lawan ke 0 atau buat lawan kehabisan deck saat draw. Buka Log Duel untuk membaca riwayat. Esc menutup detail / panduan atau membuka menu."
 	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan deck Fajar (serangan) dan Gerhana (kontrol). Untuk saat ini duel hanya memakai dua deck bawaan. Koleksi tetap dapat dibaca di Galeri Kartu; editor deck dinonaktifkan. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
+	body.text += "\n\n[color=#dfbf81]10  UNDO / Ctrl+Z[/color]\nPada giliranmu, tombol Undo mengembalikan satu langkah beserta seluruh akibatnya: kartu, LP, hasil draw, tribute, skill, dan respons trap. Undo juga dapat dipakai saat menunggu respons Nyx atau sebelum hasil duel dikonfirmasi. Riwayat ditutup setelah Akhiri Giliran; kamu tidak dapat mundur melewati giliran lawan. Tidak ada pengacakan ulang kartu saat undo.\n\n[color=#dfbf81]11  MUSIK[/color]\nJejak Fajar adalah komposisi orisinal 2 menit 40 detik, memakai instrumen berbasis sampel: seruling, senar, koto, piano, dan perkusi lembut. Bagian akhir kembali ke awal tanpa fade-out. Slider BGM mengatur musik tanpa mengubah efek suara."
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
 
 func _build_result() -> void:
 	result_layer = _overlay()
-	_panel(result_layer,Rect2(383,154,514,416),GOLD)
+	_panel(result_layer,Rect2(383,154,514,470),GOLD)
 	_label(result_layer,"ARENA ASTRAL",Rect2(415,183,450,27),16,GOLD)
 	result_title = _label(result_layer,"VICTORY",Rect2(415,235,450,75),54,LIGHT)
 	result_description = _label(result_layer,"",Rect2(415,331,450,74),20,MUTED)
 	_button(result_layer,"DUEL LAGI",Rect2(415,432,450,49),_start_from_menu,true)
 	_button(result_layer,"Kembali ke menu",Rect2(415,499,450,42),_open_menu)
+	result_undo_button = _button(result_layer,"UNDO LANGKAH TERAKHIR",Rect2(415,558,450,42),_undo_action)
 	result_layer.hide()
 
 func _build_audio() -> void:
 	music = AudioStreamPlayer.new()
 	add_child(music)
-	var stream: AudioStreamWAV = load("res://assets/audio/first_light_battle.wav")
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = stream.data.size() / 4
+	var stream: AudioStreamOggVorbis = load("res://assets/audio/path_of_dawn.ogg")
+	stream.loop = true
+	stream.loop_offset = 0.0
 	music.stream = stream
 	music.volume_db = -20
 	urgency_music = AudioStreamPlayer.new()
 	add_child(urgency_music)
-	var layer: AudioStreamWAV = load("res://assets/audio/first_light_urgency.wav")
-	layer.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	layer.loop_begin = 0
-	layer.loop_end = layer.data.size() / 4
+	var layer: AudioStreamOggVorbis = load("res://assets/audio/path_of_dawn_strings.ogg")
+	layer.loop = true
+	layer.loop_offset = 0.0
 	urgency_music.stream = layer
 	urgency_music.volume_db = -80
 	music.play()
@@ -571,6 +577,9 @@ func _render() -> void:
 	mode_button.disabled = not active or duel.phase != "MAIN"
 	mode_button.text = "Summon: BERTAHAN" if summon_defense else "Summon: MENYERANG"
 	_update_context()
+	undo_button.disabled = not _can_undo_input()
+	undo_button.text = "UNDO (%d) / Ctrl+Z" % duel.undo_stack.size()
+	if is_instance_valid(result_undo_button): result_undo_button.visible = duel.can_undo()
 	_render_backrows()
 	_sync_response()
 	_sync_music()
@@ -792,6 +801,10 @@ func _attacker_ready() -> bool:
 	return not monster.is_empty() and not monster["defending"] and not monster["attacked"]
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_Z:
+		_undo_action()
+		get_viewport().set_input_as_handled()
+		return
 	if response_layer.visible and not zoom_layer.visible:
 		if event.is_action_pressed("ui_cancel"):
 			_message("Pilih jebakan atau Lewati untuk menyelesaikan respons.")
@@ -1232,7 +1245,8 @@ func _build_strategy_ui() -> void:
 		for button in backrow_views[side]: move_child(button,menu_layer.get_index())
 	response_layer = _overlay()
 	_panel(response_layer,Rect2(315,105,650,510),GOLD)
-	_label(response_layer,"KESEMPATAN MERESPONS",Rect2(350,132,580,40),28,GOLD)
+	_label(response_layer,"KESEMPATAN MERESPONS",Rect2(350,132,460,40),28,GOLD)
+	response_undo_button = _button(response_layer,"UNDO",Rect2(824,136,106,34),_undo_action)
 	response_text = _reading_text(response_layer,Rect2(350,190,580,134),19,LIGHT)
 	for z in range(3):
 		var button := _button(response_layer,"",Rect2(350,337+z*69,580,63),_respond_player.bind(z))
@@ -1305,6 +1319,7 @@ func _sync_response() -> void:
 	if duel.chain.is_empty() or duel.priority < 0 or menu_layer.visible or coin_layer.visible:
 		response_layer.hide()
 		return
+	response_undo_button.visible = duel.can_undo()
 	if duel.priority == 0:
 		_hide_hover()
 		var lines: Array[String] = ["Efek terakhir diselesaikan lebih dulu. LP Kamu %d / Nyx %d" % [duel.lp[0],duel.lp[1]],""]
@@ -1430,11 +1445,11 @@ func _sync_music(immediate: bool = false) -> void:
 	var duel_active: bool = not menu_layer.visible and not coin_layer.visible and not duel.over
 	var gain: float = collection_store.music_gain
 	var offset: float = linear_to_db(maxf(gain,0.0001))
-	var main_db: float = (-11.0 if duel_active else -19.0)+offset if gain > 0 else -80.0
+	var main_db: float = (-8.0 if duel_active else -18.0)+offset if gain > 0 else -80.0
 	var urgency_db: float = -80.0
 	if duel_active and gain > 0:
-		if mini(duel.lp[0],duel.lp[1]) <= 1500: urgency_db = -13.0+offset
-		elif duel.phase == "BATTLE": urgency_db = -22.0+offset
+		if mini(duel.lp[0],duel.lp[1]) <= 1500: urgency_db = -28.0+offset
+		elif duel.phase == "BATTLE": urgency_db = -36.0+offset
 	var targets: Array = [main_db,urgency_db]
 	if targets == music_targets and not immediate: return
 	music_targets = targets
@@ -1453,3 +1468,34 @@ func _ace_active() -> bool:
 func _finish_ace(token: int) -> void:
 	await get_tree().create_timer(1.08).timeout
 	if token == session: _render()
+
+func _can_undo_input() -> bool:
+	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
+
+func _undo_action() -> void:
+	if _can_undo_input(): duel.undo()
+
+func _capture_undo_ui(snapshot: Dictionary) -> void:
+	snapshot["ui"] = {"history":history.duplicate(),"inspected":inspected_card.duplicate(true),"aces":ace_seen.duplicate(true),"summon_defense":summon_defense}
+
+func _restore_undo_ui(snapshot: Dictionary) -> void:
+	# Invalidate pending AI replies, impacts, LP tweens, and victory timers.
+	session += 1
+	combat_serial += 1
+	response_pending = false
+	_reset_visuals()
+	result_layer.hide()
+	response_layer.hide()
+	combat_notice.hide()
+	status_label.show()
+	selected_hand = -1
+	selected_zone = -1
+	var ui: Dictionary = snapshot.get("ui",{})
+	history.assign(ui.get("history",[]))
+	log_view.text = "\n\n".join(history)
+	ace_seen = ui.get("aces",{}).duplicate(true)
+	summon_defense = ui.get("summon_defense",false)
+	for side in range(2):
+		lp_targets[side] = int(duel.lp[side])
+		_set_lp_value(float(duel.lp[side]),side)
+	_inspect(ui.get("inspected",Catalog.card("dawn")))

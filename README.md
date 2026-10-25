@@ -11,6 +11,15 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.11 — Jejak Fajar & Undo
+
+- Musik baru **Jejak Fajar / Path of Dawn**, komposisi orisinal 2 menit 40 detik pada 96 BPM. Instrumen berbasis sampel: seruling/shakuhachi, senar, cello, koto, piano, dan perkusi taiko yang renggang. Aransemen lebih lapang daripada Astral Drive; loop tidak berhenti atau fade-out ke hening.
+- Dua stem Ogg tersinkron dengan lapisan tambahan yang jauh lebih pelan. Pemain tetap bisa mengatur slider BGM dan tombol Audio. Tidak perlu menginstal alat musik/render apa pun untuk bermain.
+- **Undo / Ctrl+Z** mengembalikan satu langkah pemain beserta seluruh akibatnya, termasuk LP, kartu, draw, tribute, skill, perisai, dan respons trap lawan.
+- Undo dapat membatalkan animasi/AI response tertunda dan tersedia pada layar hasil untuk aksi di giliran pemain yang belum diakhiri. Setelah **Akhiri Giliran**, riwayat dikosongkan dan tidak dapat melewati giliran lawan.
+- Urutan deck dan state RNG ikut dipulihkan; undo tidak mengacak ulang hasil draw.
+- Penjelasan dan kredit: `docs/music-and-undo.md`. Komposisi baru: `tools/compose_anime_score.py`; lisensi instrumen: `assets/audio/GeneralUser-LICENSE.txt`.
+
 ## Versi 0.10 — Astral Drive
 
 - Portal summon, glow additive berlapis, partikel pengisian, gelombang benturan, dan pecahan target yang dihancurkan, dengan identitas 18 kartu tetap berbeda.

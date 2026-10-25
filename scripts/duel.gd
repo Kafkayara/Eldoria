@@ -1,6 +1,8 @@
 extends RefCounted
 const Catalog = preload("res://scripts/catalog.gd")
 
+signal checkpoint_created(snapshot: Dictionary)
+signal undone(snapshot: Dictionary)
 signal changed
 signal message(text: String)
 signal visual(kind: String, side: int, zone: int, amount: int)
@@ -27,6 +29,8 @@ var passes: int = 0
 var difficulty: String = "normal"
 var next_uid: int = 0
 var sentinel_used: Array = [false,false]
+var undo_stack: Array = []
+const UNDO_LIMIT = 64
 var rng := RandomNumberGenerator.new()
 
 func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalog.DECK, enemy_ids: Array = Catalog.DECK) -> void:
@@ -34,6 +38,7 @@ func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalo
 		rng.randomize()
 	else:
 		rng.seed = seed_value
+	undo_stack.clear()
 	decks = [Catalog.deck(player_ids), Catalog.deck(enemy_ids)]
 	backrows = [[{},{},{}],[{},{},{}]]
 	chain.clear()
@@ -117,6 +122,7 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 			tribute = target
 	elif not fields[turn][target].is_empty():
 		return reject("Zona itu sudah terisi.")
+	_remember_action("Summon %s" % card["name"])
 	if tribute >= 0:
 		var tribute_name: String = fields[turn][tribute]["name"]
 		_remove(turn, tribute)
@@ -158,6 +164,7 @@ func _spell(index: int, target: int) -> bool:
 	var slot: int = empty_backrow(turn)
 	if slot < 0:
 		return reject("Ketiga zona spell/trap terisi. Sisakan zona untuk mengaktifkan spell.")
+	_remember_action("Aktifkan %s" % card["name"])
 	var played: Dictionary = hands[turn].pop_at(index)
 	played["faceup"] = true
 	backrows[turn][slot] = played
@@ -196,6 +203,7 @@ func battle() -> bool:
 		return false
 	if turn_number == 1:
 		return reject("Pemain pertama belum bisa menyerang pada giliran pertama.")
+	_remember_action("Masuk Battle Phase")
 	phase = "BATTLE"
 	message.emit("%s memasuki Battle Phase." % who(turn))
 	changed.emit()
@@ -209,6 +217,7 @@ func switch_position(zone: int) -> bool:
 		return false
 	if monster["switched"] or monster["summoned_turn"] == turn_number:
 		return reject("Posisi hanya bisa diubah sekali, mulai giliran setelah summon.")
+	_remember_action("Ubah posisi %s" % monster["name"])
 	monster["defending"] = not monster["defending"]
 	monster["switched"] = true
 	message.emit("Posisi %s diubah." % monster["name"])
@@ -283,6 +292,7 @@ func skill() -> bool:
 		return reject("Skill hanya sekali per duel, saat Main Phase.")
 	if int(lp[turn]) > 2500:
 		return reject("Skill Kebangkitan Fajar terbuka saat LP 2500 atau kurang.")
+	_remember_action("Skill Kebangkitan Fajar")
 	skill_used[turn] = true
 	_heal(turn, 800)
 	message.emit("%s menggunakan Kebangkitan Fajar!" % who(turn))
@@ -293,6 +303,7 @@ func skill() -> bool:
 func end_turn() -> bool:
 	if over or not chain.is_empty():
 		return false
+	undo_stack.clear()
 	turn = 1 - turn
 	turn_number += 1
 	phase = "MAIN"
@@ -331,6 +342,7 @@ func set_trap(index: int, slot: int = -1) -> bool:
 		slot = empty_backrow(turn)
 	if slot < 0 or slot > 2 or not backrows[turn][slot].is_empty():
 		return reject("Pilih zona spell/trap yang kosong.")
+	_remember_action("Pasang %s" % hands[turn][index]["name"])
 	var card: Dictionary = hands[turn].pop_at(index)
 	card["set_turn"] = turn_number
 	card["faceup"] = false
@@ -347,6 +359,7 @@ func attack(attacker: int, target: int = -1) -> bool:
 		return false
 	if target < -1 or target > 2 or (target == -1 and has_monsters(1-turn)) or (target >= 0 and fields[1-turn][target].is_empty()):
 		return false
+	_remember_action("Serangan %s" % source["name"])
 	source["attacked"] = true
 	message.emit("%s menyatakan serangan %s." % [who(turn),source["name"]])
 	_queue({"action":"attack","side":turn,"card":source.duplicate(true),"zone":attacker,"target":target,"target_uid":int(fields[1-turn][target].get("uid",-1)) if target >= 0 else -1})
@@ -390,6 +403,9 @@ func _advance_response() -> void:
 func respond(side: int, slot: int = -1) -> bool:
 	if side not in [0,1] or over or chain.is_empty() or side != priority:
 		return false
+	if slot != -1 and not response_options(side).has(slot): return false
+	if side == 0:
+		_remember_action("Lewati respons" if slot == -1 else "Respons %s" % backrows[side][slot]["name"],true)
 	if slot == -1:
 		passes += 1
 	else:
@@ -475,3 +491,32 @@ func _sentinel_setup(side: int) -> void:
 		visual.emit("trap_set",side,slot,0)
 		return
 	message.emit("Penjaga Senja: tidak ada Cermin Pembalasan di deck; efek tidak terpakai.")
+
+const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","next_uid","sentinel_used"]
+
+func _remember_action(label: String, during_response: bool = false) -> void:
+	if turn != 0 or over or (not chain.is_empty() and not during_response): return
+	var state := {}
+	for key in SNAPSHOT_FIELDS:
+		var value = get(key)
+		state[key] = value.duplicate(true) if value is Array or value is Dictionary else value
+	var snapshot := {"label":label,"state":state,"rng_seed":rng.seed,"rng_state":rng.state}
+	undo_stack.append(snapshot)
+	if undo_stack.size() > UNDO_LIMIT: undo_stack.pop_front()
+	checkpoint_created.emit(snapshot)
+
+func can_undo() -> bool:
+	return turn == 0 and not undo_stack.is_empty() and int(undo_stack.back()["state"]["turn_number"]) == turn_number
+
+func undo() -> bool:
+	if not can_undo(): return false
+	var snapshot: Dictionary = undo_stack.pop_back()
+	for key in SNAPSHOT_FIELDS:
+		var value = snapshot["state"][key]
+		set(key,value.duplicate(true) if value is Array or value is Dictionary else value)
+	rng.seed = snapshot["rng_seed"]
+	rng.state = snapshot["rng_state"]
+	undone.emit(snapshot)
+	message.emit("Undo: %s. Keadaan sebelum langkah dipulihkan." % snapshot["label"])
+	changed.emit()
+	return true
