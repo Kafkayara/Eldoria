@@ -36,7 +36,7 @@ func _draw() -> void:
 		draw_arc(Vector2(1130,55),60+i*5,0,TAU,64,Color(0.8,0.66,0.4,a),1,true)
 	draw_line(Vector2(22,79),Vector2(1258,79),Color("#425563"),1,true)
 
-func _box(bg: Color, edge: Color, radius: int = 8) -> StyleBoxFlat:
+func _box(bg: Color, edge: Color, radius: int = 3) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = bg
 	style.border_color = edge
@@ -82,7 +82,7 @@ func _build() -> void:
 	_label(self,"KODEKS ELDORIA / Pelajari kartu sebelum memasuki arena.",Rect2(25,54,880,23),15,MUTED)
 	_button(self,"Kembali ke menu",Rect2(1064,22,194,42),func(): closed.emit())
 	var panel := Panel.new()
-	panel.add_theme_stylebox_override("panel",_box(Color("#101f2c"),Color("#536b74"),10))
+	panel.add_theme_stylebox_override("panel",_box(Color("#101f2c"),Color("#536b74"),3))
 	_place(panel,self,Rect2(22,95,280,604))
 	_label(self,"KARTU TERPILIH",Rect2(42,111,240,24),15,GOLD)
 	preview = CardView.new()

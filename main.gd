@@ -7,10 +7,10 @@ const Arena = preload("res://scripts/arena.gd")
 const Effects = preload("res://scripts/effects.gd")
 const Gallery = preload("res://scripts/gallery.gd")
 
-const GOLD = Color("#d9bc85")
+const GOLD = Color("#c6ae7d")
 const MUTED = Color("#b2c7d2")
 const LIGHT = Color("#eff1ed")
-const CYAN = Color("#79d5df")
+const CYAN = Color("#8bb6b9")
 
 var duel = Duel.new()
 var selected_hand: int = -1
@@ -71,6 +71,8 @@ var displayed_lp: Array = [4000.0,4000.0]
 var lp_targets: Array = [4000,4000]
 var lp_tweens: Array = [null,null]
 var gallery
+var effects_button: Button
+var impact_until: float = 0.0
 
 
 func _ready() -> void:
@@ -87,10 +89,11 @@ func _ready() -> void:
 	duel.visual.connect(_visual)
 	duel.finished.connect(_finished)
 	duel.combat.connect(_combat_explained)
+	duel.card_cue.connect(_card_visual)
 	_new_duel()
 	menu_layer.show()
 
-func _style(bg: Color, edge: Color, radius: int = 10) -> StyleBoxFlat:
+func _style(bg: Color, edge: Color, radius: int = 3) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = bg
 	box.border_color = edge
@@ -107,7 +110,7 @@ func _place(node: Control, parent: Node, rect: Rect2) -> void:
 
 func _panel(parent: Node, rect: Rect2, edge: Color = Color("#2a424e")) -> Panel:
 	var node := Panel.new()
-	node.add_theme_stylebox_override("panel", _style(Color(0.035,0.066,0.105,0.95),edge))
+	node.add_theme_stylebox_override("panel", _style(Color(0.035,0.055,0.061,0.98),edge))
 	_place(node,parent,rect)
 	return node
 
@@ -124,12 +127,12 @@ func _label(parent: Node, text_value: String, rect: Rect2, font_size: int = 17, 
 func _button(parent: Node, title: String, rect: Rect2, callback: Callable, primary: bool = false) -> Button:
 	var node := Button.new()
 	node.text = title
-	var bg: Color = Color("#bd9b5f") if primary else Color("#142937")
-	node.add_theme_stylebox_override("normal",_style(bg, GOLD if primary else Color("#3c5966"),7))
-	node.add_theme_stylebox_override("hover",_style(bg.lightened(0.12),GOLD,7))
-	node.add_theme_stylebox_override("pressed",_style(bg.darkened(0.15),GOLD,7))
-	node.add_theme_stylebox_override("disabled",_style(Color("#101c27"),Color("#253541"),7))
-	node.add_theme_stylebox_override("focus",_style(Color(0,0,0,0),CYAN,7))
+	var bg: Color = Color("#b4a078") if primary else Color("#142937")
+	node.add_theme_stylebox_override("normal",_style(bg, GOLD if primary else Color("#3c5966"),3))
+	node.add_theme_stylebox_override("hover",_style(bg.lightened(0.12),GOLD,3))
+	node.add_theme_stylebox_override("pressed",_style(bg.darkened(0.15),GOLD,3))
+	node.add_theme_stylebox_override("disabled",_style(Color("#101c27"),Color("#253541"),3))
+	node.add_theme_stylebox_override("focus",_style(Color(0,0,0,0),CYAN,3))
 	node.add_theme_color_override("font_color",Color("#121924") if primary else LIGHT)
 	node.add_theme_color_override("font_hover_color",Color("#121924") if primary else GOLD)
 	node.add_theme_color_override("font_disabled_color",Color("#91a9b5"))
@@ -141,8 +144,13 @@ func _button(parent: Node, title: String, rect: Rect2, callback: Callable, prima
 func _build_ui() -> void:
 	var arena := Arena.new()
 	_place(arena,self,Rect2(0,0,1280,720))
-	_label(self,"E L D O R I A",Rect2(20,13,340,40),29,GOLD)
+	var brand := _label(self,"ELDORIA",Rect2(20,11,280,43),32,GOLD)
+	var brand_font := SystemFont.new()
+	brand_font.font_names = PackedStringArray(["Georgia"])
+	brand.add_theme_font_override("font",brand_font)
 	_label(self,"ARENA ASTRAL / DUEL SOLO",Rect2(322,25,420,25),15,MUTED)
+	effects_button = _button(self,"EFEK: NORMAL",Rect2(726,18,178,38),_toggle_effect_mode)
+	effects_button.add_theme_font_size_override("font_size",14)
 	_button(self,"Log duel",Rect2(916,18,105,38),_toggle_log)
 	_button(self,"Panduan",Rect2(1033,18,105,38),func(): _hide_hover(); help_layer.show())
 	_button(self,"Menu",Rect2(1150,18,112,38),_open_menu)
@@ -234,6 +242,7 @@ func _build_ui() -> void:
 	log_panel.hide()
 	fx = Effects.new()
 	_place(fx,self,Rect2(0,0,1280,720))
+	fx.occlusion_check = _effects_obscured
 	combat_notice = _panel(fx,Rect2(298,480,694,35),GOLD)
 	combat_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	combat_label = _label(combat_notice,"",Rect2(10,3,674,29),17,LIGHT)
@@ -243,6 +252,7 @@ func _build_ui() -> void:
 	hover_card.large = true
 	hover_card.disabled = true
 	hover_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hover_card.z_index = 2
 	_place(hover_card,self,Rect2(560,215,238,300))
 	hover_card.hide()
 	_build_menu()
@@ -255,7 +265,7 @@ func _overlay() -> Control:
 	var node := Control.new()
 	_place(node,self,Rect2(0,0,1280,720))
 	var shade := ColorRect.new()
-	shade.color = Color(0.018,0.029,0.053,0.97)
+	shade.color = Color(0.018,0.029,0.053,0.99)
 	_place(shade,node,Rect2(0,0,1280,720))
 	return node
 
@@ -281,7 +291,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_from_menu,true)
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
-	_label(menu_layer,"VERSI 0.5 / 10 JENIS KARTU / SOLO vs AI",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.6 / OBSERVATORIUM / DUEL SOLO",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -509,9 +519,8 @@ func _zone_clicked(side: int, zone: int) -> void:
 		_message("Pilih target lawan atau Serang Langsung." if duel.phase == "BATTLE" else "Monster dipilih. Kamu bisa mengubah posisi atau masuk Battle.")
 		_render()
 	elif side == 1 and duel.phase == "BATTLE" and selected_zone >= 0:
-		var from: Vector2 = _zone_center(0,selected_zone)
+
 		if duel.attack(selected_zone,zone):
-			fx.strike(from,_zone_center(1,zone))
 			selected_zone = -1
 		_render()
 
@@ -534,9 +543,8 @@ func _battle() -> void:
 func _direct() -> void:
 	if not _can_input() or selected_zone < 0:
 		return
-	var from: Vector2 = _zone_center(0,selected_zone)
+
 	if duel.attack(selected_zone):
-		fx.strike(from,Vector2(870,112))
 		selected_zone = -1
 	_render()
 
@@ -570,9 +578,6 @@ func _run_ai(token: int) -> void:
 			continue
 		steps += 1
 		var action: Dictionary = AI.main_action(duel) if duel.phase == "MAIN" else AI.battle_action(duel)
-		if action["type"] == "attack":
-			var target: Vector2 = _zone_center(0,action["target"]) if action["target"] >= 0 else Vector2(420,112)
-			fx.strike(_zone_center(1,action["zone"]),target)
 		if not AI.apply(duel,action):
 			duel.end_turn()
 		if duel.turn == 1 and not duel.over:
@@ -608,18 +613,11 @@ func _visual(kind: String, side: int, zone: int, amount: int) -> void:
 		"summon":
 			_animate_summon(side,zone)
 			_sound("summon")
-		"spell":
-			fx.burst(Vector2(649,308),CYAN)
-			_sound("spell")
-		"attack":
-			fx.burst(_zone_center(side,zone),GOLD)
-			_sound("attack")
-		"damage":
-			_float_text("−%d LP" % amount,Vector2(354 if side == 0 else 802,137),Color("#ff8e85"))
-		"heal":
-			_float_text("+%d LP" % amount,Vector2(354 if side == 0 else 802,137),CYAN)
-			_sound("heal")
-		"shield": fx.burst(_zone_center(side,zone),CYAN)
+		"spell": _sound("spell")
+		"attack": _sound("attack")
+		"damage": _health_change(side,amount,false)
+		"heal": _health_change(side,amount,true)
+		"shield": _shield_at_impact(side,zone)
 		"draw": _sound("draw")
 
 func _float_text(text_value: String, point: Vector2, color: Color) -> void:
@@ -643,6 +641,11 @@ func _finished(winning_side: int) -> void:
 	zoom_layer.hide()
 	selected_hand = -1
 	selected_zone = -1
+	var token: int = session
+	var delay: float = maxf(0.12,impact_until-Time.get_ticks_msec()/1000.0+(0.30 if fx.reduced_motion else 0.65))
+	await get_tree().create_timer(delay).timeout
+	if token != session:
+		return
 	result_title.text = "VICTORY" if winning_side == 0 else "DEFEAT"
 	result_title.add_theme_color_override("font_color",GOLD if winning_side == 0 else Color("#da919b"))
 	result_description.text = "%s\nDuel selesai pada giliran %d." % ["Cahaya Eldoria tetap menyala. Nyx telah dikalahkan." if winning_side == 0 else "Nyx menguasai arena. Susun strategi dan coba lagi.",duel.turn_number]
@@ -774,9 +777,13 @@ func _update_lp(side: int) -> void:
 		lp_tweens[side].kill()
 	var tween := create_tween()
 	lp_tweens[side] = tween
-	tween.tween_method(_set_lp_value.bind(side),float(displayed_lp[side]),float(target),0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	var delay: float = maxf(0,impact_until-Time.get_ticks_msec()/1000.0)
+	if delay > 0:
+		tween.tween_interval(delay)
+	tween.tween_method(_set_lp_value.bind(side),float(displayed_lp[side]),float(target),0.18 if fx.reduced_motion else 0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _reset_visuals() -> void:
+	impact_until = 0
 	_hide_hover()
 	for side in range(2):
 		if lp_tweens[side] != null and lp_tweens[side].is_valid():
@@ -787,23 +794,23 @@ func _reset_visuals() -> void:
 		for view in zone_views[side]:
 			view.self_modulate = Color.WHITE
 	for child in fx.get_children():
-		if child != combat_notice:
+		if child != combat_notice and child != fx.painter:
 			fx.remove_child(child)
 			child.queue_free()
-	fx.bursts.clear()
-	fx.beams.clear()
+	fx.clear_all()
 	combat_notice.hide()
 	status_label.show()
 	combat_serial += 1
 
 func _animate_summon(side: int, zone: int) -> void:
 	var card: Dictionary = duel.fields[side][zone]
-	if card.is_empty():
+	if card.is_empty() or fx.reduced_motion:
 		return
 	var ghost := CardView.new()
 	ghost.data = card.duplicate(true)
 	ghost.disabled = true
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ghost.set_meta("card_visual",true)
 	var origin := Vector2(800,143) if side == 1 else Vector2(302,352)
 	if side == 0 and selected_hand >= 0 and selected_hand < hand_box.get_child_count():
 		origin = hand_box.get_child(selected_hand).global_position
@@ -813,7 +820,7 @@ func _animate_summon(side: int, zone: int) -> void:
 	view.self_modulate.a = 0.0
 	var tween := ghost.create_tween()
 	tween.tween_property(ghost,"position",target,0.42).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_callback(func(): view.self_modulate = Color.WHITE; fx.burst(_zone_center(side,zone),GOLD))
+	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
 	tween.tween_property(ghost,"modulate:a",0.0,0.12)
 	tween.tween_callback(ghost.queue_free)
 
@@ -846,21 +853,34 @@ func _combat_explained(report: Dictionary) -> void:
 func _animate_attack(report: Dictionary) -> void:
 	var side: int = report["side"]
 	var zone: int = report["zone"]
+	var card_id: String = report["card"]["id"]
 	var source: Vector2 = _zone_center(side,zone)
-	var target: Vector2 = _zone_center(1-side,report["target"]) if report["target"] >= 0 else Vector2(870 if side == 0 else 420,112)
+	var target: Vector2 = _zone_center(1-side,report["target"]) if report["target"] >= 0 else _profile_effect_point(1-side)
+	var delay: float = fx.impact_delay(card_id,"attack")
+	impact_until = Time.get_ticks_msec()/1000.0+delay
+	fx.play_card(card_id,"attack",source,target)
+	if fx.reduced_motion:
+		return
 	var ghost := CardView.new()
 	ghost.data = report["card"].duplicate(true)
 	ghost.data["attacked"] = false
 	ghost.disabled = true
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ghost.set_meta("card_visual",true)
 	var origin: Vector2 = source-Vector2(73,71)
 	_place(ghost,fx,Rect2(origin,Vector2(146,142)))
+	var source_view = zone_views[side][zone]
+	source_view.self_modulate.a = 0
+	var direction: Vector2 = (target-source).normalized()
 	var tween := ghost.create_tween()
-	tween.tween_property(ghost,"position",origin.lerp(target-Vector2(73,71),0.48),0.17).set_trans(Tween.TRANS_QUAD)
-	tween.tween_callback(func(): fx.strike(source,target); fx.burst(target,Color("#f4b485")))
-	tween.tween_property(ghost,"position",origin,0.23)
-	tween.tween_property(ghost,"modulate:a",0.0,0.12)
+	tween.tween_property(ghost,"position",origin-direction*4,0.1)
+	tween.tween_property(ghost,"position",origin+direction*10,0.12).set_trans(Tween.TRANS_QUAD)
+	tween.tween_interval(maxf(0.01,delay-0.22))
+	tween.tween_property(ghost,"modulate:a",0.0,0.13)
+	tween.tween_callback(func(): source_view.self_modulate = Color.WHITE)
 	tween.tween_callback(ghost.queue_free)
+	if report["target"] >= 0:
+		_hold_target(report.get("target_card",{}),1-side,report["target"],delay)
 
 func _build_gallery() -> void:
 	gallery = Gallery.new()
@@ -879,3 +899,86 @@ func _close_gallery() -> void:
 	zoom_layer.hide()
 	gallery.hide()
 	_sound("click")
+
+func _profile_effect_point(side: int) -> Vector2:
+	return Vector2(420 if side == 0 else 870,152)
+
+func _card_visual(cue: Dictionary) -> void:
+	if starting:
+		return
+	var card_id: String = cue["id"]
+	var side: int = cue["side"]
+	var action: String = cue["action"]
+	var target_side: int = cue["target_side"]
+	var target_zone: int = cue["target_zone"]
+	var source := Vector2(800,150) if side == 1 else Vector2(345,470)
+	if side == 0 and selected_hand >= 0 and selected_hand < hand_box.get_child_count():
+		source = hand_box.get_child(selected_hand).global_position+Vector2(71,45)
+	if action == "cast":
+		source = Vector2(645,309)
+	var target: Vector2 = _zone_center(target_side,target_zone) if target_zone >= 0 else _profile_effect_point(target_side)
+	if action == "cast" and card_id == "sanctuary":
+		target = _zone_center(side,1)
+	var delay: float = fx.impact_delay(card_id,action)
+	impact_until = Time.get_ticks_msec()/1000.0+delay
+	fx.play_card(card_id,action,source,target)
+	if action == "cast" and target_zone >= 0 and not fx.reduced_motion:
+		_hold_target(cue.get("target_card",{}),target_side,target_zone,delay)
+
+func _hold_target(card: Dictionary, side: int, zone: int, delay: float) -> void:
+	if card.is_empty():
+		return
+	var ghost := CardView.new()
+	ghost.data = card.duplicate(true)
+	ghost.disabled = true
+	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ghost.set_meta("card_visual",true)
+	_place(ghost,fx,Rect2(_zone_center(side,zone)-Vector2(73,71),Vector2(146,142)))
+	var view = zone_views[side][zone]
+	view.self_modulate.a = 0
+	var tween := ghost.create_tween()
+	tween.tween_interval(delay)
+	tween.tween_property(ghost,"modulate:a",0.0,0.14)
+	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
+	tween.tween_callback(ghost.queue_free)
+
+func _health_change(side: int, amount: int, healing: bool) -> void:
+	var token: int = session
+	var delay: float = maxf(0,impact_until-Time.get_ticks_msec()/1000.0)
+	if delay > 0:
+		await get_tree().create_timer(delay).timeout
+	if token != session:
+		return
+	var prefix: String = "+" if healing else "-"
+	_float_text("%s%d LP" % [prefix,amount],Vector2(354 if side == 0 else 802,137),CYAN if healing else Color("#edac95"))
+	if healing:
+		_sound("heal")
+
+func _shield_at_impact(side: int, zone: int) -> void:
+	var token: int = session
+	var delay: float = maxf(0,impact_until-Time.get_ticks_msec()/1000.0)
+	if delay > 0:
+		await get_tree().create_timer(delay).timeout
+	if token == session:
+		var point: Vector2 = _zone_center(side,zone)
+		fx.play_card("warden","guard",point,point)
+
+func _toggle_effect_mode() -> void:
+	_hide_hover()
+	fx.reduced_motion = not fx.reduced_motion
+	fx.clear_all()
+	for child in fx.get_children():
+		if child.get_meta("card_visual",false):
+			fx.remove_child(child)
+			child.queue_free()
+	for side in range(2):
+		for view in zone_views[side]:
+			view.self_modulate = Color.WHITE
+	impact_until = 0
+	effects_button.text = "EFEK: RINGKAS" if fx.reduced_motion else "EFEK: NORMAL"
+
+func _effects_obscured() -> bool:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery]:
+		if is_instance_valid(layer) and layer.visible:
+			return true
+	return false

@@ -6,6 +6,7 @@ signal message(text: String)
 signal visual(kind: String, side: int, zone: int, amount: int)
 signal finished(winner: int)
 signal combat(report: Dictionary)
+signal card_cue(cue: Dictionary)
 
 var decks: Array = [[], []]
 var hands: Array = [[], []]
@@ -114,6 +115,7 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	fields[turn][target] = monster
 	summoned = true
 	message.emit("%s summon %s dalam posisi %s." % [who(turn), monster["name"], "bertahan" if defending else "menyerang"])
+	card_cue.emit({"id":monster["id"],"action":"enter","side":turn,"target_side":turn,"target_zone":target})
 	visual.emit("summon", turn, target, 0)
 	match monster["effect"]:
 		"burn":
@@ -142,6 +144,9 @@ func _spell(index: int, target: int) -> bool:
 	var played: Dictionary = hands[turn].pop_at(index)
 	graves[turn].append(played)
 	message.emit("%s mengaktifkan %s." % [who(turn), card["name"]])
+	var target_side: int = turn if effect in ["restore","buff"] else 1-turn
+	var target_card: Dictionary = fields[target_side][target].duplicate(true) if target >= 0 else {}
+	card_cue.emit({"id":card["id"],"action":"cast","side":turn,"target_side":target_side,"target_zone":target,"target_card":target_card})
 	visual.emit("spell", turn, target, 0)
 	match effect:
 		"damage": _damage(1 - turn, 500)
@@ -195,7 +200,7 @@ func attack(attacker: int, target: int = -1) -> bool:
 	source["attacked"] = true
 	visual.emit("attack", turn, attacker, 0)
 	if target == -1:
-		combat.emit({"attack":source["atk"],"power":0,"difference":source["atk"],"defending":false,"direct":true,"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
+		combat.emit({"attack":source["atk"],"power":0,"difference":source["atk"],"defending":false,"direct":true,"target_card":{},"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
 		message.emit("%s menyerang langsung: %d!" % [source["name"], source["atk"]])
 		_damage(other, int(source["atk"]))
 	else:
@@ -203,7 +208,7 @@ func attack(attacker: int, target: int = -1) -> bool:
 		var defending: bool = enemy["defending"]
 		var power: int = int(enemy["def"]) if defending else int(enemy["atk"])
 		var difference: int = int(source["atk"]) - power
-		combat.emit({"attack":source["atk"],"power":power,"difference":difference,"defending":defending,"direct":false,"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
+		combat.emit({"attack":source["atk"],"power":power,"difference":difference,"defending":defending,"direct":false,"target_card":enemy.duplicate(true),"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
 		message.emit("%s menyerang %s." % [source["name"], enemy["name"]])
 		if difference > 0:
 			_destroy_battle(other, target)

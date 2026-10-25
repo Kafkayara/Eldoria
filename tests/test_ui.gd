@@ -23,7 +23,7 @@ func capture(name_value: String) -> void:
 		return
 	RenderingServer.force_draw(false)
 	var image = root.get_texture().get_image()
-	var filename: String = name_value.replace("eldoria-","eldoria-v04-")
+	var filename: String = name_value.replace("eldoria-","eldoria-v06-")
 	image.save_png(capture_dir.path_join(filename+".png"))
 
 func _run() -> void:
@@ -92,7 +92,7 @@ func _run() -> void:
 	board._hand_clicked(0)
 	check(board.duel.lp[1] == 3500,"UI immediate spell")
 	check(board.lp_targets[1] == 3500,"LP tween target")
-	await create_timer(0.82).timeout
+	await create_timer(1.25).timeout
 	check(roundi(board.displayed_lp[1]) == 3500,"LP counter finishes correctly")
 	board._hand_clicked(0)
 	board._zone_clicked(0,1)
@@ -140,6 +140,7 @@ func _run() -> void:
 	board._open_menu()
 	board.menu_layer.hide()
 	board._finished(0)
+	await create_timer(0.85).timeout
 	await capture("eldoria-victory")
 	board.queue_free()
 	await process_frame

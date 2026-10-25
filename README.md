@@ -11,6 +11,17 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Pembaruan versi 0.6 — Observatorium
+
+- Arah visual meja duel observatorium: batu tulis matte, ukiran statis, tepi kuningan, dan kartu cetak gading/hijau pucat.
+- Nama/statistik berwarna tinta gelap dan setiap jenis kartu mempunyai simbol khas.
+- Sepuluh profil efek dengan bentuk dan timing berbeda: enam monster memakai efek summon serta serangan; empat spell memakai efek aktivasi.
+- Efek memanfaatkan geometri dan partikel native Godot, dengan batas delapan event aktif.
+- Snapshot kartu, LP, angka damage, dan layar kemenangan mengikuti saat benturan.
+- Tombol **Efek: Normal / Ringkas** di header. Mode ringkas mempertahankan identitas kartu dan target tanpa perpindahan kartu.
+- Efek berada di atas kartu dan di belakang panel baca/menu; renderer berhenti saat efek habis.
+- Dasar riset, keputusan desain, dan identitas tiap kartu ada di `docs/visual-direction.md`.
+
 ## Pembaruan versi 0.5
 
 - **Galeri Kartu** di menu awal menampilkan seluruh jenis kartu dari katalog game.
@@ -31,7 +42,7 @@ Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama mem
 - AI menunggu saat detail kartu atau panduan dibuka.
 - Log duel dapat dibuka/tutup sebagai panel di kanan, dengan teks lebih besar.
 - Animasi kartu berpindah dari tangan ke zona saat summon dan gerakan maju saat menyerang.
-- LP dihitung bertahap selama 0,7 detik, termasuk penanganan pembaruan berurutan dan restart.
+- LP dihitung bertahap setelah benturan, termasuk penanganan pembaruan berurutan dan restart.
 - Target serangan dan spell yang sesuai disorot.
 - Penjelasan hitungan serangan memiliki area tersendiri di bawah papan.
 - Tombol serang langsung dan ubah posisi menyesuaikan kesiapan monster.
@@ -77,10 +88,14 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 - `scripts/ai.gd`: pemilihan tindakan lawan.
 - `scripts/card_view.gd`: bingkai dan tampilan kartu.
 - `scripts/card_art.gd`: pemilihan gambar dan area ilustrasi setiap jenis kartu.
+- `scripts/sigils.gd`: simbol kartu dan bahasa bentuk efek.
+- `scripts/effects_painter.gd`: lapisan efek yang memperhatikan panel modal.
+- `docs/visual-direction.md`: panduan material, sumber riset, dan identitas efek.
 - `scripts/gallery.gd`: galeri, pencarian, filter, dan panel detail sebelum duel.
 - `scripts/arena.gd`, `scripts/effects.gd`: latar dan efek animasi.
 - `assets/art/`: atlas enam ilustrasi dan empat ilustrasi individual.
 - `assets/audio/`: musik dan efek suara yang dibuat khusus.
+- `tests/test_vfx.gd`: validasi sepuluh profil efek, source/target kedua sisi, semua fase geometri, mode ringkas, dan waktu kemenangan.
 - `tests/test_gallery.gd`: keunikan isi gambar untuk 10 jenis kartu, pencarian/filter, detail, navigasi, dan pemeriksaan bahwa galeri tidak mengubah duel.
 - `tests/test_duel.gd`: pengujian aturan dan 100 duel otomatis.
 - `tests/test_ui.gd`: pengujian alur antarmuka, zoom/hover kartu, giliran dan jeda AI, animasi LP, log, audio, dan restart.
@@ -92,6 +107,7 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 Dengan executable Godot di PATH:
 
 ```powershell
+godot --headless --path . --audio-driver Dummy --script res://tests/test_vfx.gd
 godot --headless --path . --audio-driver Dummy --script res://tests/test_gallery.gd
 godot --headless --path . --script res://tests/test_duel.gd
 godot --headless --path . --audio-driver Dummy --script res://tests/test_ui.gd
