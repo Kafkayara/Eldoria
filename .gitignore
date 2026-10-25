@@ -1,0 +1,18 @@
+# Godot cache and generated Android build files
+.godot/
+/android/
+
+# Local snapshots and editor folders generated during setup
+/backups/
+/export_templates/
+/feature_profiles/
+/script_templates/
+/text_editor_themes/
+
+# Local builds and credentials
+/build/
+/builds/
+/.env
+/.env.*
+!.env.example
+/export_credentials.cfg
