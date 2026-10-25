@@ -1,5 +1,6 @@
 extends Button
-const ATLAS = preload("res://assets/art/eldoria_atlas.png")
+const Art = preload("res://scripts/card_art.gd")
+const ATLAS = Art.ATLAS
 signal inspect_requested(card_data: Dictionary)
 var data: Dictionary = {}
 var selected: bool = false
@@ -101,19 +102,19 @@ func _draw() -> void:
 	var art_top: float = title_bottom+8 if large else 39
 	var art_bottom: float = size.y-(75 if large else 34)
 	var art_rect := Rect2(7,art_top,maxf(1,size.x-14),maxf(1,art_bottom-art_top))
-	var index: int = int(data["art"])
-	var cell := Vector2(ATLAS.get_width()/3.0,ATLAS.get_height()/2.0)
-	var region := Rect2(Vector2(index%3,floori(index/3.0))*cell,cell)
+	var art_texture: Texture2D = Art.texture_for(data)
+	var region: Rect2 = Art.region_for(data)
+	var cell: Vector2 = region.size
 	var ratio: float = art_rect.size.x/art_rect.size.y
 	if ratio < 1:
 		region.position.x += (cell.x-cell.x*ratio)/2
 		region.size.x *= ratio
 	else:
 		var height: float = cell.y/ratio
-		var focus: float = [0.27,0.44,0.34,0.49,0.5,0.43][index]
+		var focus: float = Art.focus_for(data)
 		region.position.y += clampf(cell.y*focus-height/2,0,cell.y-height)
 		region.size.y = height
-	draw_texture_rect_region(ATLAS,art_rect,region,Color(0.6,0.65,0.7) if spent else Color.WHITE)
+	draw_texture_rect_region(art_texture,art_rect,region,Color(0.6,0.65,0.7) if spent else Color.WHITE)
 	draw_rect(art_rect,edge.darkened(0.4),false,1)
 	if spell:
 		_text("SPELL / AKTIF",size.y-20,18 if large else 14,edge)

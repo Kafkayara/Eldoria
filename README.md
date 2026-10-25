@@ -6,10 +6,21 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 1. Import `project.godot` di Godot 4.7.
 2. Tekan **F5** atau buka `main.tscn` dan tekan **F6**.
-3. Pilih **Mulai Duel**. Tombol **Panduan** menjelaskan aturan di dalam game.
+3. Pilih **Galeri Kartu** untuk melihat semua kartu, atau **Mulai Duel** untuk bermain. Tombol **Panduan** menjelaskan aturan di dalam game.
 4. Simpan perubahan di editor dan pilih Reload jika Godot mendeteksi file berubah.
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
+
+## Pembaruan versi 0.5
+
+- **Galeri Kartu** di menu awal menampilkan seluruh jenis kartu dari katalog game.
+- Pencarian nama, elemen, atau efek; filter Semua / Monster / Spell; urutan abjad.
+- Klik kartu untuk membaca panel detail, klik kanan atau klik ganda untuk memperbesar, dan E untuk membuka kartu yang dipilih.
+- Esc menutup detail kembali ke galeri; tombol Kembali ke Menu menutup galeri.
+- Galeri dapat digunakan tanpa memulai duel dan tidak mengubah deck, tangan, LP, atau giliran.
+- Seluruh **10 jenis kartu memakai ilustrasi berbeda**. Salinan jenis kartu yang sama tetap memakai gambar yang sama.
+- Ilustrasi baru untuk Aegis Surya (golem pelindung), Peri Astral (peri bintang), Berkah Fajar (pedang diberkati), dan Retakan Langit (celah kosmik).
+- Penentuan gambar dipakai bersama oleh galeri, detail, tangan, papan, dan animasi.
 
 ## Pembaruan versi 0.4
 
@@ -37,7 +48,7 @@ Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama mem
 - Pemain pertama tidak dapat menyerang pada giliran pertama.
 - Efek draw, heal, burn, buff, destroy, serta perisai satu kali untuk Aegis Surya.
 - Skill **Kebangkitan Fajar**: pulihkan 800 LP saat LP ≤2500, sekali per duel.
-- Enam ilustrasi orisinal dalam satu atlas, animasi summon/serangan, musik ambient, dan delapan efek suara.
+- Sepuluh ilustrasi orisinal: enam sel atlas dan empat gambar terpisah; animasi summon/serangan, musik ambient, dan delapan efek suara.
 - Tombol audio, panduan yang bisa digulir, rematch, dan kembali ke menu.
 - Menang melalui LP lawan habis atau lawan kehabisan kartu saat harus draw.
 
@@ -64,10 +75,13 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 - `scripts/catalog.gd`: definisi kartu dan komposisi deck.
 - `scripts/duel.gd`: aturan duel; tidak bergantung pada tampilan.
 - `scripts/ai.gd`: pemilihan tindakan lawan.
-- `scripts/card_view.gd`: bingkai kartu dan pembacaan ilustrasi atlas.
+- `scripts/card_view.gd`: bingkai dan tampilan kartu.
+- `scripts/card_art.gd`: pemilihan gambar dan area ilustrasi setiap jenis kartu.
+- `scripts/gallery.gd`: galeri, pencarian, filter, dan panel detail sebelum duel.
 - `scripts/arena.gd`, `scripts/effects.gd`: latar dan efek animasi.
-- `assets/art/`: atlas enam ilustrasi.
+- `assets/art/`: atlas enam ilustrasi dan empat ilustrasi individual.
 - `assets/audio/`: musik dan efek suara yang dibuat khusus.
+- `tests/test_gallery.gd`: keunikan isi gambar untuk 10 jenis kartu, pencarian/filter, detail, navigasi, dan pemeriksaan bahwa galeri tidak mengubah duel.
 - `tests/test_duel.gd`: pengujian aturan dan 100 duel otomatis.
 - `tests/test_ui.gd`: pengujian alur antarmuka, zoom/hover kartu, giliran dan jeda AI, animasi LP, log, audio, dan restart.
 - `card.tscn`, `card.gd`: contoh kartu dari tahap belajar sebelumnya; tampilan baru menggunakan `scripts/card_view.gd`.
@@ -78,6 +92,7 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 Dengan executable Godot di PATH:
 
 ```powershell
+godot --headless --path . --audio-driver Dummy --script res://tests/test_gallery.gd
 godot --headless --path . --script res://tests/test_duel.gd
 godot --headless --path . --audio-driver Dummy --script res://tests/test_ui.gd
 ```

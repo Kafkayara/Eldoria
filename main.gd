@@ -5,6 +5,7 @@ const AI = preload("res://scripts/ai.gd")
 const CardView = preload("res://scripts/card_view.gd")
 const Arena = preload("res://scripts/arena.gd")
 const Effects = preload("res://scripts/effects.gd")
+const Gallery = preload("res://scripts/gallery.gd")
 
 const GOLD = Color("#d9bc85")
 const MUTED = Color("#b2c7d2")
@@ -58,6 +59,8 @@ var zoom_title: Label
 var zoom_type: Label
 var zoom_stats: Label
 var zoom_description: RichTextLabel
+var zoom_close_button: Button
+var zoom_hint: Label
 var inspected_card: Dictionary = {}
 var hover_card
 var hover_serial: int = 0
@@ -67,6 +70,7 @@ var combat_label: Label
 var displayed_lp: Array = [4000.0,4000.0]
 var lp_targets: Array = [4000,4000]
 var lp_tweens: Array = [null,null]
+var gallery
 
 
 func _ready() -> void:
@@ -244,6 +248,7 @@ func _build_ui() -> void:
 	_build_menu()
 	_build_help()
 	_build_result()
+	_build_gallery()
 	_build_zoom()
 
 func _overlay() -> Control:
@@ -274,8 +279,9 @@ func _build_menu() -> void:
 	_label(menu_layer,"CHRONICLES OF THE FIRST LIGHT",Rect2(99,286,508,28),17,GOLD)
 	_label(menu_layer,"Cahaya terakhir Eldoria ada di tanganmu.\nPanggil monster, kuasai magi,\ndan hadapi Nyx di Arena Astral.",Rect2(99,342,508,108),22,LIGHT)
 	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_from_menu,true)
-	_button(menu_layer,"Pelajari aturan",Rect2(99,552,240,45),func(): help_layer.show())
-	_label(menu_layer,"VERSI 0.4 / SOLO vs AI / 20 KARTU",Rect2(65,663,600,29),14,MUTED)
+	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
+	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
+	_label(menu_layer,"VERSI 0.5 / 10 JENIS KARTU / SOLO vs AI",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -340,6 +346,7 @@ func _toggle_audio() -> void:
 func _new_duel() -> void:
 	session += 1
 	_reset_visuals()
+	gallery.hide()
 	zoom_layer.hide()
 	log_panel.hide()
 	history.clear()
@@ -363,6 +370,7 @@ func _start_from_menu() -> void:
 
 func _open_menu() -> void:
 	session += 1
+	gallery.hide()
 	_hide_hover()
 	zoom_layer.hide()
 	result_layer.hide()
@@ -455,7 +463,7 @@ func _zone_hover(side: int, zone: int) -> void:
 		_queue_hover(card)
 
 func _can_input() -> bool:
-	return duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible
+	return duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -557,7 +565,7 @@ func _run_ai(token: int) -> void:
 	await get_tree().create_timer(0.8).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if help_layer.visible or zoom_layer.visible:
+		if help_layer.visible or zoom_layer.visible or gallery.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -649,12 +657,17 @@ func _attacker_ready() -> bool:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E:
-		if not menu_layer.visible and not help_layer.visible and not result_layer.visible:
+		if gallery.visible:
+			gallery.inspect_selected()
+			get_viewport().set_input_as_handled()
+		elif not menu_layer.visible and not help_layer.visible and not result_layer.visible:
 			_open_card_zoom(inspected_card)
 			get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel"):
 		if zoom_layer.visible:
 			zoom_layer.hide()
+		elif gallery.visible:
+			_close_gallery()
 		elif help_layer.visible:
 			help_layer.hide()
 		elif log_panel.visible:
@@ -688,8 +701,8 @@ func _build_zoom() -> void:
 	zoom_description.add_theme_font_size_override("normal_font_size",22)
 	zoom_description.add_theme_color_override("default_color",LIGHT)
 	_place(zoom_description,zoom_layer,Rect2(566,323,454,181))
-	_label(zoom_layer,"Klik kiri untuk bermain. Klik kanan atau E untuk detail.",Rect2(566,523,454,45),15,MUTED)
-	_button(zoom_layer,"KEMBALI KE DUEL",Rect2(566,592,454,45),func(): zoom_layer.hide(),true)
+	zoom_hint = _label(zoom_layer,"Klik kiri untuk bermain. Klik kanan atau E untuk detail.",Rect2(566,523,454,45),15,MUTED)
+	zoom_close_button = _button(zoom_layer,"KEMBALI KE DUEL",Rect2(566,592,454,45),func(): zoom_layer.hide(),true)
 	_label(zoom_layer,"Esc menutup tampilan ini.",Rect2(253,586,280,38),15,MUTED)
 	zoom_layer.hide()
 
@@ -704,16 +717,18 @@ func _open_card_zoom(card: Dictionary) -> void:
 	zoom_type.text = "SPELL / MAGI AKTIF" if card["kind"] == "spell" else "%s / LEVEL %d" % [card["element"],card["level"]]
 	zoom_stats.text = "ATK %d   /   DEF %d" % [card["atk"],card["def"]] if card["kind"] == "monster" else "KARTU SPELL"
 	zoom_description.text = card["text"]
+	zoom_close_button.text = "KEMBALI KE GALERI" if gallery.visible else "KEMBALI KE DUEL"
+	zoom_hint.text = "Pelajari statistik dan efeknya sebelum memasuki arena." if gallery.visible else "Klik kiri untuk bermain. Klik kanan atau E untuk detail."
 	zoom_layer.show()
 
 func _queue_hover(card: Dictionary, from_hand: bool = false) -> void:
 	_hide_hover()
-	if menu_layer.visible or help_layer.visible or result_layer.visible or zoom_layer.visible:
+	if menu_layer.visible or help_layer.visible or result_layer.visible or zoom_layer.visible or gallery.visible:
 		return
 	var token: int = hover_serial
 	var data_copy: Dictionary = card.duplicate(true)
 	await get_tree().create_timer(0.38).timeout
-	if token != hover_serial or menu_layer.visible or help_layer.visible or result_layer.visible or zoom_layer.visible:
+	if token != hover_serial or menu_layer.visible or help_layer.visible or result_layer.visible or zoom_layer.visible or gallery.visible:
 		return
 	var point: Vector2 = get_local_mouse_position()
 	hover_card.position = Vector2(clampf(point.x-119,294,1020),238 if from_hand else clampf(point.y-150,85,396))
@@ -846,3 +861,21 @@ func _animate_attack(report: Dictionary) -> void:
 	tween.tween_property(ghost,"position",origin,0.23)
 	tween.tween_property(ghost,"modulate:a",0.0,0.12)
 	tween.tween_callback(ghost.queue_free)
+
+func _build_gallery() -> void:
+	gallery = Gallery.new()
+	gallery.hide()
+	_place(gallery,self,Rect2(0,0,1280,720))
+	gallery.closed.connect(_close_gallery)
+	gallery.inspect_requested.connect(_open_card_zoom)
+
+func _open_gallery() -> void:
+	_hide_hover()
+	zoom_layer.hide()
+	_sound("click")
+	gallery.show_library()
+
+func _close_gallery() -> void:
+	zoom_layer.hide()
+	gallery.hide()
+	_sound("click")

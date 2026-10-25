@@ -7,7 +7,7 @@ Metode: **imagegen bawaan**, bukan CLI/API terpisah.
 Berkas proyek: `assets/art/eldoria_atlas.png` (1536×1024).
 Lokasi tersimpan: `C:\Users\Kafka\Documents\anime-card-duel\assets\art\eldoria_atlas.png`.
 
-Atlas dibaca langsung sebagai grid tiga kolom dan dua baris oleh Godot. Ilustrasi tidak dipotong atau diubah menjadi enam berkas bitmap. Varian kartu memakai ilustrasi yang sama ketika sesuai (misalnya Peri Astral dan Oracle Rembulan).
+Atlas dibaca langsung sebagai grid tiga kolom dan dua baris oleh Godot. Ilustrasi tidak dipotong atau diubah menjadi enam berkas bitmap. Sejak versi 0.5, atlas dipakai oleh enam jenis kartu dengan enam sel berbeda. Aegis Surya, Peri Astral, Berkah Fajar, dan Retakan Langit memakai gambar individual. Seluruh 10 jenis kartu kini memiliki ilustrasi berbeda. Rincian empat gambar baru dan prompt final tersedia di V05_ILLUSTRATIONS.md dan folder prompts/.
 
 Prompt final:
 
