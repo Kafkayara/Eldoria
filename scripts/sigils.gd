@@ -52,3 +52,26 @@ static func draw(canvas: CanvasItem, id: String, center: Vector2, radius: float,
 			canvas.draw_polyline(points([Vector2(-0.7,-0.7),Vector2(-1,0),Vector2(-0.7,0.7)],center,radius,angle),color,width,true)
 			canvas.draw_polyline(points([Vector2(0.7,-0.7),Vector2(1,0),Vector2(0.7,0.7)],center,radius,angle),color,width,true)
 
+
+		"sentinel":
+			canvas.draw_line(center-Vector2(0,radius),center+Vector2(0,radius),color,width,true)
+			canvas.draw_arc(center+Vector2(radius*0.2,-radius*0.5),radius*0.5,-PI,PI/2,20,color,width,true)
+		"owl":
+			canvas.draw_polyline(points([Vector2(-1,-0.7),Vector2(-0.6,0.6),Vector2(0,1),Vector2(0.6,0.6),Vector2(1,-0.7),Vector2(0,0),Vector2(-1,-0.7)],center,radius,angle),color,width,true)
+		"witch":
+			canvas.draw_arc(center,radius,0,TAU,32,color,width,true)
+			canvas.draw_line(center-Vector2(radius*0.7,radius*0.7),center+Vector2(radius*0.7,radius*0.7),color,width,true)
+		"noctis":
+			canvas.draw_arc(center,radius,0.3,TAU-0.3,32,color,width*2,true)
+			canvas.draw_polyline(points([Vector2(-1,-1),Vector2(-0.4,0),Vector2(0,0.7),Vector2(0.4,0),Vector2(1,-1)],center,radius,angle),color,width,true)
+		"mirror":
+			canvas.draw_arc(center,radius*0.8,0,TAU,32,color,width,true)
+			canvas.draw_polyline(points([Vector2(-1,0.4),Vector2(0,-0.6),Vector2(1,0.4)],center,radius,angle),color,width,true)
+		"seal":
+			canvas.draw_rect(Rect2(center-Vector2.ONE*radius*0.65,Vector2.ONE*radius*1.3),color,false,width)
+			canvas.draw_line(center-Vector2.ONE*radius,center+Vector2.ONE*radius,color,width,true)
+		"thorns":
+			for i in range(3):
+				canvas.draw_polyline(points([Vector2(-1,-0.8+i*0.7),Vector2(0,-0.2+i*0.7),Vector2(1,-0.8+i*0.7)],center,radius,angle),color,width,true)
+		"hourglass":
+			canvas.draw_polyline(points([Vector2(-0.8,-1),Vector2(0.8,-1),Vector2(-0.8,1),Vector2(0.8,1),Vector2(-0.8,-1)],center,radius,angle),color,width,true)

@@ -11,6 +11,19 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.8 — Gerhana, respons, dan deck builder
+
+- **Dua deck siap pakai**: Fajar / Serangan dan Gerhana / Kontrol. Pilih deck kamu, deck Nyx, dan kesulitan Santai / Normal / Sulit di menu utama.
+- **18 jenis kartu** dengan gambar berbeda: 10 monster, 5 spell, 3 trap. Delapan ilustrasi Gerhana ada di atlas baru, terpisah dari kartu awal.
+- Tiga zona spell/trap per pihak. Trap dipasang tertutup dan baru dapat digunakan mulai giliran setelah pemasangan. Spell memakai satu zona sementara selama aktivasi.
+- **Cermin Pembalasan** membatalkan serangan dan memantulkan 300 damage; **Belenggu Spektral** menurunkan ATK penyerang 500 sebelum damage; **Segel Hening** membatalkan spell/trap terakhir, termasuk respons Segel lawan.
+- Jendela respons hanya muncul jika ada pilihan legal. Tidak ada batas waktu untuk pemain. Nyx juga dapat merespons dan membalas respons.
+- Rantai selesai setelah dua pihak lewat berturut-turut, dari link terakhir ke pertama. Efek summon/skill belum memiliki jebakan respons dalam set kartu ini.
+- **Koleksi & Deck Builder**: semua kartu tersedia, cari/lihat kartu, tambah/kurangi, beri nama, simpan deck baru atau perbarui deck buatanmu, dan langsung gunakan melawan Nyx.
+- Deck harus tepat 20 kartu, maksimal 3 salinan per jenis, dan minimal 8 monster. Preset tetap tersedia saat kamu menyimpan variasinya.
+- Simpanan lokal `user://eldoria_collection_v1.json` menyimpan deck kustom, pilihan deck, dan kesulitan. Cadangan `.bak` dipakai jika simpanan utama tidak terbaca. Progres duel tidak disimpan.
+- Rincian aturan dan cakupan ada di `docs/decks-and-responses.md`; prompt ilustrasi di `assets/prompts/gerhana_atlas.txt`.
+
 ## Pembaruan: lempar koin dan teks kartu
 
 - **Mulai Duel** dan **Duel Lagi** membuka lempar koin acak dengan dua hasil berpeluang sama: gambar matahari berarti kamu mulai; angka I berarti Nyx mulai.
@@ -61,18 +74,18 @@ Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama mem
 - Menu utama, arena animasi, panel detail, log duel, dan layar kemenangan/kekalahan.
 - Duel offline melawan **Nyx**, dengan jeda tindakan yang bisa diikuti.
 - Deck 20 kartu per pemain, empat kartu awal, tiga zona monster, dan LP awal 4000.
-- Sepuluh jenis kartu: enam monster dan empat spell.
-- Normal summon sekali per giliran; Naga Bara membutuhkan satu tribute.
+- Delapan belas jenis kartu: sepuluh monster, lima spell, dan tiga trap.
+- Normal summon sekali per giliran; Naga Bara dan Naga Noctis membutuhkan satu tribute.
 - Posisi menyerang/bertahan, pergantian posisi, dan satu serangan per monster per giliran.
 - Main Phase, Battle Phase, akhir giliran, dan draw otomatis.
 - Pemain pertama tidak dapat menyerang pada giliran pertama.
 - Efek draw, heal, burn, buff, destroy, serta perisai satu kali untuk Aegis Surya.
 - Skill **Kebangkitan Fajar**: pulihkan 800 LP saat LP ≤2500, sekali per duel.
-- Sepuluh ilustrasi orisinal: enam sel atlas dan empat gambar terpisah; animasi summon/serangan, musik ambient, dan delapan efek suara.
+- Delapan belas ilustrasi orisinal: dua atlas dan empat gambar terpisah; animasi summon/serangan, musik ambient, dan delapan efek suara.
 - Tombol audio, panduan yang bisa digulir, rematch, dan kembali ke menu.
 - Menang melalui LP lawan habis atau lawan kehabisan kartu saat harus draw.
 
-Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, atau ekspor/pengujian Android/iOS.
+Duel ini memakai rantai respons sederhana untuk spell/trap dan serangan. Multiplayer, sistem ekonomi/buka paket, serta ekspor/pengujian Android/iOS belum ditambahkan.
 
 ## Cara mengontrol
 
@@ -86,6 +99,7 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 - Retakan Langit: pilih monster lawan dengan ATK ≤1800.
 - Battle: pilih monster milikmu, lalu monster lawan. Jika papan lawan kosong, pilih **Serang Langsung**.
 - Gunakan **Ubah Posisi** pada Main Phase, mulai giliran setelah summon.
+- Trap: pilih dari tangan, lalu klik zona spell/trap kosong milikmu. Pada jendela respons, pilih trap atau Lewati.
 - Klik **Akhiri Giliran** untuk memberi giliran kepada Nyx.
 - **Esc** menutup detail, panduan, atau log terlebih dahulu; setelah itu membuka menu. Progres duel tidak disimpan ketika memulai duel baru.
 
@@ -100,12 +114,14 @@ Ini belum mencakup trap/chain, multiplayer, deck builder, penyimpanan koleksi, a
 - `scripts/sigils.gd`: simbol kartu dan bahasa bentuk efek.
 - `scripts/effects_painter.gd`: lapisan efek yang memperhatikan panel modal.
 - `docs/visual-direction.md`: panduan material, sumber riset, dan identitas efek.
+- `scripts/deck_store.gd`, `scripts/deck_builder.gd`: validasi, penyimpanan, koleksi, dan editor deck.
+- `tests/test_strategy.gd`, `tests/test_strategy_ui.gd`: rantai respons, simpan/muat/pemulihan, deck kustom, dan 240 duel campuran pada tiga kesulitan.
 - `scripts/gallery.gd`: galeri, pencarian, filter, dan panel detail sebelum duel.
 - `scripts/arena.gd`, `scripts/effects.gd`: latar dan efek animasi.
-- `assets/art/`: atlas enam ilustrasi dan empat ilustrasi individual.
+- `assets/art/`: dua atlas ilustrasi dan empat ilustrasi individual.
 - `assets/audio/`: musik dan efek suara yang dibuat khusus.
-- `tests/test_vfx.gd`: validasi sepuluh profil efek, source/target kedua sisi, semua fase geometri, mode ringkas, dan waktu kemenangan.
-- `tests/test_gallery.gd`: keunikan isi gambar untuk 10 jenis kartu, pencarian/filter, detail, navigasi, dan pemeriksaan bahwa galeri tidak mengubah duel.
+- `tests/test_vfx.gd`: validasi delapan belas profil efek, source/target kedua sisi, semua fase geometri, mode ringkas, dan waktu kemenangan.
+- `tests/test_gallery.gd`: keunikan isi gambar untuk 18 jenis kartu, pencarian/filter, detail, navigasi, dan pemeriksaan bahwa galeri tidak mengubah duel.
 - `tests/test_duel.gd`: pengujian aturan dan 100 duel otomatis.
 - `tests/test_ui.gd`: pengujian alur antarmuka, zoom/hover kartu, giliran dan jeda AI, animasi LP, log, audio, dan restart.
 - `card.tscn`, `card.gd`: contoh kartu dari tahap belajar sebelumnya; tampilan baru menggunakan `scripts/card_view.gd`.

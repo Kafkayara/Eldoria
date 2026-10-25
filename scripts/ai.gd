@@ -3,7 +3,7 @@ extends RefCounted
 # Pilih satu langkah; UI memberi jeda agar giliran lawan bisa diikuti.
 static func main_action(duel) -> Dictionary:
 	var side: int = duel.turn
-	if not duel.skill_used[side] and int(duel.lp[side]) <= 2500:
+	if duel.difficulty != "easy" and not duel.skill_used[side] and int(duel.lp[side]) <= 2500:
 		return {"type":"skill"}
 	if not duel.summoned:
 		var best: int = -1
@@ -17,6 +17,18 @@ static func main_action(duel) -> Dictionary:
 			if int(c["level"]) <= 4 and duel.empty_zone(side) < 0:
 				continue
 			var value: int = int(c["atk"])
+			if duel.difficulty == "easy":
+				value = 10000-i
+			elif duel.difficulty == "hard":
+				if duel.turn_number == 1:
+					value = maxi(int(c["atk"]),int(c["def"]))
+				if c["effect"] == "shield":
+					value += 250
+				if int(c["level"]) > 4:
+					var weakest: int = 9999
+					for m in duel.fields[side]:
+						if not m.is_empty(): weakest = mini(weakest,int(m["atk"]))
+					value -= weakest / 2
 			if c["effect"] == "draw":
 				value += 350
 			if value > score:
@@ -27,12 +39,20 @@ static func main_action(duel) -> Dictionary:
 			var target: int = duel.empty_zone(side)
 			if target < 0:
 				target = 0
-			return {"type":"play", "index":best, "target":target, "defending":int(c["atk"]) < 1300}
+				for z in range(1,3):
+					if int(duel.fields[side][z]["atk"]) < int(duel.fields[side][target]["atk"]): target = z
+			return {"type":"play", "index":best, "target":target, "defending":int(c["def"]) > int(c["atk"]) and duel.difficulty != "easy"}
+	for i in range(duel.hands[side].size()):
+		if duel.hands[side][i]["kind"] == "trap" and duel.empty_backrow(side) >= 0:
+			return {"type":"play","index":i,"target":duel.empty_backrow(side)}
 	for i in range(duel.hands[side].size()):
 		var card: Dictionary = duel.hands[side][i]
-		if card["kind"] != "spell":
+		if card["kind"] != "spell" or duel.empty_backrow(side) < 0:
 			continue
 		match card["effect"]:
+			"insight":
+				if duel.decks[side].size() >= 2:
+					return {"type":"play","index":i,"target":-1}
 			"damage": return {"type":"play", "index":i, "target":-1}
 			"restore":
 				if int(duel.lp[side]) <= 3300:
@@ -101,3 +121,20 @@ static func apply(duel, action: Dictionary) -> bool:
 		"attack": return duel.attack(action["zone"], action["target"])
 		"end": return duel.end_turn()
 	return false
+
+static func response(duel, side: int) -> int:
+	var options: Array = duel.response_options(side)
+	if options.is_empty():
+		return -1
+	# Easy bot sometimes lets an opportunity pass; hard bot preserves scarce
+	# counters against harmless healing and uses reflect before weakening.
+	if duel.difficulty == "easy":
+		return options[0] if duel.rng.randf() < 0.45 else -1
+	if duel.difficulty == "hard":
+		var last: Dictionary = duel.chain.back()
+		if last["action"] == "spell" and last["card"]["effect"] == "restore" and duel.lp[side] > 1000:
+			return -1
+		for z in options:
+			if duel.backrows[side][z]["effect"] == "reflect":
+				return z
+	return options[0]

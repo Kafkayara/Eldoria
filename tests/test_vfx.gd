@@ -75,7 +75,7 @@ func _run() -> void:
 			board.duel.hands[side] = [card]
 			var target: int = 1
 			if card["kind"] == "monster":
-				if id == "ember":
+				if int(card["level"]) > 4:
 					board.duel.fields[side][0] = unit("dawn")
 			else:
 				match id:
@@ -87,8 +87,11 @@ func _run() -> void:
 					_: target = -1
 			board._render()
 			check(board.duel.play(0,target),"Valid model action: "+id)
+			if card["kind"] == "trap":
+				check(board.fx.events.is_empty(),"Setting trap does not reveal VFX: "+id)
+				continue
 			check(board.fx.last_cue.get("card_id","") == id,"Correct card VFX on play: "+id)
-			var expected_side: int = side if card["kind"] == "monster" or id in ["blessing","sanctuary"] else 1-side
+			var expected_side: int = side if card["kind"] == "monster" or id in ["blessing","sanctuary","hourglass"] else 1-side
 			var expected: Vector2 = board._zone_center(expected_side,target) if target >= 0 else board._profile_effect_point(expected_side)
 			if id == "sanctuary":
 				expected = board._zone_center(side,1)
@@ -105,7 +108,7 @@ func _run() -> void:
 			continue
 		fresh()
 		board.duel.hands[0] = [Catalog.card(id)]
-		if id == "ember":
+		if int(Catalog.CARDS[id]["level"]) > 4:
 			board.duel.fields[0][0] = unit("dawn")
 		board._render()
 		board.selected_hand = 0
@@ -125,6 +128,9 @@ func _run() -> void:
 			check(board.duel.attack(0,0),"Attack accepted: "+id)
 			check(board.fx.last_cue["card_id"] == id and board.fx.last_cue["action"] == "attack","Attack uses its own profile: "+id)
 			await samples(id,"attack")
+		elif card["kind"] == "trap":
+			board.fx.play_card(id,"cast",Vector2(645,309),board._profile_effect_point(1))
+			await samples(id,"cast")
 		else:
 			board.duel.hands[0] = [card]
 			board.duel.fields[0][1] = unit("dawn")

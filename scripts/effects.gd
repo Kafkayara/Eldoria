@@ -12,7 +12,15 @@ const PROFILES = {
 	"storm": {"shape":"forked_lightning","color":Color("#76bfe3"),"light":Color("#d3f1ff"),"impact":0.38,"duration":0.90},
 	"sanctuary": {"shape":"sunrise","color":Color("#e1c57f"),"light":Color("#f7e9b3"),"impact":0.48,"duration":1.15},
 	"blessing": {"shape":"winged_blade","color":Color("#e8d2a1"),"light":Color("#fff9de"),"impact":0.46,"duration":1.10},
-	"eclipse": {"shape":"sky_fracture","color":Color("#ba79b3"),"light":Color("#f5c5e9"),"impact":0.50,"duration":1.10}
+	"eclipse": {"shape":"sky_fracture","color":Color("#ba79b3"),"light":Color("#f5c5e9"),"impact":0.50,"duration":1.10},
+	"sentinel":{"shape":"sentinel","color":Color("#a6b4d9"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"owl":{"shape":"owl","color":Color("#b8d8db"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"witch":{"shape":"witch","color":Color("#ba98d4"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"noctis":{"shape":"noctis","color":Color("#929bc8"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"mirror":{"shape":"mirror","color":Color("#cbdde2"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"seal":{"shape":"seal","color":Color("#bd85cd"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"thorns":{"shape":"thorns","color":Color("#86c9d7"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95},
+	"hourglass":{"shape":"hourglass","color":Color("#a69cd9"),"light":Color("#edf1ff"),"impact":0.42,"duration":0.95}
 }
 var events: Array = []
 # Compatibility with previous visual reset code.
@@ -131,6 +139,12 @@ func _draw_event(event: Dictionary) -> void:
 		return
 	if event["action"] == "guard":
 		_draw_guard(b,color,light,_phase(t,0,duration),true)
+		return
+	if event["card_id"] in ["sentinel","owl","witch","noctis","mirror","seal","thorns","hourglass"]:
+		var center: Vector2 = b if hit else a.lerp(b,travel)
+		Sigils.draw(painter,event["card_id"],center,15+18*travel,color,event["time"]*0.5,2)
+		if hit:
+			painter.draw_arc(b,18+after*45,0,TAU,40,_color(light,1-after),2,true)
 		return
 	match event["card_id"]:
 		"dawn":

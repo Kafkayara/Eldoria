@@ -111,12 +111,12 @@ func _build() -> void:
 	search_box.add_theme_color_override("font_placeholder_color",MUTED)
 	search_box.add_theme_stylebox_override("normal",_box(Color("#142936"),Color("#526c79")))
 	search_box.add_theme_stylebox_override("focus",_box(Color("#1b3442"),CYAN))
-	_place(search_box,self,Rect2(324,96,433,42))
+	_place(search_box,self,Rect2(324,96,340,42))
 	search_box.text_changed.connect(_search_changed)
-	var categories: Array = [["","Semua"],["monster","Monster"],["spell","Spell"]]
+	var categories: Array = [["","Semua"],["monster","Monster"],["spell","Spell"],["trap","Trap"]]
 	for index in range(categories.size()):
 		var item: Array = categories[index]
-		var button := _button(self,item[1],Rect2(773+164*index,96,152,42),set_category.bind(item[0]))
+		var button := _button(self,item[1],Rect2(676+145*index,96,137,42),set_category.bind(item[0]))
 		button.toggle_mode = true
 		filter_buttons[item[0]] = button
 	summary = _label(self,"",Rect2(324,150,934,25),16,MUTED)
@@ -179,12 +179,15 @@ func _refresh_cards() -> void:
 		filter_buttons[key].set_pressed_no_signal(key == category)
 	var monster_count: int = 0
 	var spell_count: int = 0
+	var trap_count: int = 0
 	for card in Catalog.CARDS.values():
 		if card["kind"] == "monster":
 			monster_count += 1
-		else:
+		elif card["kind"] == "spell":
 			spell_count += 1
-	summary.text = "%d dari %d kartu / %d monster + %d spell / Klik kartu untuk detail." % [visible_ids.size(),Catalog.CARDS.size(),monster_count,spell_count]
+		else:
+			trap_count += 1
+	summary.text = "%d dari %d kartu / %d monster + %d spell + %d trap" % [visible_ids.size(),Catalog.CARDS.size(),monster_count,spell_count,trap_count]
 	empty_state.visible = visible_ids.is_empty()
 	scroll.visible = not visible_ids.is_empty()
 	scroll.set_deferred("scroll_vertical",0)
@@ -206,7 +209,7 @@ func select_card(id: String) -> void:
 	selected_card = Catalog.card(id)
 	preview.data = selected_card
 	preview.queue_redraw()
-	card_type.text = "SPELL / MAGI AKTIF" if selected_card["kind"] == "spell" else "%s / LEVEL %d" % [selected_card["element"],selected_card["level"]]
+	card_type.text = Catalog.type_text(selected_card)
 	description.text = selected_card["text"]
 	description.scroll_to_line(0)
 	lore.text = selected_card.get("lore", "")

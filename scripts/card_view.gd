@@ -87,19 +87,20 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([center+Vector2(0,-14),center+Vector2(14,0),center+Vector2(0,14),center+Vector2(-14,0)]),Color("#365362"))
 		_text("PILIH ZONA" if selected else empty_caption,size.y-14,12,Color("#eddbb6") if selected else Color("#b0bdba"))
 		return
-	var spell: bool = data["kind"] == "spell"
-	var edge: Color = Color("#628379") if spell else gold
+	var trap: bool = data["kind"] == "trap"
+	var spell: bool = data["kind"] != "monster"
+	var edge: Color = Color("#946f94") if trap else (Color("#628379") if spell else gold)
 	var spent: bool = data.get("attacked",false)
 	var defending: bool = data.get("defending",false)
 	if selected:
 		_box(Rect2(Vector2(-3,-3),size+Vector2(6,6)),Color("#d3be91"),Color("#fff0c9"),1,3)
-	_box(outer,Color("#d3dfd4") if spell else Color("#e7dec7"),Color("#f7eccd") if selected or hover else edge,2,2)
+	_box(outer,Color("#ddd0dc") if trap else (Color("#d3dfd4") if spell else Color("#e7dec7")),Color("#f7eccd") if selected or hover else edge,2,2)
 	var element_colors: Dictionary = {"CAHAYA":Color("#a28a54"),"API":Color("#b46c4d"),"BULAN":Color("#89819e"),"ALAM":Color("#618774"),"SPELL":Color("#64897b")}
 	draw_rect(Rect2(5,4,maxf(1,size.x-10),2),element_colors.get(data["element"],edge))
 	var title_size: int = (22 if size.x > 260 else 19) if large else 14
 	_title(str(data["name"]),title_size,Color("#1d2b2d"))
 	var title_bottom: float = 64 if large else 47
-	var tag: String = "SPELL" if spell else "%s / LV.%d" % [data["element"],data["level"]]
+	var tag: String = ("TRAP" if trap else "SPELL") if spell else "%s / LV.%d" % [data["element"],data["level"]]
 	if large:
 		_text(tag,title_bottom,14,Color("#506458") if spell else Color("#65573c"))
 	var art_top: float = title_bottom+8 if large else 39
@@ -123,7 +124,7 @@ func _draw() -> void:
 		draw_rect(Rect2(art_rect.position+Vector2(2,2),Vector2(20,20)),Color(0.91,0.88,0.78,0.96))
 		Sigils.draw(self,str(data["id"]),art_rect.position+Vector2(12,12),7,Color("#334743"),0,1.2)
 	if spell:
-		_text("SPELL / AKTIF",size.y-20,18 if large else 14,Color("#31584f"))
+		_text("TRAP / RESPONS" if trap else "SPELL / AKTIF",size.y-20,18 if large else 14,Color("#31584f"))
 		return
 	var stat_y: float = size.y-(45 if large else 15)
 	var stat_size: int = 23 if large else 17
@@ -149,5 +150,5 @@ func _draw() -> void:
 			draw_rect(Rect2(size.x-bw-7,art_top+2,bw,16),Color(0.025,0.07,0.10,0.96))
 			draw_string(font,Vector2(size.x-bw-2,art_top+14),badge,HORIZONTAL_ALIGNMENT_LEFT,-1,10,badge_color)
 			if data.get("shield",false):
-				draw_rect(Rect2(8,art_top+2,38,16),Color(0.025,0.07,0.10,0.96))
-				draw_string(font,Vector2(10,art_top+14),"AEGIS",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("#abd7da"))
+				draw_rect(Rect2(8,art_top+2,52,16),Color(0.025,0.07,0.10,0.96))
+				draw_string(font,Vector2(10,art_top+14),"PERISAI",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("#abd7da"))

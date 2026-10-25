@@ -26,3 +26,8 @@ Lokasi tersimpan: `C:\Users\Kafka\Documents\anime-card-duel\assets\audio\`.
 Semua audio disintesis dari gelombang sinus, envelope, harmonik, dan noise deterministik pada 22050 Hz, PCM 16-bit. Tidak ada suara karakter atau rekaman franchise lain. Musik dapat dimatikan lewat tombol Audio.
 
 Sumber pembuat audio yang dapat dijalankan ulang ada di `tools/generate_audio.py`.
+
+
+## Gerhana (versi 0.8)
+
+Atlas orisinal baru dibuat dengan tool imagegen bawaan dan disimpan di `C:/Users/Kafka/Documents/anime-card-duel/assets/art/gerhana_atlas.png`. Grid 4 kolom × 2 baris dipakai langsung oleh Godot: Penjaga Senja, Burung Hantu Perak, Penyihir Cermin, Naga Noctis, Cermin Pembalasan, Segel Hening, Belenggu Spektral, Jam Pasir Astral. Kartu lama tidak diganti. Total koleksi sekarang 18 ilustrasi berbeda. Prompt final lengkap ada di `assets/prompts/gerhana_atlas.txt`; tidak memakai CLI atau API key.

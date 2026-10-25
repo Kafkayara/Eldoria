@@ -20,14 +20,25 @@ var phase: String = "MAIN"
 var summoned: bool = false
 var over: bool = false
 var winner: int = -1
+var backrows: Array = [[{},{},{}],[{},{},{}]]
+var chain: Array = []
+var priority: int = -1
+var passes: int = 0
+var difficulty: String = "normal"
+var next_uid: int = 0
 var rng := RandomNumberGenerator.new()
 
-func start(seed_value: int = -1, first_side: int = 0) -> void:
+func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalog.DECK, enemy_ids: Array = Catalog.DECK) -> void:
 	if seed_value < 0:
 		rng.randomize()
 	else:
 		rng.seed = seed_value
-	decks = [Catalog.deck(), Catalog.deck()]
+	decks = [Catalog.deck(player_ids), Catalog.deck(enemy_ids)]
+	backrows = [[{},{},{}],[{},{},{}]]
+	chain.clear()
+	priority = -1
+	passes = 0
+	next_uid = 0
 	hands = [[], []]
 	fields = [[{}, {}, {}], [{}, {}, {}]]
 	graves = [[], []]
@@ -80,11 +91,13 @@ func empty_zone(side: int) -> int:
 	return -1
 
 func play(index: int, target: int = -1, defending: bool = false) -> bool:
-	if over or phase != "MAIN":
+	if over or not chain.is_empty() or phase != "MAIN":
 		return reject("Kartu hanya bisa dimainkan pada Main Phase.")
 	if index < 0 or index >= hands[turn].size():
 		return false
 	var card: Dictionary = hands[turn][index]
+	if card["kind"] == "trap":
+		return set_trap(index,target)
 	if card["kind"] == "spell":
 		return _spell(index, target)
 	if summoned:
@@ -97,7 +110,7 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 			if not fields[turn][i].is_empty() and (tribute == -1 or fields[turn][i]["atk"] < fields[turn][tribute]["atk"]):
 				tribute = i
 		if tribute == -1:
-			return reject("Naga Bara memerlukan satu monster sebagai tribute.")
+			return reject("Monster level tinggi memerlukan satu monster sebagai tribute.")
 		if not fields[turn][target].is_empty():
 			tribute = target
 	elif not fields[turn][target].is_empty():
@@ -107,6 +120,8 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 		_remove(turn, tribute)
 		message.emit("%s dikorbankan sebagai tribute." % tribute_name)
 	var monster: Dictionary = hands[turn].pop_at(index).duplicate(true)
+	next_uid += 1
+	monster["uid"] = next_uid
 	monster["defending"] = defending
 	monster["attacked"] = false
 	monster["switched"] = false
@@ -117,15 +132,8 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	message.emit("%s summon %s dalam posisi %s." % [who(turn), monster["name"], "bertahan" if defending else "menyerang"])
 	card_cue.emit({"id":monster["id"],"action":"enter","side":turn,"target_side":turn,"target_zone":target})
 	visual.emit("summon", turn, target, 0)
-	match monster["effect"]:
-		"burn":
-			_damage(1 - turn, 300)
-			message.emit("Efek Naga Bara: 300 kerusakan!")
-		"heal":
-			_heal(turn, 400)
-		"draw":
-			_draw(turn)
-			message.emit("Efek Peri Astral: ambil satu kartu.")
+	if monster["effect"] in ["burn","heal","draw"]:
+		_queue({"action":"summon","side":turn,"card":monster.duplicate(true)})
 	_check_end()
 	changed.emit()
 	return true
@@ -133,6 +141,8 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 func _spell(index: int, target: int) -> bool:
 	var card: Dictionary = hands[turn][index]
 	var effect: String = card["effect"]
+	if effect not in ["buff","destroy"]:
+		target = -1
 	if effect == "buff":
 		if target < 0 or target > 2 or fields[turn][target].is_empty():
 			return reject("Berkah Fajar: pilih monster milikmu.")
@@ -141,29 +151,44 @@ func _spell(index: int, target: int) -> bool:
 			return reject("Retakan Langit: pilih monster lawan.")
 		if int(fields[1 - turn][target]["atk"]) > 1800:
 			return reject("Target Retakan Langit harus memiliki ATK 1800 atau kurang.")
+	var slot: int = empty_backrow(turn)
+	if slot < 0:
+		return reject("Ketiga zona spell/trap terisi. Sisakan zona untuk mengaktifkan spell.")
 	var played: Dictionary = hands[turn].pop_at(index)
-	graves[turn].append(played)
-	message.emit("%s mengaktifkan %s." % [who(turn), card["name"]])
-	var target_side: int = turn if effect in ["restore","buff"] else 1-turn
-	var target_card: Dictionary = fields[target_side][target].duplicate(true) if target >= 0 else {}
-	card_cue.emit({"id":card["id"],"action":"cast","side":turn,"target_side":target_side,"target_zone":target,"target_card":target_card})
-	visual.emit("spell", turn, target, 0)
-	match effect:
-		"damage": _damage(1 - turn, 500)
-		"restore": _heal(turn, 700)
-		"buff":
-			fields[turn][target]["atk"] += 400
-			fields[turn][target]["def"] += 400
-			message.emit("Berkah Fajar: +400 ATK / DEF.")
-		"destroy":
-			message.emit("%s dihancurkan Retakan Langit." % fields[1 - turn][target]["name"])
-			_remove(1 - turn, target)
-	_check_end()
+	played["faceup"] = true
+	backrows[turn][slot] = played
+	message.emit("%s mengaktifkan %s." % [who(turn),card["name"]])
+	var target_side: int = turn if effect in ["restore","buff","insight"] else 1-turn
+	var target_uid: int = int(fields[target_side][target].get("uid",-1)) if target >= 0 else -1
+	_queue({"action":"spell","side":turn,"card":played,"slot":slot,"target":target,"target_side":target_side,"target_uid":target_uid})
 	changed.emit()
 	return true
 
+func _resolve_spell(event: Dictionary) -> void:
+	var card: Dictionary = event["card"]
+	var side: int = event["side"]
+	var target: int = event["target"]
+	var target_side: int = event["target_side"]
+	if target >= 0 and (fields[target_side][target].is_empty() or int(fields[target_side][target].get("uid",-1)) != event["target_uid"]):
+		message.emit("Target %s sudah tidak ada; efek gagal." % card["name"])
+		return
+	card_cue.emit({"id":card["id"],"action":"cast","side":side,"target_side":target_side,"target_zone":target,"target_card":fields[target_side][target].duplicate(true) if target >= 0 else {}})
+	visual.emit("spell",side,target,0)
+	match card["effect"]:
+		"damage": _damage(1-side,500)
+		"restore": _heal(side,700)
+		"insight":
+			_draw(side)
+			if not over:
+				_draw(side)
+		"buff":
+			fields[side][target]["atk"] += 400
+			fields[side][target]["def"] += 400
+		"destroy": _remove(1-side,target)
+
+
 func battle() -> bool:
-	if over or phase != "MAIN":
+	if over or not chain.is_empty() or phase != "MAIN":
 		return false
 	if turn_number == 1:
 		return reject("Pemain pertama belum bisa menyerang pada giliran pertama.")
@@ -173,7 +198,7 @@ func battle() -> bool:
 	return true
 
 func switch_position(zone: int) -> bool:
-	if over or phase != "MAIN" or zone < 0 or zone > 2:
+	if over or not chain.is_empty() or phase != "MAIN" or zone < 0 or zone > 2:
 		return false
 	var monster: Dictionary = fields[turn][zone]
 	if monster.is_empty():
@@ -186,7 +211,7 @@ func switch_position(zone: int) -> bool:
 	changed.emit()
 	return true
 
-func attack(attacker: int, target: int = -1) -> bool:
+func _attack_now(attacker: int, target: int = -1) -> bool:
 	if over or phase != "BATTLE" or attacker < 0 or attacker > 2:
 		return false
 	var source: Dictionary = fields[turn][attacker]
@@ -229,7 +254,7 @@ func _destroy_battle(side: int, zone: int) -> void:
 	var monster: Dictionary = fields[side][zone]
 	if monster.get("shield", false):
 		monster["shield"] = false
-		message.emit("Perisai Aegis menahan kehancuran!")
+		message.emit("Perisai %s menahan kehancuran!" % monster["name"])
 		visual.emit("shield", side, zone, 0)
 	else:
 		message.emit("%s dihancurkan." % monster["name"])
@@ -250,7 +275,7 @@ func _heal(side: int, amount: int) -> void:
 	visual.emit("heal", side, -1, actual)
 
 func skill() -> bool:
-	if over or phase != "MAIN" or skill_used[turn]:
+	if over or not chain.is_empty() or phase != "MAIN" or skill_used[turn]:
 		return reject("Skill hanya sekali per duel, saat Main Phase.")
 	if int(lp[turn]) > 2500:
 		return reject("Skill Kebangkitan Fajar terbuka saat LP 2500 atau kurang.")
@@ -262,7 +287,7 @@ func skill() -> bool:
 	return true
 
 func end_turn() -> bool:
-	if over:
+	if over or not chain.is_empty():
 		return false
 	turn = 1 - turn
 	turn_number += 1
@@ -286,3 +311,140 @@ func _check_end() -> void:
 		winner = 0 if int(lp[1]) <= 0 else 1
 		message.emit("Kemenangan untuk %s!" % who(winner))
 		finished.emit(winner)
+
+func empty_backrow(side: int) -> int:
+	for z in range(3):
+		if backrows[side][z].is_empty():
+			return z
+	return -1
+
+func set_trap(index: int, slot: int = -1) -> bool:
+	if over or not chain.is_empty() or phase != "MAIN" or index < 0 or index >= hands[turn].size():
+		return false
+	if hands[turn][index]["kind"] != "trap":
+		return false
+	if slot < 0:
+		slot = empty_backrow(turn)
+	if slot < 0 or slot > 2 or not backrows[turn][slot].is_empty():
+		return reject("Pilih zona spell/trap yang kosong.")
+	var card: Dictionary = hands[turn].pop_at(index)
+	card["set_turn"] = turn_number
+	card["faceup"] = false
+	backrows[turn][slot] = card
+	message.emit("%s memasang jebakan tertutup di zona %d." % [who(turn),slot+1])
+	changed.emit()
+	return true
+
+func attack(attacker: int, target: int = -1) -> bool:
+	if over or not chain.is_empty() or phase != "BATTLE" or attacker < 0 or attacker > 2:
+		return false
+	var source: Dictionary = fields[turn][attacker]
+	if source.is_empty() or source["defending"] or source["attacked"]:
+		return false
+	if target < -1 or target > 2 or (target == -1 and has_monsters(1-turn)) or (target >= 0 and fields[1-turn][target].is_empty()):
+		return false
+	source["attacked"] = true
+	message.emit("%s menyatakan serangan %s." % [who(turn),source["name"]])
+	_queue({"action":"attack","side":turn,"card":source.duplicate(true),"zone":attacker,"target":target,"target_uid":int(fields[1-turn][target].get("uid",-1)) if target >= 0 else -1})
+	changed.emit()
+	return true
+
+func response_options(side: int) -> Array:
+	var options: Array = []
+	if side not in [0,1] or over or chain.is_empty() or side != priority:
+		return options
+	var last: Dictionary = chain.back()
+	for z in range(3):
+		var card: Dictionary = backrows[side][z]
+		if card.is_empty() or card["kind"] != "trap" or card.get("set_turn",turn_number) >= turn_number:
+			continue
+		var legal: bool = false
+		if card["effect"] == "negate":
+			legal = last["side"] != side and last["action"] in ["spell","trap"]
+		elif card["effect"] in ["reflect","weaken"]:
+			legal = last["action"] == "attack" and last["side"] != side
+		if legal:
+			options.append(z)
+	return options
+
+func _queue(event: Dictionary) -> void:
+	chain.append(event)
+	passes = 0
+	priority = 1-int(event["side"])
+	_advance_response()
+
+func _advance_response() -> void:
+	# Skip priority only when that side has no legal response. A human with
+	# a legal trap always gets an explicit decision; there is no timer.
+	while not chain.is_empty() and response_options(priority).is_empty():
+		passes += 1
+		priority = 1-priority
+		if passes >= 2:
+			_resolve_chain()
+			break
+
+func respond(side: int, slot: int = -1) -> bool:
+	if side not in [0,1] or over or chain.is_empty() or side != priority:
+		return false
+	if slot == -1:
+		passes += 1
+	else:
+		if not response_options(side).has(slot):
+			return false
+		var card: Dictionary = backrows[side][slot]
+		backrows[side][slot] = {}
+		graves[side].append(card)
+		message.emit("Respons %s: %s (rantai %d)." % [who(side),card["name"],chain.size()+1])
+		chain.append({"action":"trap","side":side,"card":card,"negates":chain.size()-1})
+		passes = 0
+	priority = 1-side
+	if passes >= 2:
+		_resolve_chain()
+	else:
+		_advance_response()
+	changed.emit()
+	return true
+
+func _resolve_chain() -> void:
+	priority = -1
+	for i in range(chain.size()-1,-1,-1):
+		var event: Dictionary = chain[i]
+		var action: String = event["action"]
+		var card: Dictionary = event["card"]
+		var side: int = event["side"]
+		if not event.get("cancelled",false) and not over:
+			message.emit("Selesaikan: %s." % card["name"])
+			match action:
+				"spell": _resolve_spell(event)
+				"summon":
+					match card["effect"]:
+						"burn": _damage(1-side,300)
+						"heal": _heal(side,400)
+						"draw": _draw(side)
+				"trap":
+					card_cue.emit({"id":card["id"],"action":"cast","side":side,"target_side":1-side,"target_zone":-1,"target_card":{}})
+					var previous: Dictionary = chain[event["negates"]]
+					match card["effect"]:
+						"negate": previous["cancelled"] = true
+						"reflect":
+							previous["cancelled"] = true
+							_damage(1-side,300)
+						"weaken":
+							var z: int = previous["zone"]
+							if not fields[1-side][z].is_empty():
+								fields[1-side][z]["atk"] = maxi(0,int(fields[1-side][z]["atk"])-500)
+				"attack":
+					var z: int = event["zone"]
+					var t: int = event["target"]
+					if not fields[side][z].is_empty() and (t < 0 or (not fields[1-side][t].is_empty() and int(fields[1-side][t].get("uid",-1)) == event["target_uid"])):
+						fields[side][z]["attacked"] = false
+						_attack_now(z,t)
+		else:
+			if event.get("cancelled",false):
+				message.emit("Efek/serangan %s dibatalkan." % card["name"])
+		if action == "spell":
+			graves[side].append(backrows[side][event["slot"]])
+			backrows[side][event["slot"]] = {}
+		_check_end()
+	chain.clear()
+	passes = 0
