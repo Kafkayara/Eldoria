@@ -8,6 +8,9 @@ var enemy: String = "gerhana"
 var difficulty: String = "normal"
 var load_notice: String = ""
 var music_gain: float = 0.70
+var sfx_gain: float = 0.80
+var animation_speed: float = 1.0
+var reduced_motion: bool = false
 
 func entries() -> Dictionary:
 	var result: Dictionary = Catalog.PRESETS.duplicate(true)
@@ -31,6 +34,12 @@ func load_data() -> void:
 			return
 	var saved_gain = parsed.get("music_gain",0.70)
 	if saved_gain is float or saved_gain is int: music_gain = clampf(float(saved_gain),0,1)
+	var saved_sfx = parsed.get("sfx_gain",0.80)
+	if (saved_sfx is float or saved_sfx is int) and is_finite(float(saved_sfx)): sfx_gain = clampf(float(saved_sfx),0,1)
+	var saved_speed = parsed.get("animation_speed",1.0)
+	if (saved_speed is float or saved_speed is int) and float(saved_speed) in [1.0,1.5,2.0]: animation_speed = float(saved_speed)
+	var saved_reduced = parsed.get("reduced_motion",false)
+	if saved_reduced is bool: reduced_motion = saved_reduced
 	var saved = parsed.get("decks",{})
 	if saved is Dictionary:
 		for key in saved:
@@ -49,7 +58,7 @@ func save_data() -> Error:
 	var temporary: String = path+".tmp"
 	var file := FileAccess.open(temporary,FileAccess.WRITE)
 	if file == null: return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version":1,"decks":customs,"active":active,"enemy":enemy,"difficulty":difficulty,"music_gain":music_gain},"  "))
+	file.store_string(JSON.stringify({"version":1,"decks":customs,"active":active,"enemy":enemy,"difficulty":difficulty,"music_gain":music_gain,"sfx_gain":sfx_gain,"animation_speed":animation_speed,"reduced_motion":reduced_motion},"  "))
 	file.flush()
 	file.close()
 	# On Windows rename-over-existing is not guaranteed. Preserve a recoverable

@@ -28,6 +28,7 @@ var events: Array = []
 # Compatibility with previous visual reset code.
 var bursts: Array = []
 var beams: Array = []
+var animation_speed: float = 1.0
 var reduced_motion: bool = false
 var elapsed: float = 0.0
 var last_cue: Dictionary = {}
@@ -55,10 +56,10 @@ func _ready() -> void:
 
 func impact_delay(card_id: String, action: String) -> float:
 	if reduced_motion:
-		return 0.08
+		return 0.08/animation_speed
 	if action == "enter":
-		return 0.42
-	return float(PROFILES.get(card_id,PROFILES["dawn"])["impact"])
+		return 0.42/animation_speed
+	return float(PROFILES.get(card_id,PROFILES["dawn"])["impact"])/animation_speed
 
 func play_card(card_id: String, action: String, source: Vector2, target: Vector2, details: Dictionary = {}) -> Dictionary:
 	if not PROFILES.has(card_id):
@@ -68,7 +69,7 @@ func play_card(card_id: String, action: String, source: Vector2, target: Vector2
 		"card_id":card_id,"shape":profile["shape"],"action":action,
 		"from":Vector2(clampf(source.x,310,980),clampf(source.y,100,465)),
 		"to":Vector2(clampf(target.x,330,964),clampf(target.y,150,460)),
-		"time":0.0,"impact":impact_delay(card_id,action),
+		"time":0.0,"impact":impact_delay(card_id,action)*animation_speed,"rate":animation_speed,
 		"duration":0.32 if reduced_motion else float(profile["duration"]),
 		"color":profile["color"],"light":profile["light"],"simple":reduced_motion
 	}
@@ -98,7 +99,7 @@ func strike(source: Vector2, target: Vector2) -> void:
 func _process(delta: float) -> void:
 	elapsed += delta
 	for event in events:
-		event["time"] += delta
+		event["time"] += delta*float(event.get("rate",1.0))
 	events = events.filter(func(event): return event["time"] < event["duration"])
 	redraw_effects()
 	if events.is_empty():

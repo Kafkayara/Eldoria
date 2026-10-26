@@ -1,5 +1,6 @@
 extends Control
 const Hints = preload("res://scripts/duel_hints.gd")
+const Summary = preload("res://scripts/duel_summary.gd")
 const Duel = preload("res://scripts/duel.gd")
 const Catalog = preload("res://scripts/catalog.gd")
 const AI = preload("res://scripts/ai.gd")
@@ -16,6 +17,21 @@ const LIGHT = Color("#eff1ed")
 const CYAN = Color("#8bb6b9")
 
 var duel = Duel.new()
+var duel_summary = Summary.new()
+var settings_layer: Control
+var quick_guide_layer: Control
+var settings_music: HSlider
+var settings_sfx: HSlider
+var music_value: Label
+var sfx_value: Label
+var speed_select: OptionButton
+var reduced_check: CheckBox
+var quick_title: Label
+var quick_text: Label
+var guide_previous: Button
+var guide_next: Button
+var guide_page: int = 0
+var result_summary: RichTextLabel
 var selected_hand: int = -1
 var selected_zone: int = -1
 var summon_defense: bool = false
@@ -122,6 +138,12 @@ func _ready() -> void:
 	if not Catalog.PRESETS.has(collection_store.active): collection_store.active = "fajar"
 	_build_ui()
 	_build_audio()
+	_apply_comfort_preferences()
+	duel_summary.reset()
+	duel.combat.connect(func(report): duel_summary.combat(report,duel.turn_number,duel.lp))
+	duel.card_cue.connect(func(cue):
+		if not duel.over: duel_summary.cue(cue,duel.turn_number))
+	duel.visual.connect(func(kind,side,_zone,amount): duel_summary.visual(kind,side,amount,duel.lp))
 	duel.checkpoint_created.connect(_capture_undo_ui)
 	duel.undone.connect(_restore_undo_ui)
 	duel.changed.connect(_render)
@@ -315,6 +337,7 @@ func _build_ui() -> void:
 	_build_zoom()
 	_build_coin()
 	_build_strategy_ui()
+	_build_comfort_ui()
 
 func _overlay() -> Control:
 	var node := Control.new()
@@ -345,14 +368,15 @@ func _build_menu() -> void:
 	_label(menu_layer,"Pilih deck dan tantang Nyx di Arena Astral.",Rect2(99,328,508,29),18,LIGHT)
 	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_from_menu,true)
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
-	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
+	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),_open_quick_guide)
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.14 / TOMBAK DAN SELUBUNG",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.15 / KENYAMANAN DUEL",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
 	_panel(help_layer,Rect2(222,50,836,620),Color("#ae945e"))
-	_label(help_layer,"Panduan Duel Eldoria",Rect2(252,74,776,45),30,GOLD)
+	_label(help_layer,"Panduan Duel Eldoria",Rect2(252,74,570,45),28,GOLD)
+	_button(help_layer,"Panduan singkat",Rect2(846,81,182,33),_open_quick_guide)
 	var body := RichTextLabel.new()
 	body.add_theme_font_size_override("normal_font_size",19)
 	body.add_theme_color_override("default_color",LIGHT)
@@ -362,19 +386,21 @@ func _build_help() -> void:
 	body.text += "\n\n[color=#dfbf81]10  UNDO / Ctrl+Z[/color]\nPada giliranmu, tombol Undo mengembalikan satu langkah beserta seluruh akibatnya: kartu, LP, hasil draw, tribute, skill, dan respons trap. Undo juga dapat dipakai saat menunggu respons Nyx atau sebelum hasil duel dikonfirmasi. Riwayat ditutup setelah Akhiri Giliran; kamu tidak dapat mundur melewati giliran lawan. Tidak ada pengacakan ulang kartu saat undo.\n\n[color=#dfbf81]11  MUSIK[/color]\nJejak Fajar adalah komposisi orisinal 2 menit 40 detik, memakai instrumen berbasis sampel: seruling, senar, koto, piano, dan perkusi lembut. Bagian akhir kembali ke awal tanpa fade-out. Slider BGM mengatur musik tanpa mengubah efek suara."
 	body.text += "\n\n[color=#dfbf81]12  FAJAR VS GERHANA[/color]\nFajar memakai 13 monster, 6 spell, dan 1 trap. Naga Bara kini 2500 ATK dan tetap memberi 300 damage saat summon. Penjaga Fajar 1700 ATK. Tiga Peri Astral membantu mengambil kartu; Pasang Segel Hening terlebih dahulu agar mulai giliran berikutnya bisa membalas Cermin atau Belenggu. Naga Noctis tetap 2300 ATK dan bertahan dari kehancuran battle sekali. Bara unggul dalam tekanan serangan; Noctis unggul dalam ketahanan. Perhatikan trap dan gunakan Berkah Fajar sebelum Battle.\n"
 	body.text += "\n\n[color=#dfbf81]13  KOMBINASI DECK[/color]\nFAJAR: Tombak Surya memberi +500 ATK, -300 DEF, dan MENEMBUS selama monster di papan. Selisih ATK atas DEF mengurangi LP meskipun target memakai perisai. Contoh: Penjaga Fajar 1700 + Tombak 500 melawan Burung Hantu DEF 2000 memberikan 200 damage. Berkah Fajar dapat ditambahkan; siapkan Segel Hening untuk melawan trap. DEF yang turun membuat perubahan ke posisi bertahan lebih berisiko.\n\nGERHANA: Selubung Gerhana memberi +400 ATK/DEF dan satu perisai. Pakai pada Noctis setelah perisainya habis untuk bertahan lalu menyerang balik. Perisai tidak menumpuk dan tidak melindungi LP atau penghancuran oleh spell. Cermin membatalkan serangan menembus; Belenggu mengurangi ATK sebelum selisih dihitung; Segel dapat membatalkan kedua spell baru.\n\nMasing-masing deck tetap 20 kartu dan memuat satu kartu baru. Lihat ilustrasi, cerita, serta efek lengkap di Galeri Kartu."
+	body.text += "\n\n[color=#dfbf81]14  PENGATURAN & HASIL[/color]\nBuka Pengaturan di menu atau kanan papan. Volume musik dan efek suara terpisah. Kecepatan animasi 1x / 1,5x / 2x tidak mengubah tempo musik. Efek ringkas mengurangi gerakan; pilihan tersimpan otomatis. Panduan singkat menjelaskan inti duel dalam tiga halaman. Layar hasil merangkum LP, kerusakan, pemulihan, trap, serangan terbesar, dan momen terakhir. Aksi yang di-Undo ikut dihapus dari ringkasan.\n"
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
 
 func _build_result() -> void:
 	result_layer = _overlay()
-	_panel(result_layer,Rect2(383,154,514,470),GOLD)
-	_label(result_layer,"ARENA ASTRAL",Rect2(415,183,450,27),16,GOLD)
-	result_title = _label(result_layer,"VICTORY",Rect2(415,235,450,75),54,LIGHT)
-	result_description = _label(result_layer,"",Rect2(415,331,450,74),20,MUTED)
-	_button(result_layer,"DUEL LAGI",Rect2(415,432,450,49),_start_from_menu,true)
-	_button(result_layer,"Kembali ke menu",Rect2(415,499,450,42),_open_menu)
-	result_undo_button = _button(result_layer,"UNDO LANGKAH TERAKHIR",Rect2(415,558,450,42),_undo_action)
+	_panel(result_layer,Rect2(250,52,780,616),GOLD)
+	result_title = _label(result_layer,"VICTORY",Rect2(286,85,708,70),54,LIGHT)
+	result_description = _label(result_layer,"",Rect2(286,163,708,58),18,MUTED)
+	result_summary = _reading_text(result_layer,Rect2(286,235,708,237),17,LIGHT)
+	_button(result_layer,"DUEL LAGI",Rect2(286,493,340,45),_start_from_menu,true)
+	_button(result_layer,"Kembali ke menu",Rect2(644,493,350,45),_open_menu)
+	result_undo_button = _button(result_layer,"UNDO LANGKAH TERAKHIR",Rect2(286,552,708,42),_undo_action)
+	_label(result_layer,"Ringkasan mengikuti aksi yang tetap berlaku setelah Undo.",Rect2(286,617,708,23),13,MUTED)
 	result_layer.hide()
 
 func _build_audio() -> void:
@@ -404,7 +430,7 @@ func _build_audio() -> void:
 		sound_streams[name_value] = load("res://assets/audio/%s.wav" % name_value)
 
 func _sound(name_value: String) -> void:
-	if muted or starting or not sound_streams.has(name_value):
+	if muted or starting or collection_store.sfx_gain <= 0 or not sound_streams.has(name_value):
 		return
 	for player in sfx:
 		if not player.playing:
@@ -432,6 +458,7 @@ func _new_duel(first_side: int = 0) -> void:
 	zoom_layer.hide()
 	log_panel.hide()
 	history.clear()
+	duel_summary.reset()
 	selected_hand = -1
 	selected_zone = -1
 	summon_defense = false
@@ -447,7 +474,7 @@ func _start_from_menu() -> void:
 	session += 1
 	_reset_visuals()
 	_hide_hover()
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,response_layer]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,response_layer,settings_layer,quick_guide_layer]:
 		layer.hide()
 	coin_side = -1
 	coin_face.face = -1
@@ -465,11 +492,11 @@ func _start_from_menu() -> void:
 	coin_tween = create_tween()
 	if not fx.reduced_motion:
 		for i in range(7):
-			coin_tween.tween_property(coin_face,"scale:x",0.06,0.08)
+			coin_tween.tween_property(coin_face,"scale:x",0.06,_pace(0.08))
 			coin_tween.tween_callback(_coin_frame.bind(i % 2))
-			coin_tween.tween_property(coin_face,"scale:x",1.0,0.09)
+			coin_tween.tween_property(coin_face,"scale:x",1.0,_pace(0.09))
 	else:
-		coin_tween.tween_interval(0.25)
+		coin_tween.tween_interval(_pace(0.25))
 	coin_tween.tween_callback(_reveal_coin.bind(outcome,token))
 
 func _coin_frame(side: int) -> void:
@@ -491,6 +518,8 @@ func _confirm_coin() -> void:
 	_begin_duel(coin_side)
 
 func _begin_duel(first_side: int) -> void:
+	settings_layer.hide()
+	quick_guide_layer.hide()
 	if coin_tween and coin_tween.is_valid():
 		coin_tween.kill()
 	coin_layer.hide()
@@ -502,6 +531,8 @@ func _begin_duel(first_side: int) -> void:
 		_run_ai(session)
 
 func _open_menu() -> void:
+	settings_layer.hide()
+	quick_guide_layer.hide()
 	session += 1
 	coin_layer.hide()
 	response_layer.hide()
@@ -628,7 +659,7 @@ func _zone_hover(side: int, zone: int) -> void:
 			_queue_hover(card)
 
 func _can_input() -> bool:
-	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
+	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -734,10 +765,10 @@ func _end_turn() -> void:
 	_run_ai(session)
 
 func _run_ai(token: int) -> void:
-	await get_tree().create_timer(0.8).timeout
+	await get_tree().create_timer(_pace(0.8)).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible:
+		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -745,7 +776,7 @@ func _run_ai(token: int) -> void:
 		if not AI.apply(duel,action):
 			duel.end_turn()
 		if duel.turn == 1 and not duel.over:
-			await get_tree().create_timer(0.65).timeout
+			await get_tree().create_timer(_pace(0.65)).timeout
 	if token != session:
 		return
 	if duel.turn == 1 and not duel.over:
@@ -789,8 +820,8 @@ func _visual(kind: String, side: int, zone: int, amount: int) -> void:
 func _float_text(text_value: String, point: Vector2, color: Color) -> void:
 	var node := _label(fx,text_value,Rect2(point,Vector2(190,38)),26,color)
 	var tween := node.create_tween().set_parallel(true)
-	tween.tween_property(node,"position:y",point.y-37,0.9)
-	tween.tween_property(node,"modulate:a",0.0,0.65).set_delay(0.4)
+	tween.tween_property(node,"position:y",point.y-37,_pace(0.9))
+	tween.tween_property(node,"modulate:a",0.0,_pace(0.65)).set_delay(_pace(0.4))
 	tween.chain().tween_callback(node.queue_free)
 
 func _banner(text_value: String, color: Color) -> void:
@@ -798,8 +829,8 @@ func _banner(text_value: String, color: Color) -> void:
 	node.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	node.set_meta("phase_banner",true)
 	var tween := node.create_tween()
-	tween.tween_interval(0.65)
-	tween.tween_property(node,"modulate:a",0.0,0.45)
+	tween.tween_interval(_pace(0.65))
+	tween.tween_property(node,"modulate:a",0.0,_pace(0.45))
 	tween.tween_callback(node.queue_free)
 
 func _finished(winning_side: int) -> void:
@@ -811,13 +842,15 @@ func _finished(winning_side: int) -> void:
 	while trap_presenting and token == session:
 		await get_tree().create_timer(0.1).timeout
 	if token != session: return
-	var delay: float = maxf(0.12,impact_until-Time.get_ticks_msec()/1000.0+(0.30 if fx.reduced_motion else 0.65))
+	var delay: float = maxf(0.12,impact_until-Time.get_ticks_msec()/1000.0+_pace(0.30 if fx.reduced_motion else 0.65))
 	await get_tree().create_timer(delay).timeout
 	if token != session:
 		return
 	result_title.text = "VICTORY" if winning_side == 0 else "DEFEAT"
 	result_title.add_theme_color_override("font_color",GOLD if winning_side == 0 else Color("#da919b"))
 	result_description.text = "%s\nDuel selesai pada giliran %d." % ["Cahaya Eldoria tetap menyala. Nyx telah dikalahkan." if winning_side == 0 else "Nyx menguasai arena. Susun strategi dan coba lagi.",duel.turn_number]
+	result_summary.text = duel_summary.text(duel.lp,duel.turn_number)
+	result_summary.scroll_to_line(0)
 	_sound("win" if winning_side == 0 else "lose")
 	result_layer.show()
 
@@ -828,6 +861,12 @@ func _attacker_ready() -> bool:
 	return not monster.is_empty() and not monster["defending"] and not monster["attacked"]
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if settings_layer.visible or quick_guide_layer.visible:
+		if event.is_action_pressed("ui_cancel"):
+			if quick_guide_layer.visible: quick_guide_layer.hide()
+			else: settings_layer.hide()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_Z:
 		_undo_action()
 		get_viewport().set_input_as_handled()
@@ -984,7 +1023,7 @@ func _update_lp(side: int) -> void:
 	var delay: float = maxf(0,impact_until-Time.get_ticks_msec()/1000.0)
 	if delay > 0:
 		tween.tween_interval(delay)
-	tween.tween_method(_set_lp_value.bind(side),float(displayed_lp[side]),float(target),0.18 if fx.reduced_motion else 0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_method(_set_lp_value.bind(side),float(displayed_lp[side]),float(target),_pace(0.18 if fx.reduced_motion else 0.55)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func _reset_visuals() -> void:
 	trap_presenting = false
@@ -1032,9 +1071,9 @@ func _animate_summon(side: int, zone: int) -> void:
 	var view = zone_views[side][zone]
 	view.self_modulate.a = 0.0
 	var tween := ghost.create_tween()
-	tween.tween_property(ghost,"position",target,0.42).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(ghost,"position",target,_pace(0.42)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
-	tween.tween_property(ghost,"modulate:a",0.0,0.12)
+	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.12))
 	tween.tween_callback(ghost.queue_free)
 
 func _combat_explained(report: Dictionary) -> void:
@@ -1061,7 +1100,7 @@ func _combat_explained(report: Dictionary) -> void:
 	combat_notice.show()
 	status_label.hide()
 	_animate_attack(report)
-	await get_tree().create_timer(2.6).timeout
+	await get_tree().create_timer(_pace(2.6)).timeout
 	if token == combat_serial:
 		combat_notice.hide()
 		status_label.show()
@@ -1091,10 +1130,10 @@ func _animate_attack(report: Dictionary) -> void:
 	source_view.self_modulate.a = 0
 	var direction: Vector2 = (target-source).normalized()
 	var tween := ghost.create_tween()
-	tween.tween_property(ghost,"position",origin-direction*4,0.1)
-	tween.tween_property(ghost,"position",origin+direction*10,0.12).set_trans(Tween.TRANS_QUAD)
-	tween.tween_interval(maxf(0.01,delay-0.22))
-	tween.tween_property(ghost,"modulate:a",0.0,0.13)
+	tween.tween_property(ghost,"position",origin-direction*4,_pace(0.1))
+	tween.tween_property(ghost,"position",origin+direction*10,_pace(0.12)).set_trans(Tween.TRANS_QUAD)
+	tween.tween_interval(maxf(0.01,delay-_pace(0.22)))
+	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.13))
 	tween.tween_callback(func(): source_view.self_modulate = Color.WHITE)
 	tween.tween_callback(ghost.queue_free)
 	if report["target"] >= 0:
@@ -1165,7 +1204,7 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float) -> void:
 	view.self_modulate.a = 0
 	var tween := ghost.create_tween()
 	tween.tween_interval(delay)
-	tween.tween_property(ghost,"modulate:a",0.0,0.14)
+	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.14))
 	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
 	tween.tween_callback(ghost.queue_free)
 
@@ -1199,6 +1238,9 @@ func _shield_at_impact(side: int, zone: int) -> void:
 func _toggle_effect_mode() -> void:
 	_hide_hover()
 	fx.reduced_motion = not fx.reduced_motion
+	collection_store.reduced_motion = fx.reduced_motion
+	if is_instance_valid(reduced_check): reduced_check.set_pressed_no_signal(fx.reduced_motion)
+	_save_preferences()
 	CardView.allow_art_motion = not fx.reduced_motion
 	ace_active_until = 0
 	fx.clear_all()
@@ -1214,7 +1256,7 @@ func _toggle_effect_mode() -> void:
 	_render()
 
 func _effects_obscured() -> bool:
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer]:
 		if is_instance_valid(layer) and layer.visible:
 			return true
 	return false
@@ -1395,8 +1437,8 @@ func _respond_player(slot: int) -> void:
 		duel.respond(0,slot)
 
 func _bot_response(token: int) -> void:
-	await get_tree().create_timer(0.65).timeout
-	while token == session and (help_layer.visible or zoom_layer.visible or gallery.visible):
+	await get_tree().create_timer(_pace(0.65)).timeout
+	while token == session and (help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible):
 		await get_tree().create_timer(0.2).timeout
 	if token != session: return
 	response_pending = false
@@ -1420,7 +1462,7 @@ func _play_trap_visuals(token: int) -> void:
 		ghost.pivot_offset = ghost.size/2.0
 		if not fx.reduced_motion:
 			ghost.scale.x = 0.05
-			ghost.create_tween().tween_property(ghost,"scale:x",1.0,0.18)
+			ghost.create_tween().tween_property(ghost,"scale:x",1.0,_pace(0.18))
 		var note := _panel(fx,Rect2(555,548,436,145),GOLD)
 		note.set_meta("card_visual",true)
 		_label(note,("DIBATALKAN / " if cancelled else "TRAP AKTIF / ")+duel.who(side),Rect2(12,8,410,23),15,GOLD)
@@ -1431,7 +1473,7 @@ func _play_trap_visuals(token: int) -> void:
 		var target := Vector2(645,309) if cue["id"] == "seal" else _zone_center(cue["target_side"],maxi(0,int(cue["target_zone"])))
 		fx.play_card(cue["id"],"cancel" if cancelled else "cast",source,target)
 		_sound("trap_reveal")
-		await get_tree().create_timer(0.38 if fx.reduced_motion else 1.15).timeout
+		await get_tree().create_timer(_pace(0.38 if fx.reduced_motion else 1.15)).timeout
 		if token != session: return
 		if is_instance_valid(ghost): ghost.queue_free()
 		if is_instance_valid(note): note.queue_free()
@@ -1457,9 +1499,10 @@ func _show_ace_intro(card: Dictionary, side: int) -> void:
 	var key: String = "%d:%s" % [side,card["id"]]
 	if ace_seen.has(key): return
 	ace_seen[key] = true
-	ace_active_until = Time.get_ticks_msec()/1000.0+1.05
+	ace_active_until = Time.get_ticks_msec()/1000.0+_pace(1.05)
 	_finish_ace(session)
 	var cutin := AceCutin.new()
+	cutin.animation_speed = collection_store.animation_speed
 	cutin.card = card.duplicate(true)
 	cutin.owner_text = "KAMU" if side == 0 else "NYX"
 	cutin.accent = Effects.PROFILES[card["id"]]["color"]
@@ -1476,6 +1519,10 @@ func _delayed_sound(name_value: String, delay: float, token: int) -> void:
 
 func _music_volume_changed(value: float) -> void:
 	collection_store.music_gain = value/100.0
+	music_slider.set_value_no_signal(value)
+	if is_instance_valid(settings_music):
+		settings_music.set_value_no_signal(value)
+		music_value.text = "%d%%" % roundi(value)
 	_sync_music()
 	_save_preferences()
 
@@ -1505,17 +1552,17 @@ func _ace_active() -> bool:
 	return Time.get_ticks_msec()/1000.0 < ace_active_until
 
 func _finish_ace(token: int) -> void:
-	await get_tree().create_timer(1.08).timeout
+	await get_tree().create_timer(_pace(1.08)).timeout
 	if token == session: _render()
 
 func _can_undo_input() -> bool:
-	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
+	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible
 
 func _undo_action() -> void:
 	if _can_undo_input(): duel.undo()
 
 func _capture_undo_ui(snapshot: Dictionary) -> void:
-	snapshot["ui"] = {"history":history.duplicate(),"inspected":inspected_card.duplicate(true),"aces":ace_seen.duplicate(true),"summon_defense":summon_defense}
+	snapshot["ui"] = {"history":history.duplicate(),"inspected":inspected_card.duplicate(true),"aces":ace_seen.duplicate(true),"summon_defense":summon_defense,"summary":duel_summary.snapshot()}
 
 func _restore_undo_ui(snapshot: Dictionary) -> void:
 	# Invalidate pending AI replies, impacts, LP tweens, and victory timers.
@@ -1530,6 +1577,7 @@ func _restore_undo_ui(snapshot: Dictionary) -> void:
 	selected_hand = -1
 	selected_zone = -1
 	var ui: Dictionary = snapshot.get("ui",{})
+	if ui.has("summary"): duel_summary.restore(ui["summary"])
 	history.assign(ui.get("history",[]))
 	log_view.text = "\n\n".join(history)
 	ace_seen = ui.get("aces",{}).duplicate(true)
@@ -1538,3 +1586,100 @@ func _restore_undo_ui(snapshot: Dictionary) -> void:
 		lp_targets[side] = int(duel.lp[side])
 		_set_lp_value(float(duel.lp[side]),side)
 	_inspect(ui.get("inspected",Catalog.card("dawn")))
+
+func _pace(seconds: float) -> float:
+	return seconds/collection_store.animation_speed
+
+func _build_comfort_ui() -> void:
+	_button(menu_layer,"PENGATURAN",Rect2(700,643,260,42),_open_settings)
+	var settings_button := _button(self,"PENGATURAN",Rect2(1028,611,216,21),_open_settings)
+	settings_button.add_theme_font_size_override("font_size",12)
+	move_child(settings_button,menu_layer.get_index())
+	settings_layer = _overlay()
+	_panel(settings_layer,Rect2(320,65,640,590),GOLD)
+	_label(settings_layer,"Pengaturan permainan",Rect2(354,90,572,43),29,GOLD)
+	_label(settings_layer,"Musik",Rect2(354,158,400,25),18,LIGHT)
+	music_value = _label(settings_layer,"",Rect2(852,158,74,25),17,CYAN)
+	settings_music = HSlider.new()
+	settings_music.max_value = 100
+	_place(settings_music,settings_layer,Rect2(354,199,572,27))
+	settings_music.value_changed.connect(_music_volume_changed)
+	_label(settings_layer,"Efek suara",Rect2(354,248,400,25),18,LIGHT)
+	sfx_value = _label(settings_layer,"",Rect2(852,248,74,25),17,CYAN)
+	settings_sfx = HSlider.new()
+	settings_sfx.max_value = 100
+	_place(settings_sfx,settings_layer,Rect2(354,289,572,27))
+	settings_sfx.value_changed.connect(_sfx_volume_changed)
+	_label(settings_layer,"Kecepatan animasi",Rect2(354,337,270,26),18,LIGHT)
+	speed_select = OptionButton.new()
+	for title in ["Normal / 1x","Cepat / 1,5x","Sangat Cepat / 2x"]: speed_select.add_item(title)
+	_place(speed_select,settings_layer,Rect2(650,330,276,40))
+	speed_select.item_selected.connect(_speed_selected)
+	reduced_check = CheckBox.new()
+	reduced_check.text = "Efek ringkas (kurangi gerakan dan kilatan)"
+	_place(reduced_check,settings_layer,Rect2(354,390,572,40))
+	reduced_check.toggled.connect(func(value):
+		if fx.reduced_motion != value: _toggle_effect_mode())
+	_label(settings_layer,"Kecepatan mengatur animasi dan jeda duel. Musik tetap pada tempo asli. Respons pemain menunggu pilihanmu.",Rect2(354,448,572,60),16,MUTED)
+	_button(settings_layer,"Panduan singkat",Rect2(354,534,272,43),_open_quick_guide)
+	_button(settings_layer,"SELESAI",Rect2(644,534,282,43),func(): settings_layer.hide(),true)
+	_label(settings_layer,"Pilihan disimpan otomatis di perangkat ini.",Rect2(354,599,572,25),14,MUTED)
+	settings_layer.hide()
+	quick_guide_layer = _overlay()
+	_panel(quick_guide_layer,Rect2(300,90,680,540),GOLD)
+	quick_title = _label(quick_guide_layer,"",Rect2(338,120,604,54),29,GOLD)
+	quick_text = _label(quick_guide_layer,"",Rect2(338,198,604,275),21,LIGHT)
+	guide_previous = _button(quick_guide_layer,"Kembali",Rect2(338,492,175,43),func(): _guide_page(-1))
+	guide_next = _button(quick_guide_layer,"Lanjut",Rect2(531,492,175,43),func(): _guide_page(1),true)
+	_button(quick_guide_layer,"Tutup",Rect2(724,492,218,43),func(): quick_guide_layer.hide())
+	_button(quick_guide_layer,"Baca aturan lengkap",Rect2(338,558,604,36),func(): quick_guide_layer.hide(); settings_layer.hide(); help_layer.show())
+	quick_guide_layer.hide()
+
+func _apply_comfort_preferences() -> void:
+	fx.animation_speed = collection_store.animation_speed
+	fx.reduced_motion = collection_store.reduced_motion
+	CardView.allow_art_motion = not fx.reduced_motion
+	effects_button.text = "EFEK: RINGKAS" if fx.reduced_motion else "EFEK: NORMAL"
+	settings_music.set_value_no_signal(collection_store.music_gain*100)
+	music_value.text = "%d%%" % roundi(collection_store.music_gain*100)
+	settings_sfx.set_value_no_signal(collection_store.sfx_gain*100)
+	sfx_value.text = "%d%%" % roundi(collection_store.sfx_gain*100)
+	speed_select.select([1.0,1.5,2.0].find(collection_store.animation_speed))
+	reduced_check.set_pressed_no_signal(fx.reduced_motion)
+	_sync_sfx()
+
+func _open_settings() -> void:
+	_hide_hover()
+	_apply_comfort_preferences()
+	settings_layer.show()
+
+func _sync_sfx() -> void:
+	for player in sfx:
+		player.volume_db = -12+linear_to_db(maxf(collection_store.sfx_gain,0.0001))
+		if collection_store.sfx_gain <= 0: player.stop()
+
+func _sfx_volume_changed(value: float) -> void:
+	collection_store.sfx_gain = value/100.0
+	sfx_value.text = "%d%%" % roundi(value)
+	_sync_sfx()
+	_save_preferences()
+
+func _speed_selected(index: int) -> void:
+	collection_store.animation_speed = [1.0,1.5,2.0][index]
+	fx.animation_speed = collection_store.animation_speed
+	_save_preferences()
+
+func _open_quick_guide() -> void:
+	_hide_hover()
+	guide_page = 0
+	_guide_page(0)
+	quick_guide_layer.show()
+
+func _guide_page(step: int) -> void:
+	guide_page = clampi(guide_page+step,0,2)
+	var titles := ["1 / 3 — Siapkan papan", "2 / 3 — Serang dengan rencana", "3 / 3 — Respons dan perbaiki"]
+	var pages := ["Pada Main Phase, klik kartu tangan lalu zona yang menyala. Satu normal summon per giliran; naga perlu satu monster sebagai tribute.\n\nSpell penguatan menargetkan monstermu. Trap dipasang di kanan papan dan baru siap mulai giliran berikutnya.","Masuk Battle, pilih monster SIAP MENYERANG, lalu arahkan kursor ke target untuk melihat perkiraan. Klik target untuk menyerang.\n\nTombak Surya menembus DEF. Selubung Gerhana menguatkan monster dan memulihkan perisai. Giliran pertama belum boleh menyerang.","Saat jendela respons muncul, pilih trap atau Lewati. Efek terakhir diselesaikan lebih dulu. Jebakan tertutup bisa mengubah perkiraan serangan.\n\nSalah langkah? Undo atau Ctrl+Z tersedia sampai Akhiri Giliran. Atur volume dan kecepatan lewat Pengaturan."]
+	quick_title.text = titles[guide_page]
+	quick_text.text = pages[guide_page]
+	guide_previous.disabled = guide_page == 0
+	guide_next.disabled = guide_page == 2

@@ -4,11 +4,12 @@ var card: Dictionary = {}
 var accent := Color("#d6ad63")
 var owner_text: String = ""
 var age: float = 0.0
+var animation_speed: float = 1.0
 var occlusion_check: Callable
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 func _process(delta: float) -> void:
-	age += delta
+	age += delta*animation_speed
 	visible = not (occlusion_check.is_valid() and occlusion_check.call())
 	modulate.a = minf(1.0,age/0.10)*clampf((1.05-age)/0.18,0,1)
 	position.x = 296-(1-pow(minf(1,age/0.18),0.4))*130
