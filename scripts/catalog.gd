@@ -2,8 +2,8 @@ extends RefCounted
 
 # Definisi kartu dipisahkan dari aturan dan tampilan.
 const CARDS = {
-	"dawn": {"id":"dawn", "name":"Penjaga Fajar", "kind":"monster", "element":"CAHAYA", "atk":1600, "def":1200, "level":4, "art":0, "effect":"", "lore":"Ksatria Eldoria yang menjaga cahaya terakhir di gerbang kota.", "text":"Monster normal tanpa efek khusus."},
-	"ember": {"id":"ember", "name":"Naga Bara", "kind":"monster", "element":"API", "atk":2200, "def":1500, "level":6, "art":1, "effect":"burn", "lore":"Dari perut gunung purba, naga ini membawa bara yang tak pernah padam.", "text":"Tribute: korbankan 1 monster (zona pilihan, atau ATK terendah). Saat summon: berikan 300 kerusakan ke LP lawan."},
+	"dawn": {"id":"dawn", "name":"Penjaga Fajar", "kind":"monster", "element":"CAHAYA", "atk":1700, "def":1200, "level":4, "art":0, "effect":"", "lore":"Ksatria Eldoria yang menjaga cahaya terakhir di gerbang kota.", "text":"Monster normal tanpa efek khusus."},
+	"ember": {"id":"ember", "name":"Naga Bara", "kind":"monster", "element":"API", "atk":2500, "def":1500, "level":6, "art":1, "effect":"burn", "lore":"Dari perut gunung purba, naga ini membawa bara yang tak pernah padam.", "text":"Tribute: korbankan 1 monster (zona pilihan, atau ATK terendah). Saat summon: berikan 300 kerusakan ke LP lawan."},
 	"oracle": {"id":"oracle", "name":"Oracle Rembulan", "kind":"monster", "element":"BULAN", "atk":1200, "def":1700, "level":3, "art":2, "effect":"heal", "lore":"Di bawah rembulan, sang oracle membaca takdir melalui pantulan bintang.", "text":"Saat summon: pulihkan 400 LP, hingga maksimal 4000 LP."},
 	"fenrir": {"id":"fenrir", "name":"Fenrir Zamrud", "kind":"monster", "element":"ALAM", "atk":1800, "def":900, "level":4, "art":3, "effect":"", "lore":"Roh penjaga hutan zamrud yang memburu siapa pun yang mengusik tanahnya.", "text":"Monster normal tanpa efek khusus."},
 	"warden": {"id":"warden", "name":"Aegis Surya", "kind":"monster", "element":"CAHAYA", "atk":900, "def":2100, "level":4, "art":0, "art_file":"res://assets/art/aegis_surya.png", "art_focus":0.32, "effect":"shield", "lore":"Ditempa untuk menahan malam, Aegis menyimpan sinar matahari di dalam perisainya.", "text":"Sekali selama berada di papan, bertahan dari kehancuran akibat serangan. Kerusakan LP tetap berlaku."},
@@ -21,13 +21,13 @@ const CARDS = {
 	"thorns": {"id":"thorns","name":"Belenggu Spektral","kind":"trap","element":"TRAP","atk":0,"def":0,"level":0,"art":0,"night_art":6,"effect":"weaken","lore":"Duri tanpa wujud menahan pedang sebelum menyentuh tanah.","text":"Respons serangan lawan: ATK monster penyerang turun 500 selama berada di papan. Serangan tetap berlanjut."},
 	"hourglass": {"id":"hourglass","name":"Jam Pasir Astral","kind":"spell","element":"SPELL","atk":0,"def":0,"level":0,"art":0,"night_art":7,"effect":"insight","lore":"Sebutir pasir menyimpan ingatan langit sebelum fajar.","text":"Aktifkan dari tangan: ambil 2 kartu. Kehabisan deck saat mengambil kartu berarti kalah."}
 }
-const DECK = ["dawn","dawn","dawn","ember","ember","oracle","oracle","fenrir","fenrir","fenrir","warden","sprite","sprite","storm","storm","sanctuary","sanctuary","blessing","blessing","eclipse"]
+const DECK = ["dawn","dawn","dawn","ember","ember","oracle","fenrir","fenrir","fenrir","warden","sprite","sprite","storm","storm","sanctuary","blessing","blessing","eclipse","sprite","seal"]
 
 static func card(id: String) -> Dictionary:
 	return CARDS[id].duplicate(true)
 
 const GERHANA = ["sentinel","sentinel","sentinel","owl","owl","witch","witch","noctis","noctis","oracle","sprite","sprite","mirror","mirror","seal","thorns","hourglass","blessing","storm","eclipse"]
-const PRESETS = {"fajar":{"name":"Fajar / Serangan","cards":DECK},"gerhana":{"name":"Gerhana / Kontrol","cards":GERHANA}}
+const PRESETS = {"fajar":{"name":"Fajar / Serangan","cards":DECK,"summary":"13 monster, 6 spell, 1 trap. Naga Bara 2500 ATK; 3 Peri Astral untuk draw; Segel Hening untuk membalas trap."},"gerhana":{"name":"Gerhana / Kontrol","cards":GERHANA,"summary":"12 monster, 4 spell, 4 trap. Naga Noctis 2300 ATK dengan perisai; kendalikan serangan memakai jebakan."}}
 
 static func type_text(c: Dictionary) -> String:
 	if c["kind"] == "trap":

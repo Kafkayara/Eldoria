@@ -346,7 +346,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.11 / JEJAK FAJAR / UNDO",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.12 / FAJAR VS GERHANA",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -359,6 +359,7 @@ func _build_help() -> void:
 	body.text = "[color=#dfbf81]01  MEMBACA KARTU[/color]\nArahkan kursor untuk pratinjau besar. Klik kanan kartu, tekan E, atau pilih Perbesar Kartu untuk membaca efek lengkap. Klik kiri dipakai untuk bermain.\n\n[color=#dfbf81]02  MAIN PHASE[/color]\nPilih monster di tangan, pilih mode menyerang / bertahan, lalu klik zona tujuan yang menyala. Satu normal summon per giliran. Naga Bara perlu satu tribute.\n\n[color=#dfbf81]03  SPELL[/color]\nBadai Aether dan Suaka Surya aktif langsung. Berkah Fajar menargetkan monstermu; Retakan Langit menargetkan monster lawan dengan ATK 1800 atau kurang.\n\n[color=#dfbf81]04  BATTLE PHASE[/color]\nKlik Masuk Battle, pilih monstermu yang bisa menyerang, lalu klik monster lawan yang menyala. Jika papan lawan kosong, pilih Serang Langsung. Satu serangan per monster. Pemain pertama tidak menyerang pada giliran pertama.\n\n[color=#dfbf81]05  DAMAGE & STRATEGI[/color]\nLawan posisi menyerang: selisih ATK mengurangi LP. Lawan bertahan memakai DEF; menang tidak memberi kerusakan LP. Penjelasan hitungan muncul saat serangan. Ubah posisi mulai giliran setelah summon. Skill memulihkan 800 LP sekali saat LP 2500 atau kurang.\n\n[color=#dfbf81]06  MENANG[/color]\nTurunkan LP lawan ke 0 atau buat lawan kehabisan deck saat draw. Buka Log Duel untuk membaca riwayat. Esc menutup detail / panduan atau membuka menu."
 	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan deck Fajar (serangan) dan Gerhana (kontrol). Untuk saat ini duel hanya memakai dua deck bawaan. Koleksi tetap dapat dibaca di Galeri Kartu; editor deck dinonaktifkan. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
 	body.text += "\n\n[color=#dfbf81]10  UNDO / Ctrl+Z[/color]\nPada giliranmu, tombol Undo mengembalikan satu langkah beserta seluruh akibatnya: kartu, LP, hasil draw, tribute, skill, dan respons trap. Undo juga dapat dipakai saat menunggu respons Nyx atau sebelum hasil duel dikonfirmasi. Riwayat ditutup setelah Akhiri Giliran; kamu tidak dapat mundur melewati giliran lawan. Tidak ada pengacakan ulang kartu saat undo.\n\n[color=#dfbf81]11  MUSIK[/color]\nJejak Fajar adalah komposisi orisinal 2 menit 40 detik, memakai instrumen berbasis sampel: seruling, senar, koto, piano, dan perkusi lembut. Bagian akhir kembali ke awal tanpa fade-out. Slider BGM mengatur musik tanpa mengubah efek suara."
+	body.text += "\n\n[color=#dfbf81]12  FAJAR VS GERHANA[/color]\nFajar memakai 13 monster, 6 spell, dan 1 trap. Naga Bara kini 2500 ATK dan tetap memberi 300 damage saat summon. Penjaga Fajar 1700 ATK. Tiga Peri Astral membantu mengambil kartu; Pasang Segel Hening terlebih dahulu agar mulai giliran berikutnya bisa membalas Cermin atau Belenggu. Naga Noctis tetap 2300 ATK dan bertahan dari kehancuran battle sekali. Bara unggul dalam tekanan serangan; Noctis unggul dalam ketahanan. Perhatikan trap dan gunakan Berkah Fajar sebelum Battle.\n"
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
@@ -1267,11 +1268,13 @@ func _refresh_deck_choices() -> void:
 	for key in all:
 		deck_select.add_item(all[key]["name"])
 		deck_select.set_item_metadata(deck_select.item_count-1,key)
+		deck_select.get_popup().set_item_tooltip(deck_select.item_count-1,str(all[key].get("summary","")))
 		if key == collection_store.active: deck_select.select(deck_select.item_count-1)
 	enemy_select.clear()
 	for key in Catalog.PRESETS:
 		enemy_select.add_item(Catalog.PRESETS[key]["name"])
 		enemy_select.set_item_metadata(enemy_select.item_count-1,key)
+		enemy_select.get_popup().set_item_tooltip(enemy_select.item_count-1,str(Catalog.PRESETS[key].get("summary","")))
 		if key == collection_store.enemy: enemy_select.select(enemy_select.item_count-1)
 
 func _render_backrows() -> void:

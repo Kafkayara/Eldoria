@@ -11,6 +11,15 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.12 — Keseimbangan Fajar / Gerhana
+
+- Naga Bara 2200 → **2500 ATK**, mempertahankan tribute satu monster, 1500 DEF, dan burn summon 300. Noctis tetap 2300 ATK dengan perisai satu kali: Bara menekan, Noctis bertahan.
+- Penjaga Fajar 1600 → **1700 ATK**.
+- Fajar menukar satu Oracle menjadi Peri Astral ketiga, serta satu Suaka Surya menjadi Segel Hening. Total 13 monster, 6 spell, 1 trap; Gerhana tidak diubah.
+- Tooltip pilihan deck dan panduan di dalam game menjelaskan dukungan Fajar. Data kartu, detail, dan sorotan ace mengikuti statistik baru.
+- Verifikasi final 3.000 duel per versi pada seed baru yang sama: Fajar **30,67% → 48,37%**, Gerhana final 51,63%. Mencakup kedua posisi deck, kedua urutan pembuka, dan tiga tingkat AI. Hasil simulasi adalah patokan pengujian, bukan jaminan win rate pemain.
+- Rincian dan reproduksi: `docs/fajar-balance.md`; benchmark: `tests/bench_balance.gd`. Tes matchup khusus di `tests/test_fajar_balance.gd` dan pengujian tampilan di `tests/test_balance_ui.gd`.
+
 ## Versi 0.11 — Jejak Fajar & Undo
 
 - Musik baru **Jejak Fajar / Path of Dawn**, komposisi orisinal 2 menit 40 detik pada 96 BPM. Instrumen berbasis sampel: seruling/shakuhachi, senar, cello, koto, piano, dan perkusi taiko yang renggang. Aransemen lebih lapang daripada Astral Drive; loop tidak berhenti atau fade-out ke hening.

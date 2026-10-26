@@ -1,6 +1,6 @@
-# Eldoria 0.9: deck bawaan dan respons
+# Eldoria 0.12: deck bawaan dan respons
 
-Fajar menggunakan monster agresif, damage langsung, dan buff. Gerhana memakai 12 monster, 4 trap, dan 4 spell untuk mengendalikan serangan dan mempertahankan sumber daya. Keduanya punya 20 kartu; untuk sementara pemain memilih deck bawaan dan tidak dapat mengedit susunan kartu.
+Fajar menggunakan 13 monster, 6 spell, dan 1 trap, dengan Naga Bara 2500 ATK, Penjaga Fajar 1700 ATK, tiga Peri Astral, damage langsung, buff, dan Segel Hening. Rincian pengujian keseimbangan ada di fajar-balance.md. Gerhana memakai 12 monster, 4 trap, dan 4 spell untuk mengendalikan serangan dan mempertahankan sumber daya. Keduanya punya 20 kartu; untuk sementara pemain memilih deck bawaan dan tidak dapat mengedit susunan kartu.
 
 ## Aturan zona
 

@@ -64,7 +64,7 @@ func _run() -> void:
 	check(d.play(0) and d.lp[0] == 4000,"Healing caps at 4000")
 	check(not d.play(0,-1) and d.hands[0].size() == 2,"Invalid spell does not consume card")
 	d.fields[0][0] = unit("dawn")
-	check(d.play(0,0) and d.fields[0][0]["atk"] == 2000,"Buff spell")
+	check(d.play(0,0) and d.fields[0][0]["atk"] == 2100,"Buff spell")
 	d.fields[1][0] = unit("ember")
 	check(not d.play(0,0),"Destroy spell target restriction")
 	d.fields[1][1] = unit("warden",true)
@@ -75,7 +75,7 @@ func _run() -> void:
 	d.fields[1][0] = unit("dawn")
 	check(not d.attack(0),"No direct attack through monsters")
 	check(d.attack(0,0),"Monster battle")
-	check(d.fields[1][0].is_empty() and d.lp[1] == 3800,"ATK battle damage and destruction")
+	check(d.fields[1][0].is_empty() and d.lp[1] == 3900,"ATK battle damage and destruction")
 	check(not d.attack(0),"One attack per monster")
 	d = fresh()
 	d.phase = "BATTLE"
@@ -86,7 +86,7 @@ func _run() -> void:
 	d.phase = "BATTLE"
 	d.fields[0][0] = unit("dawn")
 	d.fields[1][0] = unit("warden",true)
-	check(d.attack(0,0) and d.lp[0] == 3500 and not d.fields[0][0].is_empty(),"Losing to DEF does not destroy attacker")
+	check(d.attack(0,0) and d.lp[0] == 3600 and not d.fields[0][0].is_empty(),"Losing to DEF does not destroy attacker")
 	d = fresh()
 	d.phase = "BATTLE"
 	d.fields[0][0] = unit("ember")
@@ -124,12 +124,14 @@ func _run() -> void:
 		var actions: int = 0
 		while not d.over and actions < 700:
 			actions += 1
-			var action: Dictionary = AI.main_action(d) if d.phase == "MAIN" else AI.battle_action(d)
-			if not AI.apply(d,action):
-				d.end_turn()
+			if not d.chain.is_empty():
+				d.respond(d.priority,AI.response(d,d.priority))
+			else:
+				var action: Dictionary = AI.main_action(d) if d.phase == "MAIN" else AI.battle_action(d)
+				if not AI.apply(d,action): d.end_turn()
 			for side in range(2):
 				var count: int = d.decks[side].size()+d.hands[side].size()+d.graves[side].size()
-				for m in d.fields[side]:
+				for m in d.fields[side]+d.backrows[side]:
 					if not m.is_empty():
 						count += 1
 				check(count == 20,"Card conservation seed %d" % seed_value)

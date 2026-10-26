@@ -86,7 +86,7 @@ func _run() -> void:
 	check(board.duel.hands[0].size() == 4, "Summon consumes hand card")
 	board._hand_clicked(0)
 	board._zone_clicked(0,0)
-	check(board.duel.fields[0][0]["atk"] == 2000,"UI targeted buff")
+	check(board.duel.fields[0][0]["atk"] == 2100,"UI targeted buff")
 	board._hand_clicked(0)
 	board._zone_clicked(0,0)
 	board._hand_clicked(0)
@@ -114,7 +114,7 @@ func _run() -> void:
 	board._zone_clicked(0,0)
 	board._zone_clicked(1,0)
 	check(board.duel.fields[0][0].get("attacked",false),"UI attack")
-	check(board.combat_notice.visible and "200" in board.combat_label.text,"Combat calculation is visible")
+	check(board.combat_notice.visible and "= 300 kerusakan LP" in board.combat_label.text,"Combat calculation is visible")
 	await create_timer(0.22).timeout
 	await capture("eldoria-combat")
 	board.help_layer.show()
