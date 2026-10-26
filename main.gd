@@ -1,4 +1,5 @@
 extends Control
+const Hints = preload("res://scripts/duel_hints.gd")
 const Duel = preload("res://scripts/duel.gd")
 const Catalog = preload("res://scripts/catalog.gd")
 const AI = preload("res://scripts/ai.gd")
@@ -262,7 +263,7 @@ func _build_ui() -> void:
 	hand_scroll.add_child(hand_box)
 	_panel(self,Rect2(1010,80,252,624),Color("#4d6672"))
 	_label(self,"KOMANDO DUEL",Rect2(1028,97,216,26),16,GOLD)
-	context_label = _label(self,"",Rect2(1028,139,216,101),18,LIGHT)
+	context_label = _label(self,"",Rect2(1028,133,216,114),14,LIGHT)
 	battle_button = _button(self,"MASUK BATTLE",Rect2(1028,257,216,46),_battle)
 	direct_button = _button(self,"SERANG LANGSUNG",Rect2(1028,257,216,46),_direct)
 	position_button = _button(self,"UBAH POSISI",Rect2(1028,317,216,43),_change_position)
@@ -527,15 +528,17 @@ func _render() -> void:
 		for index in range(3):
 			var view = zone_views[side][index]
 			view.data = duel.fields[side][index]
+			view.action_hint = Hints.monster_status(duel,view.data) if side == 0 else ""
+			view.tooltip_text = Hints.stats(view.data)
 			view.selected = side == 0 and index == selected_zone
 			if selected_hand >= 0 and selected_hand < duel.hands[0].size() and duel.turn == 0 and duel.phase == "MAIN":
 				var chosen: Dictionary = duel.hands[0][selected_hand]
 				var effect: String = chosen["effect"]
 				if chosen["kind"] == "monster" and side == 0:
-					view.selected = (view.data.is_empty() or int(chosen["level"]) > 4) and not duel.summoned
-				elif effect == "buff" and side == 0:
+					view.selected = (view.data.is_empty() or int(chosen["level"]) > 4) and Hints.hand_reason(duel,chosen).is_empty()
+				elif effect == "buff" and side == 0 and Hints.hand_reason(duel,chosen).is_empty():
 					view.selected = not view.data.is_empty()
-				elif effect == "destroy" and side == 1:
+				elif effect == "destroy" and side == 1 and Hints.hand_reason(duel,chosen).is_empty():
 					view.selected = not view.data.is_empty() and int(view.data.get("atk",9999)) <= 1800
 			if side == 1 and duel.turn == 0 and duel.phase == "BATTLE" and _attacker_ready():
 				view.selected = not view.data.is_empty()
@@ -553,7 +556,9 @@ func _render() -> void:
 		card.mouse_entered.connect(_hand_hover.bind(index))
 		card.mouse_exited.connect(_hide_hover)
 		card.inspect_requested.connect(_open_card_zoom)
-		card.tooltip_text = "Klik kiri: pilih / Klik kanan: detail besar"
+		var reason: String = Hints.hand_reason(duel,card.data)
+		card.action_hint = "BISA DIMAINKAN" if reason.is_empty() else "BELUM BISA"
+		card.tooltip_text = reason if not reason.is_empty() else "Klik kiri: pilih / Klik kanan: detail besar"
 	_clear_children(enemy_hand)
 	for i in range(mini(duel.hands[1].size(),8)):
 		var back := CardView.new()
@@ -577,6 +582,10 @@ func _render() -> void:
 	position_button.disabled = not active or duel.phase != "MAIN" or not can_switch
 	mode_button.disabled = not active or duel.phase != "MAIN"
 	mode_button.text = "Summon: BERTAHAN" if summon_defense else "Summon: MENYERANG"
+	battle_button.tooltip_text = "Giliran pertama belum boleh menyerang." if duel.turn_number == 1 else "Masuk Battle; kartu tangan tidak bisa dimainkan sesudahnya."
+	direct_button.tooltip_text = "Pilih monster siap menyerang dan kosongkan papan lawan."
+	position_button.tooltip_text = "Pilih monster. Posisi bisa diubah sekali, mulai giliran setelah summon."
+	skill_button.tooltip_text = "Sekali per duel, Main Phase, LP 2500 atau kurang: pulihkan 800 LP."
 	_update_context()
 	undo_button.disabled = not _can_undo_input()
 	undo_button.text = "UNDO (%d) / Ctrl+Z" % duel.undo_stack.size()
@@ -592,6 +601,7 @@ func _inspect(card: Dictionary) -> void:
 	detail_card.data = inspected_card
 	detail_card.queue_redraw()
 	detail_type.text = Catalog.type_text(card)
+	detail_type.tooltip_text = Hints.stats(card)
 	detail_desc.text = card["text"]
 	detail_desc.scroll_to_line(0)
 	detail_lore.text = card.get("lore", "")
@@ -601,12 +611,18 @@ func _hand_hover(index: int) -> void:
 	if index >= 0 and index < duel.hands[0].size():
 		_inspect(duel.hands[0][index])
 		_queue_hover(duel.hands[0][index],true)
+		var reason: String = Hints.hand_reason(duel,duel.hands[0][index])
+		if not reason.is_empty(): context_label.text = reason
 
 func _zone_hover(side: int, zone: int) -> void:
 	var card: Dictionary = duel.fields[side][zone]
 	_inspect(card)
 	if not card.is_empty():
-		_queue_hover(card)
+		if side == 1 and _can_input() and duel.phase == "BATTLE" and _attacker_ready():
+			context_label.text = Hints.forecast(duel,duel.fields[0][selected_zone],card)
+			context_label.tooltip_text = context_label.text
+		else:
+			_queue_hover(card)
 
 func _can_input() -> bool:
 	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible
@@ -619,6 +635,13 @@ func _hand_clicked(index: int) -> void:
 	_inspect(card)
 	if duel.phase != "MAIN":
 		_message("Kartu dari tangan hanya bisa dimainkan pada Main Phase.")
+		return
+	var reason: String = Hints.hand_reason(duel,card)
+	if not reason.is_empty():
+		selected_hand = -1
+		_message(reason)
+		_render()
+		context_label.text = reason
 		return
 	_sound("click")
 	selected_zone = -1
@@ -910,12 +933,14 @@ func _hide_hover() -> void:
 	hover_serial += 1
 	if is_instance_valid(hover_card):
 		hover_card.hide()
+	if is_instance_valid(context_label): _update_context()
 
 func _toggle_log() -> void:
 	_hide_hover()
 	log_panel.visible = not log_panel.visible
 
 func _update_context() -> void:
+	context_label.tooltip_text = ""
 	if duel.over:
 		context_label.text = "Duel selesai."
 	elif duel.turn == 1:
@@ -924,7 +949,13 @@ func _update_context() -> void:
 		var card: Dictionary = duel.hands[0][selected_hand]
 		context_label.text = "%s\n%s" % [card["name"],"Pasang di zona emas di kanan papanmu." if card["kind"] == "trap" else "Pilih zona yang menyala."]
 	elif duel.phase == "BATTLE":
-		context_label.text = "Battle Phase\nPilih monstermu, lalu target lawan."
+		if _attacker_ready():
+			context_label.text = Hints.forecast(duel,duel.fields[0][selected_zone],{}) if not duel.has_monsters(1) else "Arahkan kursor ke target untuk melihat perkiraan hasil. Klik untuk menyerang."
+		elif selected_zone >= 0:
+			context_label.text = Hints.monster_status(duel,duel.fields[0][selected_zone]) + "\nPilih monster lain yang siap."
+		else:
+			context_label.text = "Pilih monster SIAP MENYERANG, lalu arahkan kursor ke target."
+		context_label.tooltip_text = context_label.text
 	elif duel.turn_number == 1:
 		context_label.text = "Main Phase\nPanggil monster, lalu akhiri giliran pertama."
 	else:

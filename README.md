@@ -185,3 +185,8 @@ Ilustrasi dibuat dengan imagegen bawaan. Musik dan efek suara disintesis khusus 
 ## GitHub
 
 Setelah menyimpan perubahan di Godot, tinjau perubahan dengan `git status`, buat commit, lalu `git push`. Cache, cadangan lokal, dan hasil build dikecualikan oleh `.gitignore`.
+
+
+## v0.13 — Petunjuk duel
+
+Penanda kesiapan monster, alasan kartu belum bisa dimainkan, perubahan statistik, dan perkiraan hasil serangan tersedia. Lihat [petunjuk duel](docs/duel-clarity.md).

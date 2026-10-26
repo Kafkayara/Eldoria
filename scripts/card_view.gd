@@ -1,4 +1,5 @@
 extends Button
+const Catalog = preload("res://scripts/catalog.gd")
 const Art = preload("res://scripts/card_art.gd")
 const Sigils = preload("res://scripts/sigils.gd")
 const ATLAS = Art.ATLAS
@@ -6,6 +7,7 @@ signal inspect_requested(card_data: Dictionary)
 static var allow_art_motion: bool = true
 var art_offset := Vector2.ZERO
 var data: Dictionary = {}
+var action_hint: String = ""
 var selected: bool = false
 var back: bool = false
 var empty_caption: String = "ZONA MONSTER"
@@ -132,6 +134,10 @@ func _draw() -> void:
 	if size.x >= 100:
 		draw_rect(Rect2(art_rect.position+Vector2(2,2),Vector2(20,20)),Color(0.91,0.88,0.78,0.96))
 		Sigils.draw(self,str(data["id"]),art_rect.position+Vector2(12,12),7,Color("#334743"),0,1.2)
+	if not action_hint.is_empty() and not large:
+		var badge_y: float = art_bottom-17
+		draw_rect(Rect2(8,badge_y,size.x-16,17),Color("#132c30"))
+		_text(action_hint,badge_y+12,10,Color("#f3e5bb"))
 	if spell:
 		_text("TRAP / RESPONS" if trap else "SPELL / AKTIF",size.y-20,18 if large else 14,Color("#31584f"))
 		return
@@ -139,10 +145,15 @@ func _draw() -> void:
 	var stat_size: int = 23 if large else 17
 	var half: float = size.x/2
 	draw_line(Vector2(half,art_bottom+6),Vector2(half,size.y-20),Color("#52616b"),1)
+	var base: Dictionary = Catalog.card(data["id"])
+	var da: int = int(data["atk"])-int(base["atk"])
+	var dd: int = int(data["def"])-int(base["def"])
 	var left: String = str(data["atk"])
 	var right: String = str(data["def"])
-	draw_string(font,Vector2(half/2-font.get_string_size(left,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size).x/2,stat_y),left,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size,Color("#293237"))
-	draw_string(font,Vector2(half+half/2-font.get_string_size(right,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size).x/2,stat_y),right,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size,cyan)
+	draw_string(font,Vector2(half/2-font.get_string_size(left,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size).x/2,stat_y),left,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size,Color("#206447") if da > 0 else (Color("#a22f35") if da < 0 else Color("#293237")))
+	draw_string(font,Vector2(half+half/2-font.get_string_size(right,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size).x/2,stat_y),right,HORIZONTAL_ALIGNMENT_LEFT,-1,stat_size,Color("#206447") if dd > 0 else (Color("#a22f35") if dd < 0 else cyan))
+	if large and (da != 0 or dd != 0):
+		_text("Dari awal: ATK %+d / DEF %+d" % [da,dd],size.y-6,11,Color("#315b61"))
 	var label_y: float = size.y-(27 if large else 2)
 	draw_string(font,Vector2(half/2-11,label_y),"ATK",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("#665841"))
 	draw_string(font,Vector2(half+half/2-11,label_y),"DEF",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("#315b61"))
