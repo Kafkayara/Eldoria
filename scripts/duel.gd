@@ -155,7 +155,7 @@ func _spell(index: int, target: int) -> bool:
 		target = -1
 	if effect == "buff":
 		if target < 0 or target > 2 or fields[turn][target].is_empty():
-			return reject("Berkah Fajar: pilih monster milikmu.")
+			return reject("%s: pilih monster milikmu." % card["name"])
 	if effect == "destroy":
 		if target < 0 or target > 2 or fields[1 - turn][target].is_empty():
 			return reject("Retakan Langit: pilih monster lawan.")
@@ -193,8 +193,10 @@ func _resolve_spell(event: Dictionary) -> void:
 			if not over:
 				_draw(side)
 		"buff":
-			fields[side][target]["atk"] += 400
-			fields[side][target]["def"] += 400
+			fields[side][target]["atk"] = maxi(0,int(fields[side][target]["atk"])+int(card.get("atk_gain",400)))
+			fields[side][target]["def"] = maxi(0,int(fields[side][target]["def"])+int(card.get("def_gain",400)))
+			if card.get("grants_piercing",false): fields[side][target]["piercing"] = true
+			if card.get("grants_shield",false): fields[side][target]["shield"] = true
 		"destroy": _remove(1-side,target)
 
 
@@ -246,11 +248,11 @@ func _attack_now(attacker: int, target: int = -1) -> bool:
 		var defending: bool = enemy["defending"]
 		var power: int = int(enemy["def"]) if defending else int(enemy["atk"])
 		var difference: int = int(source["atk"]) - power
-		combat.emit({"attack":source["atk"],"power":power,"difference":difference,"defending":defending,"direct":false,"target_card":enemy.duplicate(true),"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
+		combat.emit({"attack":source["atk"],"power":power,"difference":difference,"defending":defending,"direct":false,"target_card":enemy.duplicate(true),"piercing":source.get("piercing",false),"side":turn,"zone":attacker,"target":target,"card":source.duplicate(true)})
 		message.emit("%s menyerang %s." % [source["name"], enemy["name"]])
 		if difference > 0:
 			_destroy_battle(other, target)
-			if not defending:
+			if not defending or source.get("piercing",false):
 				_damage(other, difference)
 		elif difference < 0:
 			_damage(turn, -difference)

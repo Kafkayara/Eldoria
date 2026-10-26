@@ -1,6 +1,8 @@
-# Eldoria 0.12: deck bawaan dan respons
+# Eldoria 0.14: deck bawaan dan respons
 
 Fajar menggunakan 13 monster, 6 spell, dan 1 trap, dengan Naga Bara 2500 ATK, Penjaga Fajar 1700 ATK, tiga Peri Astral, damage langsung, buff, dan Segel Hening. Rincian pengujian keseimbangan ada di fajar-balance.md. Gerhana memakai 12 monster, 4 trap, dan 4 spell untuk mengendalikan serangan dan mempertahankan sumber daya. Keduanya punya 20 kartu; untuk sementara pemain memilih deck bawaan dan tidak dapat mengedit susunan kartu.
+
+Kartu baru v0.14: Tombak Surya menggantikan satu Badai Aether di Fajar; Selubung Gerhana menggantikan Berkah Fajar di Gerhana. Lihat [identitas deck](deck-identity.md) untuk kombinasi, MENEMBUS, perisai, dan hasil uji terbaru.
 
 ## Aturan zona
 
@@ -39,4 +41,4 @@ Santai memilih monster secara sederhana, tidak memakai skill, dan kadang melewat
 
 ## Verifikasi
 
-Test strategi menjalankan kedua urutan pembuka, dua arketipe, dan tiga kesulitan; memeriksa konservasi 20 kartu termasuk zona spell/trap, LP, dan duel selesai. Tes unit mencakup timing trap, respons berantai, pembatalan, penurunan ATK sebelum damage, slot penuh, deck-out, validasi deck, simpan/muat, dan pemulihan cadangan. Tes UI memakai deck bawaan, memverifikasi klik nyata ke zona emas, dan menjalankan rantai empat link melalui panel pemain dan respons otomatis Nyx. Galeri memeriksa keunikan piksel ilustrasi seluruh 18 kartu. Efek visual diuji dengan renderer native Godot.
+Test strategi menjalankan kedua urutan pembuka, dua arketipe, dan tiga kesulitan; memeriksa konservasi 20 kartu termasuk zona spell/trap, LP, dan duel selesai. Tes unit mencakup timing trap, respons berantai, pembatalan, penurunan ATK sebelum damage, slot penuh, deck-out, validasi deck, simpan/muat, dan pemulihan cadangan. Tes UI memakai deck bawaan, memverifikasi klik nyata ke zona emas, dan menjalankan rantai empat link melalui panel pemain dan respons otomatis Nyx. Galeri memeriksa keunikan piksel ilustrasi seluruh 20 kartu. Efek visual diuji dengan renderer native Godot.

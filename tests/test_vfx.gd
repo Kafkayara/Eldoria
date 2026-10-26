@@ -79,7 +79,7 @@ func _run() -> void:
 					board.duel.fields[side][0] = unit("dawn")
 			else:
 				match id:
-					"blessing": board.duel.fields[side][1] = unit("dawn")
+					"blessing","solar_lance","lunar_veil": board.duel.fields[side][1] = unit("dawn")
 					"eclipse": board.duel.fields[1-side][1] = unit("fenrir")
 					"sanctuary":
 						board.duel.lp[side] = 2500
@@ -91,7 +91,7 @@ func _run() -> void:
 				check(board.fx.events.is_empty(),"Setting trap does not reveal VFX: "+id)
 				continue
 			check(board.fx.last_cue.get("card_id","") == id,"Correct card VFX on play: "+id)
-			var expected_side: int = side if card["kind"] == "monster" or id in ["blessing","sanctuary","hourglass"] else 1-side
+			var expected_side: int = side if card["kind"] == "monster" or id in ["blessing","solar_lance","lunar_veil","sanctuary","hourglass"] else 1-side
 			var expected: Vector2 = board._zone_center(expected_side,target) if target >= 0 else board._profile_effect_point(expected_side)
 			if id == "sanctuary":
 				expected = board._zone_center(side,1)
@@ -137,7 +137,7 @@ func _run() -> void:
 			board.duel.fields[1][1] = unit("fenrir")
 			board.duel.lp[0] = 2500
 			board._render()
-			var target: int = 1 if id in ["blessing","eclipse"] else -1
+			var target: int = 1 if id in ["blessing","solar_lance","lunar_veil","eclipse"] else -1
 			board.duel.play(0,target)
 			await samples(id,"cast")
 	fresh()

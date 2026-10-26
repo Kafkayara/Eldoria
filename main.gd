@@ -347,7 +347,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),func(): help_layer.show())
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.12 / FAJAR VS GERHANA",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.14 / TOMBAK DAN SELUBUNG",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -357,10 +357,11 @@ func _build_help() -> void:
 	body.add_theme_font_size_override("normal_font_size",19)
 	body.add_theme_color_override("default_color",LIGHT)
 	body.bbcode_enabled = true
-	body.text = "[color=#dfbf81]01  MEMBACA KARTU[/color]\nArahkan kursor untuk pratinjau besar. Klik kanan kartu, tekan E, atau pilih Perbesar Kartu untuk membaca efek lengkap. Klik kiri dipakai untuk bermain.\n\n[color=#dfbf81]02  MAIN PHASE[/color]\nPilih monster di tangan, pilih mode menyerang / bertahan, lalu klik zona tujuan yang menyala. Satu normal summon per giliran. Naga Bara perlu satu tribute.\n\n[color=#dfbf81]03  SPELL[/color]\nBadai Aether dan Suaka Surya aktif langsung. Berkah Fajar menargetkan monstermu; Retakan Langit menargetkan monster lawan dengan ATK 1800 atau kurang.\n\n[color=#dfbf81]04  BATTLE PHASE[/color]\nKlik Masuk Battle, pilih monstermu yang bisa menyerang, lalu klik monster lawan yang menyala. Jika papan lawan kosong, pilih Serang Langsung. Satu serangan per monster. Pemain pertama tidak menyerang pada giliran pertama.\n\n[color=#dfbf81]05  DAMAGE & STRATEGI[/color]\nLawan posisi menyerang: selisih ATK mengurangi LP. Lawan bertahan memakai DEF; menang tidak memberi kerusakan LP. Penjelasan hitungan muncul saat serangan. Ubah posisi mulai giliran setelah summon. Skill memulihkan 800 LP sekali saat LP 2500 atau kurang.\n\n[color=#dfbf81]06  MENANG[/color]\nTurunkan LP lawan ke 0 atau buat lawan kehabisan deck saat draw. Buka Log Duel untuk membaca riwayat. Esc menutup detail / panduan atau membuka menu."
+	body.text = "[color=#dfbf81]01  MEMBACA KARTU[/color]\nArahkan kursor untuk pratinjau besar. Klik kanan kartu, tekan E, atau pilih Perbesar Kartu untuk membaca efek lengkap. Klik kiri dipakai untuk bermain.\n\n[color=#dfbf81]02  MAIN PHASE[/color]\nPilih monster di tangan, pilih mode menyerang / bertahan, lalu klik zona tujuan yang menyala. Satu normal summon per giliran. Naga Bara perlu satu tribute.\n\n[color=#dfbf81]03  SPELL[/color]\nBadai Aether dan Suaka Surya aktif langsung. Berkah Fajar menargetkan monstermu; Retakan Langit menargetkan monster lawan dengan ATK 1800 atau kurang.\n\n[color=#dfbf81]04  BATTLE PHASE[/color]\nKlik Masuk Battle, pilih monstermu yang bisa menyerang, lalu klik monster lawan yang menyala. Jika papan lawan kosong, pilih Serang Langsung. Satu serangan per monster. Pemain pertama tidak menyerang pada giliran pertama.\n\n[color=#dfbf81]05  DAMAGE & STRATEGI[/color]\nLawan posisi menyerang: selisih ATK mengurangi LP. Lawan bertahan memakai DEF; menang tidak memberi kerusakan LP kecuali penyerang memiliki MENEMBUS. Penjelasan hitungan muncul saat serangan. Ubah posisi mulai giliran setelah summon. Skill memulihkan 800 LP sekali saat LP 2500 atau kurang.\n\n[color=#dfbf81]06  MENANG[/color]\nTurunkan LP lawan ke 0 atau buat lawan kehabisan deck saat draw. Buka Log Duel untuk membaca riwayat. Esc menutup detail / panduan atau membuka menu."
 	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan deck Fajar (serangan) dan Gerhana (kontrol). Untuk saat ini duel hanya memakai dua deck bawaan. Koleksi tetap dapat dibaca di Galeri Kartu; editor deck dinonaktifkan. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
 	body.text += "\n\n[color=#dfbf81]10  UNDO / Ctrl+Z[/color]\nPada giliranmu, tombol Undo mengembalikan satu langkah beserta seluruh akibatnya: kartu, LP, hasil draw, tribute, skill, dan respons trap. Undo juga dapat dipakai saat menunggu respons Nyx atau sebelum hasil duel dikonfirmasi. Riwayat ditutup setelah Akhiri Giliran; kamu tidak dapat mundur melewati giliran lawan. Tidak ada pengacakan ulang kartu saat undo.\n\n[color=#dfbf81]11  MUSIK[/color]\nJejak Fajar adalah komposisi orisinal 2 menit 40 detik, memakai instrumen berbasis sampel: seruling, senar, koto, piano, dan perkusi lembut. Bagian akhir kembali ke awal tanpa fade-out. Slider BGM mengatur musik tanpa mengubah efek suara."
 	body.text += "\n\n[color=#dfbf81]12  FAJAR VS GERHANA[/color]\nFajar memakai 13 monster, 6 spell, dan 1 trap. Naga Bara kini 2500 ATK dan tetap memberi 300 damage saat summon. Penjaga Fajar 1700 ATK. Tiga Peri Astral membantu mengambil kartu; Pasang Segel Hening terlebih dahulu agar mulai giliran berikutnya bisa membalas Cermin atau Belenggu. Naga Noctis tetap 2300 ATK dan bertahan dari kehancuran battle sekali. Bara unggul dalam tekanan serangan; Noctis unggul dalam ketahanan. Perhatikan trap dan gunakan Berkah Fajar sebelum Battle.\n"
+	body.text += "\n\n[color=#dfbf81]13  KOMBINASI DECK[/color]\nFAJAR: Tombak Surya memberi +500 ATK, -300 DEF, dan MENEMBUS selama monster di papan. Selisih ATK atas DEF mengurangi LP meskipun target memakai perisai. Contoh: Penjaga Fajar 1700 + Tombak 500 melawan Burung Hantu DEF 2000 memberikan 200 damage. Berkah Fajar dapat ditambahkan; siapkan Segel Hening untuk melawan trap. DEF yang turun membuat perubahan ke posisi bertahan lebih berisiko.\n\nGERHANA: Selubung Gerhana memberi +400 ATK/DEF dan satu perisai. Pakai pada Noctis setelah perisainya habis untuk bertahan lalu menyerang balik. Perisai tidak menumpuk dan tidak melindungi LP atau penghancuran oleh spell. Cermin membatalkan serangan menembus; Belenggu mengurangi ATK sebelum selisih dihitung; Segel dapat membatalkan kedua spell baru.\n\nMasing-masing deck tetap 20 kartu dan memuat satu kartu baru. Lihat ilustrasi, cerita, serta efek lengkap di Galeri Kartu."
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
@@ -603,6 +604,8 @@ func _inspect(card: Dictionary) -> void:
 	detail_type.text = Catalog.type_text(card)
 	detail_type.tooltip_text = Hints.stats(card)
 	detail_desc.text = card["text"]
+	if card.get("piercing",false): detail_desc.text += "\n\nSTATUS PAPAN: MENEMBUS DEF. Selisih ATK terhadap DEF mengurangi LP lawan."
+	if card.get("shield",false): detail_desc.text += "\n\nSTATUS PAPAN: PERISAI aktif (1 kehancuran akibat serangan)."
 	detail_desc.scroll_to_line(0)
 	detail_lore.text = card.get("lore", "")
 	detail_lore.scroll_to_line(0)
@@ -907,6 +910,8 @@ func _open_card_zoom(card: Dictionary) -> void:
 	zoom_type.text = Catalog.type_text(card)
 	zoom_stats.text = "ATK %d   /   DEF %d" % [card["atk"],card["def"]] if card["kind"] == "monster" else str(card["kind"]).to_upper()
 	zoom_description.text = card["text"]
+	if card.get("piercing",false): zoom_description.text += "\n\nSTATUS PAPAN: MENEMBUS DEF. Selisih ATK terhadap DEF mengurangi LP lawan."
+	if card.get("shield",false): zoom_description.text += "\n\nSTATUS PAPAN: PERISAI aktif (1 kehancuran akibat serangan)."
 	zoom_description.scroll_to_line(0)
 	zoom_lore.text = card.get("lore", "")
 	zoom_lore.scroll_to_line(0)
@@ -1046,7 +1051,7 @@ func _combat_explained(report: Dictionary) -> void:
 	if report["direct"]:
 		text_value = "SERANG LANGSUNG / %d kerusakan LP" % attack_power
 	elif report["defending"] and difference >= 0:
-		text_value = "%d ATK vs %d DEF / 0 kerusakan LP" % [attack_power,enemy_power]
+		text_value = "%d ATK vs %d DEF / %d kerusakan LP%s" % [attack_power,enemy_power,difference if report.get("piercing",false) else 0," / MENEMBUS" if report.get("piercing",false) else ""]
 	elif difference < 0:
 		text_value = "%d ATK vs %d %s / penyerang -%d LP" % [attack_power,enemy_power,"DEF" if report["defending"] else "ATK",-difference]
 	else:

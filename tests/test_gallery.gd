@@ -81,7 +81,7 @@ func _run() -> void:
 	g.select_card("sprite")
 	check(g.preview.data["id"] == "sprite" and "ambil" in g.description.text,"Selecting fairy updates art and effect")
 	g.filter_buttons["spell"].pressed.emit()
-	check(g.visible_ids.size() == 5,"Spell filter")
+	check(g.visible_ids.size() == 7,"Spell filter")
 	for id in g.visible_ids:
 		check(Catalog.CARDS[id]["kind"] == "spell","Spell-only results")
 	g.filter_buttons["trap"].pressed.emit()

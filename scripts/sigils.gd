@@ -9,6 +9,12 @@ static func points(raw: Array, center: Vector2, scale_value: float, angle: float
 static func draw(canvas: CanvasItem, id: String, center: Vector2, radius: float, color: Color, angle: float = 0.0, width: float = 1.5) -> void:
 	var path: Array = []
 	match id:
+		"solar_lance":
+			canvas.draw_line(center+Vector2(-.7,.7)*radius,center+Vector2(.7,-.7)*radius,color,width,true)
+			canvas.draw_polyline(points([Vector2(.1,-.8),Vector2(.8,-.8),Vector2(.8,-.1)],center,radius,angle),color,width,true)
+		"lunar_veil":
+			draw(canvas,"warden",center,radius*.8,color,angle,width)
+			canvas.draw_arc(center,radius,-PI*.85,PI*.1,28,color,width,true)
 		"dawn":
 			path = [Vector2(0,-1),Vector2(0,0.8)]
 			canvas.draw_polyline(points(path,center,radius,angle),color,width,true)

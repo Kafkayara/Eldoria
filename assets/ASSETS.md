@@ -45,3 +45,8 @@ Aksen baru: `ace_summon.wav`, `heavy_impact.wav`, `trap_reveal.wav`, seluruhnya 
 `path_of_dawn.ogg` dan `path_of_dawn_strings.ogg` menggantikan Astral Drive sebagai musik runtime. Komposisi orisinal berdurasi 160 detik, 96 BPM, D minor, 64 bar. Menggunakan instrumen berbasis sampel GeneralUser GS 2.0.3 oleh S. Christian Collins, dirender dengan FluidSynth 2.6.1. Lisensi penuh tersedia di `assets/audio/GeneralUser-LICENSE.txt`; sumber: https://github.com/mrbumpy409/GeneralUser-GS dan https://www.schristiancollins.com/ . Musik tidak memakai melodi atau rekaman anime lain.
 
 Source komposisi dan renderer: `tools/compose_anime_score.py`. Metadata audio terdekode ada di `path_of_dawn_score.json`. SoundFont dan binary renderer hanya digunakan sebagai alat pengembangan lokal, tidak dibundel di runtime. Aksen SFX versi sebelumnya tetap digunakan.
+
+
+## v0.14 — Tombak Surya dan Selubung Gerhana
+
+Dua ilustrasi orisinal dibuat dengan built-in image_gen: assets/art/tombak_surya.png dan assets/art/selubung_gerhana.png. Prompt final disimpan pada assets/art/deck_identity_prompts.json. Ilustrasi dipakai sebagai tekstur penuh yang berbeda untuk masing-masing kartu; tidak mengganti gambar kartu lain. Visual cast dan simbolnya digambar dengan kode Godot.

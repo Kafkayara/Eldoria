@@ -169,6 +169,9 @@ func _draw() -> void:
 			var bw: float = font.get_string_size(badge,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x+10
 			draw_rect(Rect2(size.x-bw-7,art_top+2,bw,16),Color(0.025,0.07,0.10,0.96))
 			draw_string(font,Vector2(size.x-bw-2,art_top+14),badge,HORIZONTAL_ALIGNMENT_LEFT,-1,10,badge_color)
+			if data.get("piercing",false):
+				draw_rect(Rect2(8,art_top+20,60,16),Color(0.025,0.07,0.10,0.96))
+				draw_string(font,Vector2(10,art_top+32),"MENEMBUS",HORIZONTAL_ALIGNMENT_LEFT,-1,9,Color("#f5d68e"))
 			if data.get("shield",false):
 				draw_rect(Rect2(8,art_top+2,52,16),Color(0.025,0.07,0.10,0.96))
 				draw_string(font,Vector2(10,art_top+14),"PERISAI",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("#abd7da"))

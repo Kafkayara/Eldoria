@@ -46,7 +46,7 @@ static func forecast(d, source: Dictionary, target: Dictionary) -> String:
 		var delta: int = int(source["atk"]) - power
 		result = "%d ATK vs %d %s\n" % [source["atk"],power,"DEF" if defending else "ATK"]
 		if delta > 0:
-			result += ("Perisai lawan habis." if target.get("shield",false) else "Target hancur.") + (" LP tetap." if defending else " Nyx -%d LP." % delta)
+			result += ("Perisai lawan habis." if target.get("shield",false) else "Target hancur.") + (" LP tetap." if defending and not source.get("piercing",false) else " Nyx -%d LP%s." % [delta," (tembus)" if defending else ""])
 		elif delta < 0:
 			result += "Kamu -%d LP. " % -delta
 			result += "Monstermu bertahan." if defending else ("Perisaimu habis." if source.get("shield",false) else "Monstermu hancur.")

@@ -11,6 +11,10 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.14 — Tombak dan Selubung
+
+Dua kartu pendukung baru memperjelas identitas deck: Tombak Surya memberi tekanan lewat damage menembus DEF; Selubung Gerhana memulihkan perisai dan mendukung serangan balik. Masing-masing satu salinan di deck bawaan, ilustrasi dan VFX unik, galeri 20 jenis kartu. Perbandingan 3.000 duel per versi: Fajar 48,83% → 50,63%; semua duel selesai. Rincian, batasan, cara memakai, dan pengujian: [identitas deck](docs/deck-identity.md).
+
 ## Versi 0.12 — Keseimbangan Fajar / Gerhana
 
 - Naga Bara 2200 → **2500 ATK**, mempertahankan tribute satu monster, 1500 DEF, dan burn summon 300. Noctis tetap 2300 ATK dengan perisai satu kali: Bara menekan, Noctis bertahan.

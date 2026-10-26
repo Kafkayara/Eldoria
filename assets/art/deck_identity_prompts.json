@@ -1,0 +1,14 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "generate",
+  "assets": [
+    {
+      "file": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/tombak_surya.png",
+      "prompt": "Use case: stylized-concept. Create an original premium fantasy trading card illustration for Eldoria, card Tombak Surya (Solar Spear). Full-bleed square painted anime fantasy illustration, no card frame, no letters or text or logos. A single exquisite gold and ivory solar spear thrust diagonally from lower left toward upper right, its large luminous blade clearly visible centered, penetrating an ancient dark stone shield with fine cracks and a narrow beam of sunrise. Background ruined temple terraces at sunrise, restrained amber and teal-gray palette. Strong hand-painted silhouettes, dramatic light, controlled detail, rich tactile brushwork, sophisticated 2D anime card art, no plastic 3D, no UI. Main action readable when center cropped to portrait, spear blade and fractured shield in central 65 percent. No characters, no busy particle noise."
+    },
+    {
+      "file": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/selubung_gerhana.png",
+      "prompt": "Use case: stylized-concept. Original premium fantasy trading card illustration for Eldoria, card Selubung Gerhana (Eclipse Veil). Full-bleed square hand-painted anime fantasy art with no frame, no letters text or logo. A broad translucent crescent-shaped violet and silver magical veil drapes over an ancient obsidian dragon-shaped stone guardian shield at the center of a moonlit observatory. A clear silver circular protective ring around the guardian, a few elegant fabric folds curling outward, distant eclipsed moon and weathered tower silhouettes. Guardian and shielding veil read clearly in central 65 percent, center-crop safe for a portrait card. Rich indigo, muted purple, pale silver. Controlled painterly texture, elegant strong silhouettes and deliberate lighting, sophisticated 2D anime card art, no plastic 3D, no neon particle clutter. Entirely distinct composition from a solar spear; defensive calm before a counterattack."
+    }
+  ]
+}

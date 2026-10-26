@@ -3,6 +3,8 @@ const Sigils = preload("res://scripts/sigils.gd")
 const Painter = preload("res://scripts/effects_painter.gd")
 const MAX_EVENTS: int = 8
 const PROFILES = {
+	"solar_lance":{"shape":"sunlance","color":Color("#e9b348"),"light":Color("#fff5cd"),"impact":0.40,"duration":1.05},
+	"lunar_veil":{"shape":"moonveil","color":Color("#b29bdc"),"light":Color("#edf0ff"),"impact":0.55,"duration":1.15},
 	"dawn": {"shape":"solar_cut","color":Color("#e9bd67"),"light":Color("#fff2c6"),"impact":0.38,"duration":0.85},
 	"ember": {"shape":"dragon_breath","color":Color("#f07a3f"),"light":Color("#ffd08b"),"impact":0.52,"duration":1.10},
 	"oracle": {"shape":"lunar_comet","color":Color("#a5a7ed"),"light":Color("#e3e9ff"),"impact":0.48,"duration":1.05},
@@ -183,6 +185,22 @@ func _draw_event(event: Dictionary) -> void:
 			painter.draw_arc(b,18+after*45,0,TAU,40,_color(light,1-after),2,true)
 		return
 	match event["card_id"]:
+		"solar_lance":
+			var center: Vector2 = b+Vector2(-30,30)*(1-travel)
+			painter.draw_line(center+Vector2(-36,36),center+Vector2(30,-30),light,4,true)
+			painter.draw_colored_polygon(PackedVector2Array([center+Vector2(38,-38),center+Vector2(9,-17),center+Vector2(17,-9)]),color)
+			if hit:
+				for i in range(5):
+					var offset := Vector2.from_angle(i*TAU/5)*(15+after*32)
+					painter.draw_line(b+offset,b+offset+Vector2(6,-9),light,2,true)
+		"lunar_veil":
+			_draw_guard(b,color,light,travel*0.65)
+			for i in range(3):
+				var path := PackedVector2Array()
+				for step in range(25):
+					var u: float = step/24.0
+					path.append(b+Vector2((u-.5)*95,sin(u*TAU+t*2+i)*12+(i-1)*20))
+				_ribbon(path,3.5*travel,_color(color,0.65))
 		"dawn":
 			if travel > 0 and not hit:
 				var head: Vector2 = a.lerp(b,travel)
