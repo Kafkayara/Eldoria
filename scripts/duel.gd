@@ -27,6 +27,7 @@ var chain: Array = []
 var priority: int = -1
 var passes: int = 0
 var difficulty: String = "normal"
+var enemy_name: String = "Nyx"
 var next_uid: int = 0
 var sentinel_used: Array = [false,false]
 var undo_stack: Array = []
@@ -79,7 +80,7 @@ func _draw(side: int) -> bool:
 	return true
 
 func who(side: int) -> String:
-	return "Kamu" if side == 0 else "Nyx"
+	return "Kamu" if side == 0 else enemy_name
 
 func reject(text: String) -> bool:
 	message.emit(text)
@@ -494,7 +495,7 @@ func _sentinel_setup(side: int) -> void:
 		return
 	message.emit("Penjaga Senja: tidak ada Cermin Pembalasan di deck; efek tidak terpakai.")
 
-const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","next_uid","sentinel_used"]
+const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","enemy_name","next_uid","sentinel_used"]
 
 func _remember_action(label: String, during_response: bool = false) -> void:
 	if turn != 0 or over or (not chain.is_empty() and not during_response): return

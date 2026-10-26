@@ -11,6 +11,10 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.16 — Buku I: Jendela yang Menghadap Pagi
+
+Mode cerita pendek berisi lima bab/duel, epilog, 90 halaman dialog termasuk hasil kalah, tiga pilihan yang ditanggapi lagi dalam epilog, penyimpanan posisi baca, pilihan bab, dan catatan kenangan. Buku pertama memakai Fajar serta Gerhana; belum menambah deck ketiga. Mulai lewat MODE CERITA / BUKU I pada menu. Riset, petunjuk, dan batasan: [mode cerita](docs/story-research.md). Naskah lengkap mengandung spoiler: [Buku I](docs/story-book-one.md).
+
 ## Versi 0.15 — Kenyamanan bermain
 
 Pengaturan tersedia di menu dan duel: volume musik/efek terpisah, kecepatan animasi 1x/1,5x/2x, efek ringkas tersimpan, panduan singkat tiga halaman, dan ringkasan hasil yang mengikuti Undo. Musik mempertahankan tempo asli. Detail dan pengujian: [kenyamanan bermain](docs/play-comfort.md).

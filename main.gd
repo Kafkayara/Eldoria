@@ -1,5 +1,6 @@
 extends Control
 const Hints = preload("res://scripts/duel_hints.gd")
+const StoryView = preload("res://scripts/story_view.gd")
 const Summary = preload("res://scripts/duel_summary.gd")
 const Duel = preload("res://scripts/duel.gd")
 const Catalog = preload("res://scripts/catalog.gd")
@@ -17,6 +18,14 @@ const LIGHT = Color("#eff1ed")
 const CYAN = Color("#8bb6b9")
 
 var duel = Duel.new()
+var story_view
+var story_mode: bool = false
+var opponent_label: Label
+var player_label: Label
+var arena_mode_label: Label
+var coin_rule: Label
+var result_main_button: Button
+var result_back_button: Button
 var duel_summary = Summary.new()
 var settings_layer: Control
 var quick_guide_layer: Control
@@ -210,7 +219,7 @@ func _build_ui() -> void:
 	var brand_font := SystemFont.new()
 	brand_font.font_names = PackedStringArray(["Georgia"])
 	brand.add_theme_font_override("font",brand_font)
-	_label(self,"ARENA ASTRAL / DUEL SOLO",Rect2(322,25,420,25),15,MUTED)
+	arena_mode_label = _label(self,"ARENA ASTRAL / DUEL SOLO",Rect2(322,25,390,25),15,MUTED)
 	effects_button = _button(self,"EFEK: NORMAL",Rect2(726,18,178,38),_toggle_effect_mode)
 	effects_button.add_theme_font_size_override("font_size",14)
 	_button(self,"Log duel",Rect2(916,18,105,38),_toggle_log)
@@ -236,7 +245,9 @@ func _build_ui() -> void:
 	for side in range(2):
 		var x: float = 298 if side == 0 else 747
 		_panel(self,Rect2(x,81,245,58),Color("#486575"))
-		_label(self,"KAMU" if side == 0 else "NYX / LAWAN",Rect2(x+12,87,215,20),14,CYAN if side == 0 else GOLD)
+		var name_label := _label(self,"KAMU" if side == 0 else "NYX / LAWAN",Rect2(x+12,87,215,20),14,CYAN if side == 0 else GOLD)
+		if side == 1: opponent_label = name_label
+		else: player_label = name_label
 		profile_lp.append(_label(self,"4000 LP",Rect2(x+12,108,126,28),24,LIGHT))
 		var bar := ProgressBar.new()
 		bar.max_value = 4000
@@ -337,6 +348,7 @@ func _build_ui() -> void:
 	_build_coin()
 	_build_strategy_ui()
 	_build_comfort_ui()
+	_build_story_ui()
 
 func _overlay() -> Control:
 	var node := Control.new()
@@ -365,11 +377,11 @@ func _build_menu() -> void:
 	title.add_theme_font_override("font",title_font)
 	_label(menu_layer,"CHRONICLES OF THE FIRST LIGHT",Rect2(99,286,508,28),17,GOLD)
 	_label(menu_layer,"Pilih deck dan tantang Nyx di Arena Astral.",Rect2(99,328,508,29),18,LIGHT)
-	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_from_menu,true)
+	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_free_duel,true)
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),_open_quick_guide)
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.15 / KENYAMANAN DUEL",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.16 / JENDELA YANG MENGHADAP PAGI",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -396,8 +408,8 @@ func _build_result() -> void:
 	result_title = _label(result_layer,"VICTORY",Rect2(286,85,708,70),54,LIGHT)
 	result_description = _label(result_layer,"",Rect2(286,163,708,58),18,MUTED)
 	result_summary = _reading_text(result_layer,Rect2(286,235,708,237),17,LIGHT)
-	_button(result_layer,"DUEL LAGI",Rect2(286,493,340,45),_start_from_menu,true)
-	_button(result_layer,"Kembali ke menu",Rect2(644,493,350,45),_open_menu)
+	result_main_button = _button(result_layer,"DUEL LAGI",Rect2(286,493,340,45),_result_primary,true)
+	result_back_button = _button(result_layer,"Kembali ke menu",Rect2(644,493,350,45),_result_secondary)
 	result_undo_button = _button(result_layer,"UNDO LANGKAH TERAKHIR",Rect2(286,552,708,42),_undo_action)
 	_label(result_layer,"Ringkasan mengikuti aksi yang tetap berlaku setelah Undo.",Rect2(286,617,708,23),13,MUTED)
 	result_layer.hide()
@@ -463,10 +475,19 @@ func _new_duel(first_side: int = 0) -> void:
 	summon_defense = false
 	result_layer.hide()
 	starting = true
-	duel.difficulty = collection_store.difficulty
-	duel.start(-1,first_side,Catalog.PRESETS.get(collection_store.active,Catalog.PRESETS["fajar"])["cards"],Catalog.PRESETS.get(collection_store.enemy,Catalog.PRESETS["gerhana"])["cards"])
+	var cfg: Dictionary = story_view.current_config() if story_mode else {}
+	duel.enemy_name = str(cfg.get("opponent","Nyx"))
+	opponent_label.text = duel.enemy_name.to_upper()+" / LAWAN"
+	duel_summary.reset(duel.enemy_name)
+	duel.difficulty = str(cfg.get("difficulty",collection_store.difficulty))
+	var player_key: String = str(cfg.get("player_deck",collection_store.active))
+	var enemy_key: String = str(cfg.get("enemy_deck",collection_store.enemy))
+	player_label.text = "AREN / "+player_key.to_upper() if story_mode else "KAMU"
+	arena_mode_label.text = "BUKU I / BAB %d / %s" % [story_view.progress["chapter"]+1,player_key.to_upper()] if story_mode else "ARENA ASTRAL / DUEL SOLO"
+	arena_mode_label.tooltip_text = cfg.get("focus","")
+	duel.start(-1,first_side,Catalog.PRESETS.get(player_key,Catalog.PRESETS["fajar"])["cards"],Catalog.PRESETS.get(enemy_key,Catalog.PRESETS["gerhana"])["cards"])
 	starting = false
-	_inspect(Catalog.card("dawn"))
+	_inspect(duel.hands[0][0] if story_mode and not duel.hands[0].is_empty() else Catalog.card("dawn"))
 	_render()
 
 func _start_from_menu() -> void:
@@ -478,6 +499,7 @@ func _start_from_menu() -> void:
 	coin_side = -1
 	coin_face.face = -1
 	coin_face.queue_redraw()
+	coin_rule.text = "Gambar: kamu mulai  /  Angka: %s mulai" % _opponent_name()
 	coin_result.text = "Koin sedang dilempar..."
 	coin_continue.disabled = true
 	coin_layer.show()
@@ -507,7 +529,7 @@ func _reveal_coin(side: int, token: int) -> void:
 		return
 	coin_side = side
 	_coin_frame(side)
-	coin_result.text = "GAMBAR / KAMU BERGERAK PERTAMA" if side == 0 else "ANGKA / NYX BERGERAK PERTAMA"
+	coin_result.text = "GAMBAR / KAMU BERGERAK PERTAMA" if side == 0 else "ANGKA / %s BERGERAK PERTAMA" % _opponent_name().to_upper()
 	coin_continue.disabled = false
 	_sound("summon")
 
@@ -525,11 +547,13 @@ func _begin_duel(first_side: int) -> void:
 	menu_layer.hide()
 	help_layer.hide()
 	_new_duel(first_side)
-	_banner("GILIRANMU" if first_side == 0 else "GILIRAN NYX",GOLD)
+	_banner("GILIRANMU" if first_side == 0 else "GILIRAN "+duel.who(1).to_upper(),GOLD)
 	if first_side == 1:
 		_run_ai(session)
 
 func _open_menu() -> void:
+	story_mode = false
+	story_view.hide()
 	settings_layer.hide()
 	quick_guide_layer.hide()
 	session += 1
@@ -574,7 +598,7 @@ func _render() -> void:
 			if side == 1 and duel.turn == 0 and duel.phase == "BATTLE" and _attacker_ready():
 				view.selected = not view.data.is_empty()
 			view.queue_redraw()
-	phase_label.text = "GILIRAN %02d\n%s / %s" % [duel.turn_number,"KAMU" if duel.turn == 0 else "NYX",duel.phase]
+	phase_label.text = "GILIRAN %02d\n%s / %s" % [duel.turn_number,"KAMU" if duel.turn == 0 else duel.who(1).to_upper(),duel.phase]
 	_clear_children(hand_box)
 	for index in range(duel.hands[0].size()):
 		var card := CardView.new()
@@ -658,7 +682,7 @@ func _zone_hover(side: int, zone: int) -> void:
 			_queue_hover(card)
 
 func _can_input() -> bool:
-	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible
+	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -760,14 +784,14 @@ func _end_turn() -> void:
 	selected_hand = -1
 	selected_zone = -1
 	duel.end_turn()
-	_banner("GILIRAN NYX",GOLD)
+	_banner("GILIRAN "+duel.who(1).to_upper(),GOLD)
 	_run_ai(session)
 
 func _run_ai(token: int) -> void:
 	await get_tree().create_timer(_pace(0.8)).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible:
+		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -848,6 +872,13 @@ func _finished(winning_side: int) -> void:
 	result_title.text = "VICTORY" if winning_side == 0 else "DEFEAT"
 	result_title.add_theme_color_override("font_color",GOLD if winning_side == 0 else Color("#da919b"))
 	result_description.text = "%s\nDuel selesai pada giliran %d." % ["Cahaya Eldoria tetap menyala. Nyx telah dikalahkan." if winning_side == 0 else "Nyx menguasai arena. Susun strategi dan coba lagi.",duel.turn_number]
+	result_main_button.text = "DUEL LAGI"
+	result_back_button.text = "Kembali ke menu"
+	if story_mode:
+		var cfg: Dictionary = story_view.current_config()
+		result_description.text = "Bab %d / %s\n%s" % [story_view.progress["chapter"]+1,cfg["title"],"Undo masih tersedia sampai kamu melanjutkan kisah." if winning_side == 0 else "Kekalahan ini tidak menghapus bab atau kenangan yang telah terbuka."]
+		result_main_button.text = "LANJUT CERITA" if winning_side == 0 else "SETELAH KEKALAHAN"
+		result_back_button.text = "BUKU CERITA"
 	result_summary.text = duel_summary.text(duel.lp,duel.turn_number)
 	result_summary.scroll_to_line(0)
 	_sound("win" if winning_side == 0 else "lose")
@@ -864,6 +895,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if event.is_action_pressed("ui_cancel"):
 			if quick_guide_layer.visible: quick_guide_layer.hide()
 			else: settings_layer.hide()
+		get_viewport().set_input_as_handled()
+		return
+	if story_view.visible:
+		story_view.handle_key(event)
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_Z:
@@ -987,7 +1022,7 @@ func _update_context() -> void:
 	if duel.over:
 		context_label.text = "Duel selesai."
 	elif duel.turn == 1:
-		context_label.text = "Giliran Nyx.\nAmati kartu dan strategi lawan."
+		context_label.text = "Giliran %s.\nAmati kartu dan strategi lawan." % duel.who(1)
 	elif selected_hand >= 0 and selected_hand < duel.hands[0].size():
 		var card: Dictionary = duel.hands[0][selected_hand]
 		context_label.text = "%s\n%s" % [card["name"],"Pasang di zona emas di kanan papanmu." if card["kind"] == "trap" else "Pilih zona yang menyala."]
@@ -1255,7 +1290,7 @@ func _toggle_effect_mode() -> void:
 	_render()
 
 func _effects_obscured() -> bool:
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer,story_view]:
 		if is_instance_valid(layer) and layer.visible:
 			return true
 	return false
@@ -1272,8 +1307,8 @@ func _build_coin() -> void:
 	_panel(coin_layer,Rect2(330,70,620,580),GOLD)
 	var title := _label(coin_layer,"TAKDIR PERTAMA",Rect2(370,98,540,47),32,GOLD)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var rule := _label(coin_layer,"Gambar: kamu mulai  /  Angka: Nyx mulai",Rect2(370,156,540,32),19,LIGHT)
-	rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	coin_rule = _label(coin_layer,"Gambar: kamu mulai  /  Angka: Nyx mulai",Rect2(370,156,540,32),19,LIGHT)
+	coin_rule.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	coin_face = preload("res://scripts/coin.gd").new()
 	_place(coin_face,coin_layer,Rect2(545,214,190,190))
 	coin_result = _label(coin_layer,"",Rect2(360,430,560,56),22,GOLD)
@@ -1371,7 +1406,7 @@ func _render_backrows() -> void:
 				button.tooltip_text = "Klik untuk memasang jebakan yang dipilih."
 			elif side == 1 and not card.get("faceup",false):
 				button.text = "TERTUTUP"
-				button.tooltip_text = "Kartu tertutup Nyx. Identitas tidak terlihat."
+				button.tooltip_text = "Kartu tertutup lawan. Identitas tidak terlihat."
 			elif card["kind"] == "spell":
 				button.text = card["name"]+"\nAKTIF"
 				button.tooltip_text = card["text"]
@@ -1402,7 +1437,7 @@ func _sync_response() -> void:
 	response_undo_button.visible = duel.can_undo()
 	if duel.priority == 0:
 		_hide_hover()
-		var lines: Array[String] = ["Efek terakhir diselesaikan lebih dulu. LP Kamu %d / Nyx %d" % [duel.lp[0],duel.lp[1]],""]
+		var lines: Array[String] = ["Efek terakhir diselesaikan lebih dulu. LP Kamu %d / %s %d" % [duel.lp[0],duel.who(1),duel.lp[1]],""]
 		for i in range(duel.chain.size()):
 			var event: Dictionary = duel.chain[i]
 			lines.append("%d. %s: %s / %s" % [i+1,duel.who(event["side"]),event["card"]["name"],"SERANGAN" if event["action"] == "attack" else "EFEK"])
@@ -1437,7 +1472,7 @@ func _respond_player(slot: int) -> void:
 
 func _bot_response(token: int) -> void:
 	await get_tree().create_timer(_pace(0.65)).timeout
-	while token == session and (help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible):
+	while token == session and (help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible):
 		await get_tree().create_timer(0.2).timeout
 	if token != session: return
 	response_pending = false
@@ -1503,7 +1538,7 @@ func _show_ace_intro(card: Dictionary, side: int) -> void:
 	var cutin := AceCutin.new()
 	cutin.animation_speed = collection_store.animation_speed
 	cutin.card = card.duplicate(true)
-	cutin.owner_text = "KAMU" if side == 0 else "NYX"
+	cutin.owner_text = "KAMU" if side == 0 else duel.who(1).to_upper()
 	cutin.accent = Effects.PROFILES[card["id"]]["color"]
 	cutin.occlusion_check = _effects_obscured
 	cutin.z_index = 3
@@ -1527,7 +1562,7 @@ func _music_volume_changed(value: float) -> void:
 
 func _sync_music(immediate: bool = false) -> void:
 	if not is_instance_valid(music) or not is_instance_valid(urgency_music): return
-	var duel_active: bool = not menu_layer.visible and not coin_layer.visible and not duel.over
+	var duel_active: bool = not menu_layer.visible and not coin_layer.visible and not duel.over and not story_view.visible
 	var gain: float = collection_store.music_gain
 	var offset: float = linear_to_db(maxf(gain,0.0001))
 	var main_db: float = (-8.0 if duel_active else -18.0)+offset if gain > 0 else -80.0
@@ -1555,7 +1590,7 @@ func _finish_ace(token: int) -> void:
 	if token == session: _render()
 
 func _can_undo_input() -> bool:
-	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible
+	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible
 
 func _undo_action() -> void:
 	if _can_undo_input(): duel.undo()
@@ -1682,3 +1717,61 @@ func _guide_page(step: int) -> void:
 	quick_text.text = pages[guide_page]
 	guide_previous.disabled = guide_page == 0
 	guide_next.disabled = guide_page == 2
+
+func _build_story_ui() -> void:
+	_button(menu_layer,"MODE CERITA / BUKU I",Rect2(700,533,420,61),_open_story,true)
+	_label(menu_layer,"Lima bab tentang pulang dan menjaga kenangan.",Rect2(700,604,520,28),16,LIGHT)
+	story_view = StoryView.new()
+	_place(story_view,self,Rect2(0,0,1280,720))
+	story_view.play_requested.connect(_story_play)
+	story_view.progress_changed.connect(_save_story)
+	story_view.leave_requested.connect(_open_menu)
+	story_view.settings_requested.connect(_open_settings)
+	move_child(settings_layer,get_child_count()-1)
+	move_child(quick_guide_layer,get_child_count()-1)
+
+func _opponent_name() -> String:
+	return str(story_view.current_config()["opponent"]) if story_mode else "Nyx"
+
+func _open_story() -> void:
+	session += 1
+	_reset_visuals()
+	response_pending = false
+	if coin_tween and coin_tween.is_valid(): coin_tween.kill()
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer]: layer.hide()
+	story_mode = false
+	story_view.open_book(collection_store.story_progress)
+	_sync_music()
+
+func _save_story(progress: Dictionary) -> void:
+	collection_store.story_progress = progress.duplicate(true)
+	if collection_store.save_data() != OK:
+		story_view.save_notice.text = "Progres belum tersimpan di perangkat. Kisah tetap bisa dilanjutkan selama game terbuka."
+	else: story_view.save_notice.text = "Dialog dan bab tersimpan otomatis. Duel yang terputus dimulai ulang."
+
+func _story_play(_config: Dictionary) -> void:
+	story_mode = true
+	story_view.hide()
+	_start_from_menu()
+
+func _start_free_duel() -> void:
+	story_mode = false
+	story_view.hide()
+	_start_from_menu()
+
+func _result_primary() -> void:
+	if not story_mode:
+		_start_free_duel()
+		return
+	if not duel.over: return
+	session += 1
+	_reset_visuals()
+	result_layer.hide()
+	story_view.finish_duel(duel.winner == 0)
+	_sync_music()
+
+func _result_secondary() -> void:
+	if story_mode and duel.over:
+		story_view.finish_duel(duel.winner == 0)
+		_open_story()
+	else: _open_menu()

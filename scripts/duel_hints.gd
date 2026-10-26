@@ -55,4 +55,4 @@ static func forecast(d, source: Dictionary, target: Dictionary) -> String:
 	var hidden := false
 	for c in d.backrows[1]:
 		if not c.is_empty() and not c.get("faceup",false): hidden = true
-	return result + ("\nTrap tertutup bisa mengubah hasil." if hidden else "")
+	return (result + ("\nTrap tertutup bisa mengubah hasil." if hidden else "")).replace("Nyx",d.who(1))

@@ -50,3 +50,8 @@ Source komposisi dan renderer: `tools/compose_anime_score.py`. Metadata audio te
 ## v0.14 — Tombak Surya dan Selubung Gerhana
 
 Dua ilustrasi orisinal dibuat dengan built-in image_gen: assets/art/tombak_surya.png dan assets/art/selubung_gerhana.png. Prompt final disimpan pada assets/art/deck_identity_prompts.json. Ilustrasi dipakai sebagai tekstur penuh yang berbeda untuk masing-masing kartu; tidak mengganti gambar kartu lain. Visual cast dan simbolnya digambar dengan kode Godot.
+
+
+## v0.16 — Buku I
+
+Latar dapur, jendela, lampu, dan mangkuk biru untuk Jendela yang Menghadap Pagi dibuat dengan built-in image_gen. Aset: assets/story/window_morning.png. Prompt final: assets/story/image_prompt.json. Dipakai sebagai latar mode cerita; tidak menggantikan ilustrasi kartu atau menambah kartu/deck.

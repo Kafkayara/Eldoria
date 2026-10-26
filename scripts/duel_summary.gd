@@ -1,8 +1,8 @@
 extends RefCounted
 const Catalog = preload("res://scripts/catalog.gd")
 var state: Dictionary = {}
-func reset() -> void:
-	state = {"damage":[0,0],"healed":[0,0],"traps":[0,0],"last_lp":[4000,4000],"best_damage":0,"best_hit":"Belum ada serangan yang mengurangi LP.","moments":[]}
+func reset(opponent_name: String = "Nyx") -> void:
+	state = {"opponent":opponent_name,"damage":[0,0],"healed":[0,0],"traps":[0,0],"last_lp":[4000,4000],"best_damage":0,"best_hit":"Belum ada serangan yang mengurangi LP.","moments":[]}
 func snapshot() -> Dictionary: return state.duplicate(true)
 func restore(saved: Dictionary) -> void: state = saved.duplicate(true)
 func visual(kind: String, side: int, amount: int, lp: Array) -> void:
@@ -17,7 +17,7 @@ func combat(report: Dictionary, turn_number: int, lp: Array) -> void:
 	var delta: int = int(report["difference"])
 	var damage: int = int(report["attack"]) if report["direct"] else (maxi(0,delta) if not report["defending"] or report.get("piercing",false) else 0)
 	damage = mini(damage,int(lp[1-side]))
-	var who: String = "Kamu" if side == 0 else "Nyx"
+	var who: String = "Kamu" if side == 0 else str(state.get("opponent","Nyx"))
 	if damage > int(state["best_damage"]):
 		state["best_damage"] = damage
 		state["best_hit"] = "%s / %s: %d LP" % [who,report["card"]["name"],damage]
@@ -27,7 +27,7 @@ func combat(report: Dictionary, turn_number: int, lp: Array) -> void:
 func cue(event: Dictionary, turn_number: int) -> void:
 	var c: Dictionary = Catalog.card(event["id"])
 	var side: int = event["side"]
-	var who: String = "Kamu" if side == 0 else "Nyx"
+	var who: String = "Kamu" if side == 0 else str(state.get("opponent","Nyx"))
 	if c["kind"] == "trap":
 		if not event.get("cancelled",false): state["traps"][side] += 1
 		moment(turn_number,"%s: %s %s." % [who,c["name"],"dibatalkan" if event.get("cancelled",false) else "aktif"])
@@ -39,4 +39,4 @@ func text(lp: Array, turns: int) -> String:
 	if moments.is_empty(): lines.append("Belum ada momen serangan atau efek.")
 	else:
 		for entry in moments.slice(maxi(0,moments.size()-5)): lines.append(entry)
-	return "\n".join(lines)
+	return "\n".join(lines).replace("Nyx",str(state.get("opponent","Nyx")))
