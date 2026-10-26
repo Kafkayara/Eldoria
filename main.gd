@@ -294,7 +294,6 @@ func _build_ui() -> void:
 	end_button = _button(self,"AKHIRI GILIRAN",Rect2(1028,438,216,52),_end_turn,true)
 	undo_button = _button(self,"UNDO / Ctrl+Z",Rect2(1028,509,216,43),_undo_action)
 	undo_button.tooltip_text = "Batalkan langkah pemain. Tersedia sampai Akhiri Giliran ditekan."
-	_button(self,"BUKA LOG DUEL",Rect2(1028,570,216,41),_toggle_log)
 	audio_button = _button(self,"AUDIO: ON",Rect2(1028,633,216,40),_toggle_audio)
 	audio_button.add_theme_font_size_override("font_size",14)
 	_label(self,"BGM",Rect2(1028,678,39,22),12,MUTED)
