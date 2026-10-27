@@ -71,7 +71,7 @@ func run() -> void:
 	board.collection_store.customs["custom_legacy"] = {"name":"Old deck","cards":Catalog.GERHANA}
 	board.collection_store.active = "custom_legacy"
 	board._refresh_deck_choices()
-	check(board.deck_select.item_count == 2,"Only two preset decks are selectable")
+	check(board.deck_select.item_count == 3,"Three preset decks are selectable")
 	board._begin_duel(0)
 	var total_pool: Array = board.duel.hands[0]+board.duel.decks[0]
 	check(total_pool.filter(func(c): return c["id"] == "dawn").size() == 3,"Legacy custom selection cannot enter duel")

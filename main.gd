@@ -1,5 +1,6 @@
 extends Control
 const Hints = preload("res://scripts/duel_hints.gd")
+const StoryBooks = preload("res://scripts/story_books.gd")
 const StoryView = preload("res://scripts/story_view.gd")
 const Summary = preload("res://scripts/duel_summary.gd")
 const Duel = preload("res://scripts/duel.gd")
@@ -20,6 +21,10 @@ const CYAN = Color("#8bb6b9")
 var duel = Duel.new()
 var story_view
 var story_mode: bool = false
+var grave_layer: Control
+var grave_body: RichTextLabel
+var grave_title: Label
+var grave_buttons: Array = []
 var opponent_label: Label
 var player_label: Label
 var arena_mode_label: Label
@@ -279,7 +284,13 @@ func _build_ui() -> void:
 		back.disabled = true
 		_place(back,self,Rect2(x,y,82,82))
 		deck_labels.append(_label(self,"",Rect2(x,y+88,93,22),13,GOLD))
-		grave_labels.append(_label(self,"",Rect2(x,y+110,100,22),12,MUTED))
+		var grave_label := _label(self,"",Rect2(x,y+110,100,22),12,MUTED)
+		grave_label.hide()
+		grave_labels.append(grave_label)
+		var grave_button := _button(self,"GRAVE / LIHAT",Rect2(x,y+108,95,24),_open_grave.bind(side))
+		grave_button.add_theme_font_size_override("font_size",10)
+		grave_button.tooltip_text = "Klik untuk melihat kartu di Grave."
+		grave_buttons.append(grave_button)
 	enemy_hand = HBoxContainer.new()
 	enemy_hand.add_theme_constant_override("separation",4)
 	_place(enemy_hand,self,Rect2(791,145,200,16))
@@ -349,6 +360,7 @@ func _build_ui() -> void:
 	_build_strategy_ui()
 	_build_comfort_ui()
 	_build_story_ui()
+	_build_grave_ui()
 
 func _overlay() -> Control:
 	var node := Control.new()
@@ -381,7 +393,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),_open_quick_guide)
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.16 / JENDELA YANG MENGHADAP PAGI",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.17 / RIMBA DAN KEBUN YANG PULANG",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -393,11 +405,12 @@ func _build_help() -> void:
 	body.add_theme_color_override("default_color",LIGHT)
 	body.bbcode_enabled = true
 	body.text = "[color=#dfbf81]01  MEMBACA KARTU[/color]\nArahkan kursor untuk pratinjau besar. Klik kanan kartu, tekan E, atau pilih Perbesar Kartu untuk membaca efek lengkap. Klik kiri dipakai untuk bermain.\n\n[color=#dfbf81]02  MAIN PHASE[/color]\nPilih monster di tangan, pilih mode menyerang / bertahan, lalu klik zona tujuan yang menyala. Satu normal summon per giliran. Naga Bara perlu satu tribute.\n\n[color=#dfbf81]03  SPELL[/color]\nBadai Aether dan Suaka Surya aktif langsung. Berkah Fajar menargetkan monstermu; Retakan Langit menargetkan monster lawan dengan ATK 1800 atau kurang.\n\n[color=#dfbf81]04  BATTLE PHASE[/color]\nKlik Masuk Battle, pilih monstermu yang bisa menyerang, lalu klik monster lawan yang menyala. Jika papan lawan kosong, pilih Serang Langsung. Satu serangan per monster. Pemain pertama tidak menyerang pada giliran pertama.\n\n[color=#dfbf81]05  DAMAGE & STRATEGI[/color]\nLawan posisi menyerang: selisih ATK mengurangi LP. Lawan bertahan memakai DEF; menang tidak memberi kerusakan LP kecuali penyerang memiliki MENEMBUS. Penjelasan hitungan muncul saat serangan. Ubah posisi mulai giliran setelah summon. Skill memulihkan 800 LP sekali saat LP 2500 atau kurang.\n\n[color=#dfbf81]06  MENANG[/color]\nTurunkan LP lawan ke 0 atau buat lawan kehabisan deck saat draw. Buka Log Duel untuk membaca riwayat. Esc menutup detail / panduan atau membuka menu."
-	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan deck Fajar (serangan) dan Gerhana (kontrol). Untuk saat ini duel hanya memakai dua deck bawaan. Koleksi tetap dapat dibaca di Galeri Kartu; editor deck dinonaktifkan. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
+	body.text += "\n\n[color=#dfbf81]07  ZONA SPELL / TRAP[/color]\nMasing-masing pihak punya tiga zona. Pilih trap di tangan, lalu klik zona spell/trap kosong milikmu. Trap dipasang tertutup dan baru dapat merespons mulai giliran berikutnya. Identitas trap lawan tetap tersembunyi. Spell dari tangan memakai satu zona sementara dan masuk grave setelah selesai; jika ketiga zona penuh, spell tidak dapat diaktifkan.\n\n[color=#dfbf81]08  RANTAI RESPONS[/color]\nJendela respons muncul jika ada trap yang sah. Pilih trap atau Lewati, lalu lawan mendapat kesempatan membalas. Dua lewat berturut-turut menyelesaikan rantai dari efek terakhir ke pertama. Cermin membatalkan serangan; Belenggu menurunkan ATK sebelum damage; Segel membatalkan spell/trap terakhir, termasuk Segel lawan. Efek summon dan skill belum bisa dibalas oleh tiga trap ini.\n\n[color=#dfbf81]09  DECK & AI[/color]\nMenu menyediakan Fajar (serangan), Gerhana (kontrol), dan Rimba (pemulihan ALAM). Duel memakai tiga deck bawaan. Koleksi tetap dapat dibaca di Galeri Kartu; editor deck dinonaktifkan. Santai memakai pilihan sederhana dan kadang melewatkan respons; Normal memakai heuristik dasar; Sulit menilai tribute, pertahanan awal, dan memilih pembatalan lebih hemat. Nyx tidak membaca identitas jebakan tertutupmu."
 	body.text += "\n\n[color=#dfbf81]10  UNDO / Ctrl+Z[/color]\nPada giliranmu, tombol Undo mengembalikan satu langkah beserta seluruh akibatnya: kartu, LP, hasil draw, tribute, skill, dan respons trap. Undo juga dapat dipakai saat menunggu respons Nyx atau sebelum hasil duel dikonfirmasi. Riwayat ditutup setelah Akhiri Giliran; kamu tidak dapat mundur melewati giliran lawan. Tidak ada pengacakan ulang kartu saat undo.\n\n[color=#dfbf81]11  MUSIK[/color]\nJejak Fajar adalah komposisi orisinal 2 menit 40 detik, memakai instrumen berbasis sampel: seruling, senar, koto, piano, dan perkusi lembut. Bagian akhir kembali ke awal tanpa fade-out. Slider BGM mengatur musik tanpa mengubah efek suara."
 	body.text += "\n\n[color=#dfbf81]12  FAJAR VS GERHANA[/color]\nFajar memakai 13 monster, 6 spell, dan 1 trap. Naga Bara kini 2500 ATK dan tetap memberi 300 damage saat summon. Penjaga Fajar 1700 ATK. Tiga Peri Astral membantu mengambil kartu; Pasang Segel Hening terlebih dahulu agar mulai giliran berikutnya bisa membalas Cermin atau Belenggu. Naga Noctis tetap 2300 ATK dan bertahan dari kehancuran battle sekali. Bara unggul dalam tekanan serangan; Noctis unggul dalam ketahanan. Perhatikan trap dan gunakan Berkah Fajar sebelum Battle.\n"
 	body.text += "\n\n[color=#dfbf81]13  KOMBINASI DECK[/color]\nFAJAR: Tombak Surya memberi +500 ATK, -300 DEF, dan MENEMBUS selama monster di papan. Selisih ATK atas DEF mengurangi LP meskipun target memakai perisai. Contoh: Penjaga Fajar 1700 + Tombak 500 melawan Burung Hantu DEF 2000 memberikan 200 damage. Berkah Fajar dapat ditambahkan; siapkan Segel Hening untuk melawan trap. DEF yang turun membuat perubahan ke posisi bertahan lebih berisiko.\n\nGERHANA: Selubung Gerhana memberi +400 ATK/DEF dan satu perisai. Pakai pada Noctis setelah perisainya habis untuk bertahan lalu menyerang balik. Perisai tidak menumpuk dan tidak melindungi LP atau penghancuran oleh spell. Cermin membatalkan serangan menembus; Belenggu mengurangi ATK sebelum selisih dihitung; Segel dapat membatalkan kedua spell baru.\n\nMasing-masing deck tetap 20 kartu dan memuat satu kartu baru. Lihat ilustrasi, cerita, serta efek lengkap di Galeri Kartu."
 	body.text += "\n\n[color=#dfbf81]14  PENGATURAN & HASIL[/color]\nBuka Pengaturan di menu atau kanan papan. Volume musik dan efek suara terpisah. Kecepatan animasi 1x / 1,5x / 2x tidak mengubah tempo musik. Efek ringkas mengurangi gerakan; pilihan tersimpan otomatis. Panduan singkat menjelaskan inti duel dalam tiga halaman. Layar hasil merangkum LP, kerusakan, pemulihan, trap, serangan terbesar, dan momen terakhir. Aksi yang di-Undo ikut dihapus dari ringkasan.\n"
+	body.text += "\n\n[color=#dfbf81]15  RIMBA / GRAVE[/color]\nKlik GRAVE / LIHAT untuk membaca kartu yang sudah terpakai. Benih Pulang mengembalikan monster ALAM level 4 ke bawah ke tangan, bukan langsung ke papan. Target otomatis adalah ATK dasar tertinggi, lalu kartu yang paling akhir masuk Grave jika seri. Penjaga Tunas memulihkan sekali per duel untuk semua salinannya. Lingkar Musim mengembalikan target ke dasar deck, draw satu, dan heal 400. Naga Akar Purba mendapat +150 ATK per ALAM di Grave saat summon, maksimal tiga; bonus tidak berubah setelahnya. Memulihkan monster sebelum summon naga mengurangi isi Grave. Buku II memperkenalkan Sera dan Rimba setelah lima bab Buku I selesai.\n"
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
@@ -483,7 +496,7 @@ func _new_duel(first_side: int = 0) -> void:
 	var player_key: String = str(cfg.get("player_deck",collection_store.active))
 	var enemy_key: String = str(cfg.get("enemy_deck",collection_store.enemy))
 	player_label.text = "AREN / "+player_key.to_upper() if story_mode else "KAMU"
-	arena_mode_label.text = "BUKU I / BAB %d / %s" % [story_view.progress["chapter"]+1,player_key.to_upper()] if story_mode else "ARENA ASTRAL / DUEL SOLO"
+	arena_mode_label.text = "BUKU %s / BAB %d / %s" % [story_view.Data.BOOK_NUMBER,story_view.progress["chapter"]+1,player_key.to_upper()] if story_mode else "ARENA ASTRAL / DUEL SOLO"
 	arena_mode_label.tooltip_text = cfg.get("focus","")
 	duel.start(-1,first_side,Catalog.PRESETS.get(player_key,Catalog.PRESETS["fajar"])["cards"],Catalog.PRESETS.get(enemy_key,Catalog.PRESETS["gerhana"])["cards"])
 	starting = false
@@ -539,6 +552,7 @@ func _confirm_coin() -> void:
 	_begin_duel(coin_side)
 
 func _begin_duel(first_side: int) -> void:
+	grave_layer.hide()
 	settings_layer.hide()
 	quick_guide_layer.hide()
 	if coin_tween and coin_tween.is_valid():
@@ -552,6 +566,7 @@ func _begin_duel(first_side: int) -> void:
 		_run_ai(session)
 
 func _open_menu() -> void:
+	grave_layer.hide()
 	story_mode = false
 	story_view.hide()
 	settings_layer.hide()
@@ -580,6 +595,7 @@ func _render() -> void:
 		_update_lp(side)
 		deck_labels[side].text = "DECK / %02d" % duel.decks[side].size()
 		grave_labels[side].text = "GRAVE / %02d" % duel.graves[side].size()
+		grave_buttons[side].text = "GRAVE / %02d" % duel.graves[side].size()
 		for index in range(3):
 			var view = zone_views[side][index]
 			view.data = duel.fields[side][index]
@@ -660,6 +676,12 @@ func _inspect(card: Dictionary) -> void:
 	detail_desc.text = card["text"]
 	if card.get("piercing",false): detail_desc.text += "\n\nSTATUS PAPAN: MENEMBUS DEF. Selisih ATK terhadap DEF mengurangi LP lawan."
 	if card.get("shield",false): detail_desc.text += "\n\nSTATUS PAPAN: PERISAI aktif (1 kehancuran akibat serangan)."
+	if card["effect"] in ["recover","compost","grove_recover"] and not menu_layer.visible and not gallery.visible:
+		var index: int = duel.recover_index(0)
+		detail_desc.text += "\n\nGrave kamu: " + ("target otomatis: "+duel.graves[0][index]["name"] if index >= 0 else "belum ada target yang sesuai.")
+		if card["effect"] == "grove_recover" and duel.grove_used[0]: detail_desc.text += " Pemulihan Penjaga Tunas sudah dipakai pada duel ini."
+	if card["effect"] == "root_power" and not menu_layer.visible and not gallery.visible:
+		detail_desc.text += ("\n\nBonus saat summon: +%d ATK (tetap selama di papan)." % card.get("root_bonus",0)) if card.has("uid") else ("\n\nBonus dari isi Grave sekarang: +%d ATK. Tribute ALAM ikut dihitung ketika summon." % duel.root_bonus(0,card))
 	detail_desc.scroll_to_line(0)
 	detail_lore.text = card.get("lore", "")
 	detail_lore.scroll_to_line(0)
@@ -682,7 +704,7 @@ func _zone_hover(side: int, zone: int) -> void:
 			_queue_hover(card)
 
 func _can_input() -> bool:
-	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible
+	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible and not grave_layer.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -791,7 +813,7 @@ func _run_ai(token: int) -> void:
 	await get_tree().create_timer(_pace(0.8)).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible:
+		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible or grave_layer.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -891,6 +913,10 @@ func _attacker_ready() -> bool:
 	return not monster.is_empty() and not monster["defending"] and not monster["attacked"]
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if grave_layer.visible:
+		if event.is_action_pressed("ui_cancel"): grave_layer.hide()
+		get_viewport().set_input_as_handled()
+		return
 	if settings_layer.visible or quick_guide_layer.visible:
 		if event.is_action_pressed("ui_cancel"):
 			if quick_guide_layer.visible: quick_guide_layer.hide()
@@ -1290,7 +1316,7 @@ func _toggle_effect_mode() -> void:
 	_render()
 
 func _effects_obscured() -> bool:
-	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer,story_view]:
+	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer,story_view,grave_layer]:
 		if is_instance_valid(layer) and layer.visible:
 			return true
 	return false
@@ -1472,7 +1498,7 @@ func _respond_player(slot: int) -> void:
 
 func _bot_response(token: int) -> void:
 	await get_tree().create_timer(_pace(0.65)).timeout
-	while token == session and (help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible):
+	while token == session and (help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible or grave_layer.visible):
 		await get_tree().create_timer(0.2).timeout
 	if token != session: return
 	response_pending = false
@@ -1590,7 +1616,7 @@ func _finish_ace(token: int) -> void:
 	if token == session: _render()
 
 func _can_undo_input() -> bool:
-	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible
+	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible and not grave_layer.visible
 
 func _undo_action() -> void:
 	if _can_undo_input(): duel.undo()
@@ -1719,32 +1745,43 @@ func _guide_page(step: int) -> void:
 	guide_next.disabled = guide_page == 2
 
 func _build_story_ui() -> void:
-	_button(menu_layer,"MODE CERITA / BUKU I",Rect2(700,533,420,61),_open_story,true)
-	_label(menu_layer,"Lima bab tentang pulang dan menjaga kenangan.",Rect2(700,604,520,28),16,LIGHT)
+	_button(menu_layer,"MODE CERITA",Rect2(700,533,420,61),_open_story,true)
+	_label(menu_layer,"Dua buku tentang kenangan dan tumbuh kembali.",Rect2(700,604,520,28),16,LIGHT)
 	story_view = StoryView.new()
 	_place(story_view,self,Rect2(0,0,1280,720))
 	story_view.play_requested.connect(_story_play)
 	story_view.progress_changed.connect(_save_story)
 	story_view.leave_requested.connect(_open_menu)
 	story_view.settings_requested.connect(_open_settings)
+	story_view.book_requested.connect(_open_story)
 	move_child(settings_layer,get_child_count()-1)
 	move_child(quick_guide_layer,get_child_count()-1)
 
 func _opponent_name() -> String:
 	return str(story_view.current_config()["opponent"]) if story_mode else "Nyx"
 
-func _open_story() -> void:
+func _open_story(book_id: String = "") -> void:
+	grave_layer.hide()
 	session += 1
 	_reset_visuals()
 	response_pending = false
 	if coin_tween and coin_tween.is_valid(): coin_tween.kill()
 	for layer in [menu_layer,help_layer,result_layer,zoom_layer,gallery,coin_layer,response_layer,settings_layer,quick_guide_layer]: layer.hide()
 	story_mode = false
-	story_view.open_book(collection_store.story_progress)
+	if book_id.is_empty(): book_id = collection_store.story_active_book
+	var unlocked: bool = int(collection_store.story_progress.get("cleared",0)) >= StoryBooks.First.CHAPTERS.size()
+	if book_id != "akar_esok" or not unlocked: book_id = "jendela_pagi"
+	collection_store.story_active_book = book_id
+	collection_store.story_books = StoryBooks.clean(collection_store.story_books,collection_store.story_progress)
+	story_view.configure_book(StoryBooks.data(book_id),unlocked)
+	story_view.open_book(collection_store.story_books[book_id])
+	_save_preferences()
 	_sync_music()
 
 func _save_story(progress: Dictionary) -> void:
-	collection_store.story_progress = progress.duplicate(true)
+	if progress["book"] == "jendela_pagi": collection_store.story_progress = progress.duplicate(true)
+	collection_store.story_books[progress["book"]] = progress.duplicate(true)
+	collection_store.story_active_book = progress["book"]
 	if collection_store.save_data() != OK:
 		story_view.save_notice.text = "Progres belum tersimpan di perangkat. Kisah tetap bisa dilanjutkan selama game terbuka."
 	else: story_view.save_notice.text = "Dialog dan bab tersimpan otomatis. Duel yang terputus dimulai ulang."
@@ -1775,3 +1812,28 @@ func _result_secondary() -> void:
 		story_view.finish_duel(duel.winner == 0)
 		_open_story()
 	else: _open_menu()
+
+func _build_grave_ui() -> void:
+	grave_layer = _overlay()
+	_panel(grave_layer,Rect2(275,75,730,570),GOLD)
+	grave_title = _label(grave_layer,"GRAVE",Rect2(311,101,658,42),29,GOLD)
+	grave_body = _reading_text(grave_layer,Rect2(311,165,658,365),18,LIGHT)
+	_button(grave_layer,"KEMBALI KE DUEL",Rect2(311,567,658,43),func(): grave_layer.hide(),true)
+	grave_layer.hide()
+
+func _open_grave(side: int) -> void:
+	if menu_layer.visible or coin_layer.visible or story_view.visible: return
+	_hide_hover()
+	grave_title.text = "GRAVE / "+duel.who(side).to_upper()
+	var lines: Array[String] = ["%d kartu / %d monster ALAM" % [duel.graves[side].size(),duel.nature_count(side)],""]
+	var index: int = duel.recover_index(side)
+	if index >= 0: lines.append("Target pemulihan otomatis: "+duel.graves[side][index]["name"]+"\n")
+	for card in duel.graves[side]:
+		var base: Dictionary = Catalog.card(card["id"])
+		lines.append(base["name"]+" / "+Catalog.type_text(base))
+		if base["kind"] == "monster": lines.append("ATK dasar %d / DEF dasar %d" % [base["atk"],base["def"]])
+		lines.append("")
+	if duel.graves[side].is_empty(): lines.append("Belum ada kartu di Grave.")
+	grave_body.text = "\n".join(lines)
+	grave_body.scroll_to_line(0)
+	grave_layer.show()

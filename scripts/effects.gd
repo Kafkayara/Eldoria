@@ -3,6 +3,12 @@ const Sigils = preload("res://scripts/sigils.gd")
 const Painter = preload("res://scripts/effects_painter.gd")
 const MAX_EVENTS: int = 8
 const PROFILES = {
+	"grove":{"shape":"grove_growth","color":Color("#83b866"),"light":Color("#ecf2bf"),"impact":0.4,"duration":1.05},
+	"stag":{"shape":"stag_growth","color":Color("#a4c68e"),"light":Color("#ecf2bf"),"impact":0.45,"duration":1.05},
+	"verdant":{"shape":"verdant_growth","color":Color("#68ac80"),"light":Color("#ecf2bf"),"impact":0.52,"duration":1.05},
+	"renewal":{"shape":"renewal_growth","color":Color("#c8c47b"),"light":Color("#ecf2bf"),"impact":0.42,"duration":1.05},
+	"compost":{"shape":"compost_growth","color":Color("#b2a16a"),"light":Color("#ecf2bf"),"impact":0.5,"duration":1.05},
+
 	"solar_lance":{"shape":"sunlance","color":Color("#e9b348"),"light":Color("#fff5cd"),"impact":0.40,"duration":1.05},
 	"lunar_veil":{"shape":"moonveil","color":Color("#b29bdc"),"light":Color("#edf0ff"),"impact":0.55,"duration":1.15},
 	"dawn": {"shape":"solar_cut","color":Color("#e9bd67"),"light":Color("#fff2c6"),"impact":0.38,"duration":0.85},
@@ -186,6 +192,39 @@ func _draw_event(event: Dictionary) -> void:
 			painter.draw_arc(b,18+after*45,0,TAU,40,_color(light,1-after),2,true)
 		return
 	match event["card_id"]:
+		"grove":
+			for i in range(3):
+				var origin: Vector2 = b+Vector2((i-1)*19,29)
+				var tip: Vector2 = origin+Vector2((i-1)*8,-60*travel)
+				painter.draw_line(origin,tip,color,3,true)
+				_leaf(tip,9,PI*.25+i,light)
+		"stag":
+			for side in [-1,1]:
+				var root: Vector2 = b+Vector2(side*8,20)
+				var tip: Vector2 = b+Vector2(side*38,-33)*travel
+				painter.draw_line(root,tip,light,2,true)
+				for i in range(3):
+					var joint: Vector2 = root.lerp(tip,.3+i*.2)
+					painter.draw_line(joint,joint+Vector2(side*14,-16)*travel,color,2,true)
+		"verdant":
+			for i in range(4):
+				var path := PackedVector2Array()
+				for step in range(20):
+					var u: float = step/19.0*travel
+					path.append(a.lerp(b,u)+Vector2(sin(u*PI*2+i)*9+(i-1.5)*9,0))
+				_line(path,color,3)
+			if hit:
+				for i in range(6): _leaf(b+Vector2.from_angle(i*TAU/6)*(16+after*30),7,after+i,light)
+		"renewal":
+			var point: Vector2 = a.lerp(b,travel)-Vector2(0,sin(travel*PI)*32)
+			painter.draw_circle(point,6,color)
+			_leaf(point+Vector2(-7,-9),9,-.7,light)
+			_leaf(point+Vector2(7,-9),9,.7,light)
+		"compost":
+			for i in range(8):
+				var angle: float = i*TAU/8+travel*1.4
+				_leaf(b+Vector2.from_angle(angle)*(12+24*travel),7,angle+PI/2,color)
+			painter.draw_arc(b,25*travel,0,TAU,40,light,1.5,true)
 		"solar_lance":
 			var center: Vector2 = b+Vector2(-30,30)*(1-travel)
 			painter.draw_line(center+Vector2(-36,36),center+Vector2(30,-30),light,4,true)

@@ -28,7 +28,7 @@ func run() -> void:
 	board = load("res://main.tscn").instantiate()
 	root.add_child(board)
 	await process_frame
-	check(board.deck_select.item_count == 2,"Presets remain the only available decks")
+	check(board.deck_select.item_count == 3,"Presets remain the only available decks")
 	var text: String = board.deck_select.get_popup().get_item_tooltip(0)
 	check(text.contains("2500") and text.contains("Segel"),"Menu explains new Fajar support")
 	board._begin_duel(0)

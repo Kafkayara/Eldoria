@@ -29,7 +29,7 @@ func fresh():
 func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
-	check(Catalog.CARDS.size() == 20,"20 unique types")
+	check(Catalog.CARDS.size() == 25,"25 unique types")
 	for preset in Catalog.PRESETS.values():
 		check(Catalog.validate(preset["cards"]).is_empty(),"Valid preset")
 	check(not Catalog.validate(["not-a-card"]).is_empty(),"Reject bad deck size")

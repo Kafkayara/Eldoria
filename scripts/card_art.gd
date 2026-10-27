@@ -3,6 +3,12 @@ extends RefCounted
 const NIGHT = preload("res://assets/art/gerhana_atlas.png")
 const ATLAS = preload("res://assets/art/eldoria_atlas.png")
 const INDIVIDUAL = {
+	"res://assets/art/grove.png": preload("res://assets/art/grove.png"),
+	"res://assets/art/stag.png": preload("res://assets/art/stag.png"),
+	"res://assets/art/verdant.png": preload("res://assets/art/verdant.png"),
+	"res://assets/art/renewal.png": preload("res://assets/art/renewal.png"),
+	"res://assets/art/compost.png": preload("res://assets/art/compost.png"),
+
 	"res://assets/art/tombak_surya.png": preload("res://assets/art/tombak_surya.png"),
 	"res://assets/art/selubung_gerhana.png": preload("res://assets/art/selubung_gerhana.png"),
 	"res://assets/art/aegis_surya.png": preload("res://assets/art/aegis_surya.png"),

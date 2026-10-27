@@ -27,7 +27,7 @@ func run() -> void:
 	await process_frame
 	board._open_gallery()
 	board.gallery.select_card("solar_lance")
-	check(board.gallery.tiles.size() == 20 and board.gallery.description.text.contains("MENEMBUS"),"New spell visible in complete gallery")
+	check(board.gallery.tiles.size() == 25 and board.gallery.description.text.contains("MENEMBUS"),"New spell visible in complete gallery")
 	board.gallery.inspect_selected()
 	check(board.zoom_title.text == "Tombak Surya" and board.zoom_description.text.contains("-300"),"Zoom explains offense drawback")
 	await capture("eldoria-v14-tombak-surya")

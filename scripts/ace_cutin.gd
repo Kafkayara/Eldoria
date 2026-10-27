@@ -34,4 +34,4 @@ func _draw() -> void:
 	draw_string(font,Vector2(359,45),owner_text+" / ACE SUMMON",HORIZONTAL_ALIGNMENT_LEFT,-1,15,accent)
 	draw_string(font,Vector2(357,112),card["name"],HORIZONTAL_ALIGNMENT_LEFT,-1,37,Color("#fff4d9"))
 	draw_string(font,Vector2(360,155),"ATK %d     DEF %d" % [card["atk"],card["def"]],HORIZONTAL_ALIGNMENT_LEFT,-1,21,accent)
-	draw_string(font,Vector2(360,199),"CAHAYA TERAKHIR" if card["id"] == "ember" else "GERHANA BANGKIT",HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#aabec8"))
+	draw_string(font,Vector2(360,199),"AKAR MENJAGA ESOK" if card["id"] == "verdant" else ("CAHAYA TERAKHIR" if card["id"] == "ember" else "GERHANA BANGKIT"),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#aabec8"))

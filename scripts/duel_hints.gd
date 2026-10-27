@@ -12,6 +12,7 @@ static func hand_reason(d, card: Dictionary) -> String:
 		if int(card["level"]) <= 4 and d.empty_zone(0) < 0: return "Ketiga zona monster terisi."
 	else:
 		if d.empty_backrow(0) < 0: return "Zona spell/trap penuh. Sisakan 1 zona kosong."
+		if card["effect"] in ["recover","compost"] and d.recover_index(0) < 0: return "Butuh monster ALAM level 4 atau kurang di Grave."
 		if card["effect"] == "buff" and not d.has_monsters(0): return "Butuh monster milikmu sebagai target."
 		if card["effect"] == "destroy":
 			var found := false

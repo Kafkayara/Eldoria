@@ -55,3 +55,8 @@ Dua ilustrasi orisinal dibuat dengan built-in image_gen: assets/art/tombak_surya
 ## v0.16 — Buku I
 
 Latar dapur, jendela, lampu, dan mangkuk biru untuk Jendela yang Menghadap Pagi dibuat dengan built-in image_gen. Aset: assets/story/window_morning.png. Prompt final: assets/story/image_prompt.json. Dipakai sebagai latar mode cerita; tidak menggantikan ilustrasi kartu atau menambah kartu/deck.
+
+
+## v0.17 — Rimba
+
+Lima ilustrasi orisinal dibuat dengan built-in image_gen: assets/art/grove.png, stag.png, verdant.png, renewal.png, dan compost.png. Prompt lengkap tersedia pada assets/art/rimba_image_prompts.json. Masing-masing kartu memakai sumber gambar berbeda. Simbol/VFX dibuat dengan kode; latar Buku II menggunakan ilustrasi Lingkar Musim.

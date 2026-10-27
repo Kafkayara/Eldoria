@@ -30,6 +30,7 @@ var difficulty: String = "normal"
 var enemy_name: String = "Nyx"
 var next_uid: int = 0
 var sentinel_used: Array = [false,false]
+var grove_used: Array = [false,false]
 var undo_stack: Array = []
 const UNDO_LIMIT = 64
 var rng := RandomNumberGenerator.new()
@@ -47,6 +48,7 @@ func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalo
 	passes = 0
 	next_uid = 0
 	sentinel_used = [false,false]
+	grove_used = [false,false]
 	hands = [[], []]
 	fields = [[{}, {}, {}], [{}, {}, {}]]
 	graves = [[], []]
@@ -136,6 +138,9 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	monster["switched"] = false
 	monster["summoned_turn"] = turn_number
 	monster["shield"] = monster["effect"] == "shield"
+	if monster["effect"] == "root_power":
+		monster["root_bonus"] = root_bonus(turn,monster)
+		monster["atk"] += monster["root_bonus"]
 	fields[turn][target] = monster
 	summoned = true
 	message.emit("%s summon %s dalam posisi %s." % [who(turn), monster["name"], "bertahan" if defending else "menyerang"])
@@ -143,8 +148,8 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	visual.emit("summon", turn, target, 0)
 	if monster["effect"] == "twilight_setup":
 		_sentinel_setup(turn)
-	if monster["effect"] in ["burn","heal","draw"]:
-		_queue({"action":"summon","side":turn,"card":monster.duplicate(true)})
+	if monster["effect"] in ["burn","heal","draw","grove_recover"]:
+		_queue({"action":"summon","side":turn,"zone":target,"card":monster.duplicate(true)})
 	_check_end()
 	changed.emit()
 	return true
@@ -152,6 +157,8 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 func _spell(index: int, target: int) -> bool:
 	var card: Dictionary = hands[turn][index]
 	var effect: String = card["effect"]
+	if effect in ["recover","compost"] and recover_index(turn) < 0:
+		return reject("%s: butuh monster ALAM level 4 atau kurang di Grave." % card["name"])
 	if effect not in ["buff","destroy"]:
 		target = -1
 	if effect == "buff":
@@ -170,7 +177,7 @@ func _spell(index: int, target: int) -> bool:
 	played["faceup"] = true
 	backrows[turn][slot] = played
 	message.emit("%s mengaktifkan %s." % [who(turn),card["name"]])
-	var target_side: int = turn if effect in ["restore","buff","insight"] else 1-turn
+	var target_side: int = turn if effect in ["restore","buff","insight","recover","compost"] else 1-turn
 	var target_uid: int = int(fields[target_side][target].get("uid",-1)) if target >= 0 else -1
 	_queue({"action":"spell","side":turn,"card":played,"slot":slot,"target":target,"target_side":target_side,"target_uid":target_uid})
 	changed.emit()
@@ -198,6 +205,11 @@ func _resolve_spell(event: Dictionary) -> void:
 			fields[side][target]["def"] = maxi(0,int(fields[side][target]["def"])+int(card.get("def_gain",400)))
 			if card.get("grants_piercing",false): fields[side][target]["piercing"] = true
 			if card.get("grants_shield",false): fields[side][target]["shield"] = true
+		"recover": _recover(side)
+		"compost":
+			if _recover(side,true):
+				_draw(side)
+				if not over: _heal(side,400)
 		"destroy": _remove(1-side,target)
 
 
@@ -448,6 +460,10 @@ func _resolve_chain() -> void:
 						"burn": _damage(1-side,300)
 						"heal": _heal(side,400)
 						"draw": _draw(side)
+						"grove_recover":
+							if not grove_used[side] and _recover(side):
+								grove_used[side] = true
+								card_cue.emit({"id":"grove","action":"recover","side":side,"target_side":side,"target_zone":event.get("zone",-1)})
 				"trap":
 					var previous: Dictionary = chain[event["negates"]]
 					match card["effect"]:
@@ -495,7 +511,7 @@ func _sentinel_setup(side: int) -> void:
 		return
 	message.emit("Penjaga Senja: tidak ada Cermin Pembalasan di deck; efek tidak terpakai.")
 
-const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","enemy_name","next_uid","sentinel_used"]
+const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","enemy_name","next_uid","sentinel_used","grove_used"]
 
 func _remember_action(label: String, during_response: bool = false) -> void:
 	if turn != 0 or over or (not chain.is_empty() and not during_response): return
@@ -523,3 +539,35 @@ func undo() -> bool:
 	message.emit("Undo: %s. Keadaan sebelum langkah dipulihkan." % snapshot["label"])
 	changed.emit()
 	return true
+
+func recover_index(side: int) -> int:
+	var best: int = -1
+	var best_atk: int = -1
+	for i in range(graves[side].size()):
+		var card: Dictionary = graves[side][i]
+		var base: Dictionary = Catalog.card(card["id"])
+		if base["kind"] == "monster" and base["element"] == "ALAM" and int(base["level"]) <= 4 and int(base["atk"]) >= best_atk:
+			best = i
+			best_atk = int(base["atk"])
+	return best
+
+func _recover(side: int, to_deck: bool = false) -> bool:
+	var index: int = recover_index(side)
+	if index < 0:
+		message.emit("Tidak ada monster ALAM level 4 atau kurang yang bisa dipulihkan.")
+		return false
+	var old: Dictionary = graves[side].pop_at(index)
+	var card: Dictionary = Catalog.card(old["id"])
+	if to_deck: decks[side].push_front(card)
+	else: hands[side].append(card)
+	message.emit("%s memulihkan %s dari Grave ke %s; statistik kembali ke dasar." % [who(side),card["name"],"dasar deck" if to_deck else "tangan"])
+	return true
+
+func nature_count(side: int) -> int:
+	var total := 0
+	for c in graves[side]:
+		if c["kind"] == "monster" and c["element"] == "ALAM": total += 1
+	return total
+
+func root_bonus(side: int, card: Dictionary) -> int:
+	return mini(nature_count(side),int(card.get("root_cap",3)))*int(card.get("root_step",150))

@@ -1,4 +1,5 @@
 extends RefCounted
+const StoryBooks = preload("res://scripts/story_books.gd")
 const StoryFlow = preload("res://scripts/story_flow.gd")
 const Catalog = preload("res://scripts/catalog.gd")
 const SAVE_PATH = "user://eldoria_collection_v1.json"
@@ -13,6 +14,8 @@ var sfx_gain: float = 0.80
 var animation_speed: float = 1.0
 var reduced_motion: bool = false
 var story_progress: Dictionary = StoryFlow.initial()
+var story_books: Dictionary = {}
+var story_active_book: String = "jendela_pagi"
 
 func entries() -> Dictionary:
 	var result: Dictionary = Catalog.PRESETS.duplicate(true)
@@ -43,6 +46,9 @@ func load_data() -> void:
 	var saved_reduced = parsed.get("reduced_motion",false)
 	if saved_reduced is bool: reduced_motion = saved_reduced
 	story_progress = StoryFlow.clean(parsed.get("story",{}))
+	story_books = StoryBooks.clean(parsed.get("story_books",{}),story_progress)
+	story_active_book = str(parsed.get("story_active_book","jendela_pagi"))
+	if story_active_book not in ["jendela_pagi","akar_esok"] or (story_active_book == "akar_esok" and int(story_progress["cleared"]) < 5): story_active_book = "jendela_pagi"
 	var saved = parsed.get("decks",{})
 	if saved is Dictionary:
 		for key in saved:
@@ -61,7 +67,7 @@ func save_data() -> Error:
 	var temporary: String = path+".tmp"
 	var file := FileAccess.open(temporary,FileAccess.WRITE)
 	if file == null: return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version":1,"decks":customs,"active":active,"enemy":enemy,"difficulty":difficulty,"music_gain":music_gain,"sfx_gain":sfx_gain,"animation_speed":animation_speed,"reduced_motion":reduced_motion,"story":StoryFlow.clean(story_progress)},"  "))
+	file.store_string(JSON.stringify({"version":1,"decks":customs,"active":active,"enemy":enemy,"difficulty":difficulty,"music_gain":music_gain,"sfx_gain":sfx_gain,"animation_speed":animation_speed,"reduced_motion":reduced_motion,"story":StoryFlow.clean(story_progress),"story_books":StoryBooks.clean(story_books,story_progress),"story_active_book":story_active_book},"  "))
 	file.flush()
 	file.close()
 	# On Windows rename-over-existing is not guaranteed. Preserve a recoverable

@@ -14,7 +14,7 @@ func check(ok: bool, why: String) -> void:
 		push_error(why)
 func _initialize() -> void: call_deferred("run")
 func run() -> void:
-	check(Data.CHAPTERS.size() == 5 and Catalog.PRESETS.size() == 2,"Five story duels, no third deck")
+	check(Data.CHAPTERS.size() == 5 and Catalog.PRESETS.size() == 3,"Five Book I duels preserved with three free-duel decks")
 	check(Flow.clean(null) == Flow.initial() and Flow.clean({"version":999}) == Flow.initial(),"Invalid story profile falls back safely")
 	var bad := Flow.initial()
 	bad.merge({"cleared":999,"chapter":999,"phase":"ending","line":999,"choices":{"memory":"cheat","reply":[]}},true)

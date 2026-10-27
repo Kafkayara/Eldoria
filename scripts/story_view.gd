@@ -1,17 +1,19 @@
 extends Control
-const Data = preload("res://scripts/story_data.gd")
+var Data = preload("res://scripts/story_data.gd")
+var book_two_unlocked: bool = false
 const Flow = preload("res://scripts/story_flow.gd")
 const Art = preload("res://scripts/card_art.gd")
 const Catalog = preload("res://scripts/catalog.gd")
-const BG = preload("res://assets/story/window_morning.png")
+
 const GOLD = Color("#d3bc8d")
 const LIGHT = Color("#f3f0e7")
 const MUTED = Color("#b3c5c9")
 signal play_requested(config: Dictionary)
 signal progress_changed(progress: Dictionary)
 signal leave_requested
+signal book_requested(id: String)
 signal settings_requested
-var progress: Dictionary = Flow.initial()
+var progress: Dictionary = {}
 var hub: Control
 var dialogue: Control
 var journal: Control
@@ -29,6 +31,7 @@ var save_notice: Label
 var journal_body: RichTextLabel
 var scene_image: TextureRect
 func _ready() -> void:
+	progress = Flow.initial(Data)
 	_build()
 	hide()
 func _place(node: Control, parent: Node, rect: Rect2) -> void:
@@ -80,7 +83,7 @@ func _rich(parent: Node, rect: Rect2, fs: int) -> RichTextLabel:
 	return node
 func _build() -> void:
 	var bg := TextureRect.new()
-	bg.texture = BG
+	bg.texture = load(Data.BACKGROUND)
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	bg.modulate = Color(.65,.70,.76)
@@ -88,7 +91,7 @@ func _build() -> void:
 	hub = Control.new()
 	_place(hub,self,Rect2(0,0,1280,720))
 	_panel(hub,Rect2(24,24,650,672))
-	_label(hub,"BUKU I / KISAH ELDORIA",Rect2(48,42,600,25),15,GOLD)
+	_label(hub,"BUKU %s / KISAH ELDORIA" % Data.BOOK_NUMBER,Rect2(48,42,600,25),15,GOLD)
 	_label(hub,Data.TITLE,Rect2(48,78,600,82),33)
 	hub_status = _label(hub,"",Rect2(48,164,600,44),16,MUTED)
 	for i in range(Data.CHAPTERS.size()):
@@ -99,10 +102,14 @@ func _build() -> void:
 	save_notice = _label(hub,"Dialog dan bab tersimpan otomatis. Duel yang terputus dimulai ulang.",Rect2(48,634,600,46),14,MUTED)
 	_button(hub,"Menu utama",Rect2(1035,30,220,40),func(): leave_requested.emit())
 	_button(hub,"Pengaturan",Rect2(795,30,220,40),func(): settings_requested.emit())
+	_button(hub,"Buku I",Rect2(750,320,218,40),func(): book_requested.emit("jendela_pagi"))
+	var second := _button(hub,"Buku II / Rimba",Rect2(982,320,248,40),func(): book_requested.emit("akar_esok"))
+	second.disabled = not book_two_unlocked
+	_label(hub,"Progres setiap buku disimpan terpisah." if book_two_unlocked else "Buku II terbuka setelah lima bab Buku I selesai.",Rect2(750,374,480,28),14,MUTED)
 	_button(hub,"Catatan kenangan",Rect2(810,629,420,46),open_journal)
 	_panel(hub,Rect2(748,420,482,180))
 	_label(hub,"KAMU MEMAINKAN AREN",Rect2(772,441,434,25),16,GOLD)
-	_label(hub,"Pulang, mengenal sisi lain Nyx, dan mencari cara menjaga kenangan. Lima bab memakai Fajar dan Gerhana. Pilihan dialog memengaruhi tanggapan dan epilog.",Rect2(772,482,434,95),19)
+	_label(hub,Data.PREMISE,Rect2(772,482,434,95),19)
 	dialogue = Control.new()
 	_place(dialogue,self,Rect2(0,0,1280,720))
 	_panel(dialogue,Rect2(24,87,1232,609))
@@ -134,11 +141,11 @@ func _build() -> void:
 	_button(journal,"KEMBALI",Rect2(266,579,748,43),func(): journal.hide())
 	journal.hide()
 func open_book(saved: Dictionary) -> void:
-	progress = Flow.clean(saved)
+	progress = Flow.clean(saved,Data)
 	show()
 	show_hub()
 func commit() -> void:
-	progress = Flow.clean(progress)
+	progress = Flow.clean(progress,Data)
 	progress_changed.emit(progress.duplicate(true))
 func show_hub() -> void:
 	journal.hide()
@@ -171,7 +178,7 @@ func show_page() -> void:
 	journal.hide()
 	dialogue.show()
 	var chapter: Dictionary = current_config()
-	var lines: Array = Flow.pages(progress)
+	var lines: Array = Flow.pages(progress,Data)
 	if lines.is_empty(): show_hub(); return
 	var page: Dictionary = lines[progress["line"]]
 	chapter_title.text = "EPILOG / %s" % Data.TITLE if progress["phase"] == "ending" else "BAB %d / %s" % [progress["chapter"]+1,chapter["title"]]
@@ -190,8 +197,8 @@ func show_page() -> void:
 			"intro": next_button.text = "MENUJU DUEL"
 			"loss": next_button.text = "COBA LAGI"
 			"win": next_button.text = "BACA EPILOG" if progress["chapter"] == Data.CHAPTERS.size()-1 else "BAB BERIKUTNYA"
-			"ending": next_button.text = "BUKU I TAMAT"
-	var ids: Array = ["sanctuary","hourglass","mirror","lunar_veil","blessing"]
+			"ending": next_button.text = "BUKU %s TAMAT" % Data.BOOK_NUMBER
+	var ids: Array = Data.SCENE_CARDS
 	var c: Dictionary = Catalog.card(ids[progress["chapter"]])
 	var texture := AtlasTexture.new()
 	texture.atlas = Art.texture_for(c)
@@ -203,7 +210,7 @@ func previous_page() -> void:
 	commit()
 	show_page()
 func choose(index: int) -> void:
-	var lines: Array = Flow.pages(progress)
+	var lines: Array = Flow.pages(progress,Data)
 	if lines.is_empty(): return
 	var page: Dictionary = lines[progress["line"]]
 	if not page.has("options") or index < 0 or index >= page["options"].size(): return
@@ -211,7 +218,7 @@ func choose(index: int) -> void:
 	advance(true)
 func advance(chosen: bool = false) -> void:
 	if not dialogue.visible or journal.visible: return
-	var lines: Array = Flow.pages(progress)
+	var lines: Array = Flow.pages(progress,Data)
 	if lines.is_empty(): return
 	if lines[progress["line"]].has("options") and not chosen: return
 	if progress["line"] < lines.size()-1:
@@ -255,3 +262,13 @@ func handle_key(event: InputEvent) -> void:
 		else: leave_requested.emit()
 	elif event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_SPACE] and dialogue.visible:
 		advance()
+
+func configure_book(book, unlocked: bool) -> void:
+	Data = book
+	book_two_unlocked = unlocked
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	chapter_buttons.clear()
+	choice_buttons.clear()
+	_build()

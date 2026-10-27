@@ -1,0 +1,31 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "generate",
+  "assets": [
+    {
+      "id": "grove",
+      "path": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/grove.png",
+      "prompt": "Use case stylized-concept. Original full-bleed square premium anime fantasy trading card art for Eldoria: Penjaga Tunas, a young adult forest warden with short dark hair, moss-green cloak, practical ivory armor and a wooden staff, kneeling to lift a living seedling from a cracked stone road. Roots reconnect beneath the road; a sunlit forest recovering after a flood in the background. Tender but resolute expression. Main character centered, large clear silhouette; central 65 percent safe for portrait crop. Restrained emerald, warm ochre and pale ivory palette, tactile hand-painted 2D anime fantasy illustration, sophisticated dramatic natural light, controlled fine detail. No text, numbers, card frame, logos, neon particles or 3D plastic. Distinct from armored dawn knight and purple moon witch."
+    },
+    {
+      "id": "stag",
+      "path": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/stag.png",
+      "prompt": "Use case stylized-concept. Original full-bleed square premium anime fantasy trading card art for Eldoria: Rusa Lumut. A majestic living forest stag, broad branching antlers hung with small ferns, deep russet fur with natural moss growing along its back, standing protectively over a clear spring beside a broken low stone wall. Morning mist, subtle gold reflected in water, green fern fronds frame the creature. Stag face, antlers and shoulders large and centered, readable with central portrait crop. Deep moss green, warm ochre and ivory, sophisticated hand-painted 2D anime fantasy illustration, tactile brushwork and deliberate natural lighting. No text, numbers, card borders, logos, neon particles, glitter clutter or plastic 3D rendering. Calm protective power, not a wolf or dragon."
+    },
+    {
+      "id": "verdant",
+      "path": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/verdant.png",
+      "prompt": "Use case stylized-concept. Original square full-bleed premium anime fantasy card illustration for Eldoria: Naga Akar Purba, an immense ancient living dragon made of weathered bark, powerful broad wooden horns, emerald eyes and interwoven roots. It rises beneath a broken stone footbridge and braces the bridge with its shoulders and great roots while fresh foliage grows along its back. Dawn forest gorge, deep greens and warm amber light, immense grounded protective power. Dragon head and upper torso centered and large, central 65 percent portrait-crop safe. Hand-painted sophisticated 2D anime fantasy, tactile brushwork, strong elegant silhouette, controlled detail. Do not resemble a red fire dragon or black eclipse dragon. No text, border, UI, numbers, logos, neon glitter or plastic 3D."
+    },
+    {
+      "id": "renewal",
+      "path": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/renewal.png",
+      "prompt": "Use case stylized-concept. Original square full-bleed premium anime fantasy spell card illustration for Eldoria: Benih Pulang. Close view of a traveler's weathered hand holding a single living seed with two vivid green leaves, lifted from damp torn cloth beside a fallen mossy stone marker. Thin warm green roots reconnect toward a softly lit woodland path, symbolizing retrieving a surviving seed to carry home. Main seed and open hand clearly centered, strong legible composition, central portrait crop safe. Emerald, soil brown, restrained warm gold, tactile hand-painted 2D anime fantasy illustration, believable delicate botanical detail. No card border, no text or numbers, no logos, no glitter, neon clouds or plastic 3D. Distinct from stag, humanoid warden and dragon."
+    },
+    {
+      "id": "compost",
+      "path": "C:/Users/Kafka/Documents/anime-card-duel/assets/art/compost.png",
+      "prompt": "Use case stylized-concept. Original square full-bleed premium anime fantasy spell card illustration for Eldoria: Lingkar Musim. A circular arrangement of living roots encloses a fresh sapling in dark rich soil; on the left the roots embrace copper autumn leaves breaking down, on the right small ivory blossoms and new spring ferns unfurl. No floating magic cards, no human hand, no creature. Composition is a clear botanical circular emblem formed by tangible roots in a woodland clearing, elegantly readable from a central portrait crop. Restrained emerald, copper ochre and pale ivory, warm sunlight through canopy. Sophisticated tactile hand-painted 2D anime fantasy, strong silhouette, deliberate fine detail. No text, numbers, borders, logos, neon sparks, symmetrical UI mandalas or plastic 3D. Gentle cycle of compost becoming new growth."
+    }
+  ]
+}

@@ -52,6 +52,8 @@ static func main_action(duel) -> Dictionary:
 		if card["kind"] != "spell" or duel.empty_backrow(side) < 0:
 			continue
 		match card["effect"]:
+			"recover","compost":
+				if duel.recover_index(side) >= 0: return {"type":"play","index":i,"target":-1}
 			"insight":
 				if duel.decks[side].size() >= 2:
 					return {"type":"play","index":i,"target":-1}

@@ -9,6 +9,22 @@ static func points(raw: Array, center: Vector2, scale_value: float, angle: float
 static func draw(canvas: CanvasItem, id: String, center: Vector2, radius: float, color: Color, angle: float = 0.0, width: float = 1.5) -> void:
 	var path: Array = []
 	match id:
+		"grove":
+			canvas.draw_line(center+Vector2(0,radius),center-Vector2(0,radius),color,width,true)
+			canvas.draw_polyline(points([Vector2(-.8,-.4),Vector2(0,0),Vector2(.8,-.4)],center,radius,angle),color,width,true)
+		"stag":
+			for side in [-1,1]:
+				canvas.draw_polyline(points([Vector2(0,1),Vector2(side*.5,0),Vector2(side*.8,-1)],center,radius,angle),color,width,true)
+		"verdant":
+			draw(canvas,"grove",center,radius,color,angle,width)
+			canvas.draw_arc(center,radius,-PI*.8,PI*.8,28,color,width,true)
+		"renewal":
+			canvas.draw_arc(center,radius,-PI,PI*.5,28,color,width,true)
+			canvas.draw_circle(center,radius*.25,color)
+		"compost":
+			for i in range(3):
+				var a: float = angle+i*TAU/3
+				canvas.draw_arc(center,radius,a,a+PI*.45,16,color,width,true)
 		"solar_lance":
 			canvas.draw_line(center+Vector2(-.7,.7)*radius,center+Vector2(.7,-.7)*radius,color,width,true)
 			canvas.draw_polyline(points([Vector2(.1,-.8),Vector2(.8,-.8),Vector2(.8,-.1)],center,radius,angle),color,width,true)

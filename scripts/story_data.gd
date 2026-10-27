@@ -504,3 +504,9 @@ const ENDING = [
 		"text": "Kalau begitu kita pakai panci besar."
 	}
 ]
+
+const BOOK_NUMBER = "I"
+const PREMISE = "Pulang, mengenal sisi lain Nyx, dan mencari cara menjaga kenangan. Lima bab memakai Fajar dan Gerhana. Pilihan dialog memengaruhi tanggapan dan epilog."
+const BACKGROUND = "res://assets/story/window_morning.png"
+const SCENE_CARDS = ["sanctuary","hourglass","mirror","lunar_veil","blessing"]
+const CHOICES = {"memory":["care","laughter"],"reply":["honest","uncertain"],"ritual":["lamp","table"]}
