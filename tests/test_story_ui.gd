@@ -13,6 +13,7 @@ func check(ok: bool, why: String) -> void:
 		push_error(why)
 func _initialize() -> void: call_deferred("run")
 func capture(name_value: String) -> void:
+	if board.story_view.visible and board.story_view.dialogue.visible: board.story_view.reveal_all()
 	await process_frame
 	await process_frame
 	if DisplayServer.get_name() == "headless": return
@@ -26,15 +27,16 @@ func read_scene() -> void:
 	var view = board.story_view
 	var cap := 0
 	var phase: String = view.progress["phase"]
-	while view.dialogue.visible and view.progress["phase"] == phase and cap < 40:
+	while view.dialogue.visible and view.progress["phase"] == phase and cap < 100:
 		cap += 1
 		await process_frame
+		view.reveal_all()
 		check(view.body.get_content_height() <= view.body.size.y,"Dialogue page fits reading panel")
 		var page: Dictionary = Flow.pages(view.progress)[view.progress["line"]]
 		if page.has("options"): view.choice_buttons[0].pressed.emit()
 		else: view.next_button.pressed.emit()
 		await process_frame
-	check(cap < 40,"Story scene has an exit")
+	check(cap < 100,"Story scene has an exit")
 func fixture_win() -> void:
 	var d = board.duel
 	d.turn = 0
@@ -66,10 +68,10 @@ func run() -> void:
 	view.open_journal()
 	check(not view.journal_body.text.contains("sembilan belas"),"Journal does not reveal locked plot")
 	view.journal.hide()
-	await capture("eldoria-v16-story-book")
+	await capture("eldoria-v18-story-book")
 	view.resume_button.pressed.emit()
 	check(view.body.text.contains("Tiga tahun") and not board._can_input(),"Opening prose and background input lock")
-	await capture("eldoria-v16-story-dialogue")
+	await capture("eldoria-v18-story-dialogue")
 	view.next_button.pressed.emit()
 	var mark: int = view.progress["line"]
 	board._open_menu()
@@ -79,7 +81,7 @@ func run() -> void:
 	for chapter_index in range(5):
 		check(view.progress["chapter"] == chapter_index,"Correct chapter sequence")
 		if chapter_index > 0:
-			await capture("eldoria-v16-chapter-"+str(chapter_index+1))
+			await capture("eldoria-v18-chapter-"+str(chapter_index+1))
 		await read_scene()
 		check(board.coin_layer.visible and board.story_mode and not view.visible,"Story duel uses coin flip")
 		check(board.coin_rule.text.contains(Data.CHAPTERS[chapter_index]["opponent"]),"Coin labels use story opponent")
@@ -94,7 +96,7 @@ func run() -> void:
 			var expected: Array = Catalog.GERHANA.duplicate()
 			expected.sort()
 			check(actual == expected,"Chapter four perspective uses actual Gerhana preset")
-			await capture("eldoria-v16-liora-duel")
+			await capture("eldoria-v18-liora-duel")
 		if chapter_index == 1:
 			board.duel._damage(0,4000)
 			board.duel._check_end()
@@ -107,7 +109,7 @@ func run() -> void:
 		await fixture_win()
 		check(board.result_layer.visible and view.progress["cleared"] == chapter_index,"Victory waits for confirmation before unlocking chapter")
 		if chapter_index == 0:
-			await capture("eldoria-v16-story-result")
+			await capture("eldoria-v18-story-result")
 			board._undo_action()
 			check(not board.duel.over and view.progress["cleared"] == 0,"Undo victory never grants premature story progress")
 			board.duel.attack(0)
@@ -124,7 +126,7 @@ func run() -> void:
 	check(view.progress["phase"] == "complete" and view.progress["cleared"] == 5 and view.progress["choices"].size() == 3,"All five chapters and epilogue choices finish")
 	view.open_journal()
 	check(view.journal_body.text.contains("Suaka bersama"),"Finished journal remembers the journey")
-	await capture("eldoria-v16-memory-journal")
+	await capture("eldoria-v18-memory-journal")
 	view.journal.hide()
 	view.select_chapter(0)
 	check(view.progress["cleared"] == 5,"Replay preserves unlocked chapters")

@@ -60,3 +60,8 @@ Latar dapur, jendela, lampu, dan mangkuk biru untuk Jendela yang Menghadap Pagi 
 ## v0.17 — Rimba
 
 Lima ilustrasi orisinal dibuat dengan built-in image_gen: assets/art/grove.png, stag.png, verdant.png, renewal.png, dan compost.png. Prompt lengkap tersedia pada assets/art/rimba_image_prompts.json. Masing-masing kartu memakai sumber gambar berbeda. Simbol/VFX dibuat dengan kode; latar Buku II menggunakan ilustrasi Lingkar Musim.
+
+
+## v0.18 — Visual novel
+
+13 ilustrasi baru dibuat dengan built-in image_gen: `assets/vn/characters/{aren,nyx,liora,rana,iria,sera,banyu}.png` (potret transparan) dan `assets/vn/backgrounds/{kitchen_night,archive,tower,tower_dawn,garden,garden_restored}.png` (latar). Seluruh prompt final, mode tool, dan lokasi sumber ada di `assets/vn/image_prompts.json`. Latar dapur siang `assets/story/window_morning.png` digunakan kembali; versi malam diturunkan dengan referensi gambar tersebut, begitu juga variasi menara/kebun. Desain tokoh/latar orisinal, tidak menggunakan aset visual novel lain. Dialog/potret/latar disusun oleh kode Godot, tanpa animasi wajah atau pengisi suara.

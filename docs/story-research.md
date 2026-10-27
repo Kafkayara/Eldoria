@@ -1,3 +1,5 @@
+> Catatan historis v0.16. Naskah dan presentasi aktif kini v0.18; lihat [visual novel](visual-novel.md).
+
 # Eldoria v0.16 — Riset dan mode cerita
 
 Dikerjakan 26 Oktober 2026. Cerita dan dialog Eldoria ditulis orisinal untuk dunia, tokoh, serta kartu yang sudah ada. Rujukan digunakan untuk mempelajari pendekatan emosional dan hubungan antara cerita dengan permainan.

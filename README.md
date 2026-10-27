@@ -11,6 +11,10 @@ Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini 
 
 Resolusi desain dan jendela awal 1280×720 dengan proporsi tetap. Teks utama memakai ukuran 16–22 px; nama kartu kecil dapat dibagi menjadi dua baris. Antarmuka dibangun oleh `main.gd` saat game berjalan.
 
+## Versi 0.18 — Cerita dalam format visual novel
+
+Buku I dan II ditulis ulang menjadi 234 halaman: peran dan hubungan tujuh tokoh diperkenalkan jelas, tujuan bab dan alasan duel dapat dibuka kembali. Pembaca memakai kotak dialog bawah layar, tujuh potret transparan, enam latar baru, riwayat, profil tokoh, Auto, skip teks dibaca, dan pengaturan font/kecepatan tersimpan. Rekaman Liora dibedakan dari kenangan dan kejadian sekarang. Bab serta pilihan lama dipertahankan; adegan dari naskah lama dimulai lagi dari awal adegan. Coba lewat Mode Cerita → Buku I → Bab 1. Riset, kontrol, dan hasil pengujian: [visual novel](docs/visual-novel.md). Naskah spoiler: [Buku I](docs/story-book-one.md) dan [Buku II](docs/story-book-two.md).
+
 ## Versi 0.17 — Rimba / Pemulihan dan Buku II
 
 Deck ketiga langsung tersedia dalam duel bebas: 12 monster, 7 spell, 1 trap, dengan lima kartu baru dan mekanik pemulihan ALAM dari Grave. Tombol Grave menampilkan target pemulihan. Galeri/VFX memuat 25 kartu unik. Buku II: Kebun untuk yang Pulang menambah tiga bab setelah lima bab Buku I, dengan progres buku lama tetap tersimpan. Benchmark 6.000 duel tanpa macet: Rimba 45,27% vs Fajar dan 52,87% vs Gerhana. Riset, cara bermain, hasil uji, serta batasan: [deck Rimba](docs/rimba-deck.md). Naskah baru dengan spoiler: [Buku II](docs/story-book-two.md).

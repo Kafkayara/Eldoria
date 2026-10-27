@@ -1,447 +1,487 @@
-# Eldoria — Buku I: Jendela yang Menghadap Pagi
+# Jendela yang Menghadap Pagi
 
-**Naskah lengkap. Mengandung seluruh spoiler cerita.**
+**SPOILER: naskah visual novel v0.18.** Memuat semua cabang pilihan dan respons kalah.
 
-Tokoh pemain: Aren. Tokoh lain: Liora (kakaknya), Nyx (sahabat masa kecil), Rana (penjaga gerbang), Iria (arsiparis).
+## Bab 1: Lampu yang Belum Padam
 
-Duel melepaskan atau menata segel aether melalui ikatan kartu. LP bukan nyawa tokoh. Kekalahan tidak membunuh tokoh atau menghapus progres.
+Tujuan: Temui Nyx untuk mengetahui mengapa ia meminta Aren pulang. Berlatih dengan Rana sebelum memasuki menara.
 
-## Bab 1 — Lampu yang Belum Padam
-
-Dapur di gerbang timur. Duel: Rana. Deck pemain fajar melawan fajar.
+Alasan duel: Ini latihan aman untuk mengingat penggunaan kartu Fajar. LP mengukur kekuatan susunan kartu, bukan nyawa pemain.
 
 ### Sebelum duel
 
-**Narasi**
 
-Tiga tahun setelah Malam Retak, Aren pulang dengan sepatu yang kemasukan air. Di sepanjang jalan, toko-toko sudah tutup. Hanya jendela dapur kakaknya yang masih menyala.
+*Latar: kitchen_night. Tokoh: aren. *
 
-**Aren**
+**Narasi:** Tiga tahun setelah Malam Retak, Aren kembali ke rumahnya di Eldoria. Mantelnya basah. Dari jendela dapur, cahaya lampu jatuh ke jalan.
 
-Aku tahu Liora tidak akan membukakan pintu. Aku ikut menguburkannya. Tapi tanganku tetap mengetuk tiga kali, seperti dulu.
+**Aren (batin):** Nyx, aku sudah pulang. Sekarang jelaskan kenapa suratmu cuma berbunyi: Ren, aku butuh bantuan.
 
-**Rana**
+**Narasi:** Aren biasanya mengantar barang antarkota. Selama tiga tahun ia selalu menemukan pekerjaan baru sebelum sempat pulang. Kali ini ia tidak mengambil kiriman berikutnya.
 
-Masuk. Kau masih mengetuk sebelum mengelap kaki. Kakakmu pasti mengomel.
 
-**Narasi**
+*Latar: kitchen_night. Tokoh: aren, rana. *
 
-Rana, penjaga gerbang yang merawat rumah selama Aren pergi, menggeser semangkuk sup. Di bibir mangkuk ada garis emas tipis, mengikuti retak yang sangat dikenalnya.
+**Rana:** Aren? Berdiri di sana tidak akan membuat bajumu kering. Masuk.
 
-**Aren**
+**Aren:** Bibi Rana. Kau masih menjaga rumah ini?
 
-Mangkuk ini pecah waktu aku menjatuhkannya. Liora bilang mau memperbaikinya setelah hujan berhenti.
+**Rana:** Tentu. Lalu siapa yang akan mengusir bocah-bocah dari kebunmu? Sepatunya lepas dulu. Aku baru mengepel.
 
-**Rana**
+**Narasi:** Rana adalah tetangga lama keluarga Aren dan penjaga gerbang timur. Selama Aren merantau, dialah yang merawat rumah peninggalan Liora.
 
-Aku yang memperbaiki. Lama sekali aku menunggu orang lain melakukannya.
+**Aren:** Aku menerima surat Nyx. Dia tidak ada di rumahnya.
 
-**Narasi**
+**Rana:** Dia di Suaka. Menara penyimpan rekaman dekat observatorium. Sekarang dia teknisi di sana.
 
-Di meja ada kursi kosong milik Nyx. Dulu ia selalu datang menjelang makan, membawa alasan untuk meminjam buku. Liora selalu memasak terlalu banyak.
+**Aren:** Nyx yang dulu bahkan tidak bisa membetulkan engsel lemari?
 
-**Rana**
+**Rana:** Engsel itu kau yang merusaknya. Dia cuma ikut disalahkan.
 
-Nyx tinggal di menara sekarang. Setiap malam ia menyalakan Suaka, dan suara Liora terdengar dari sana. Pagi makin terlambat tiba di lingkungan ini.
+**Aren:** ...Iya. Benar.
 
-**Aren**
+**Rana:** Duduk dulu. Ada sesuatu tentang menara itu yang perlu kau dengar.
 
-Surat Nyx cuma berbunyi: pulanglah sebelum aku lupa mengapa aku menunggu. Aku kira itu caranya meminta maaf.
+**Aren:** Apa yang terjadi?
 
-**Rana**
+**Rana:** Orang-orang mendengar suara Liora dari sana. Nyx memutarnya hampir setiap malam.
 
-Mungkin itu caranya meminta tolong. Bawa kartu-kartu Liora. Sebelum ke menara, berlatihlah denganku. Kau tidak perlu pura-pura masih ingat semuanya.
+**Aren (batin):** Kakakku meninggal saat Malam Retak. Aku ikut menguburkannya. Mendengar namanya disebut seperti ini tetap membuatku ingin menoleh ke pintu.
 
-**Narasi**
 
-Duel di Eldoria menyalurkan ikatan pada kartu penjaga. Ia dapat membuka segel aether tanpa melukai pemegangnya. Kali ini, Aren hanya perlu belajar memegangnya lagi.
+*Latar: kitchen_day. Tokoh: aren, liora. Kenangan Aren • Sebelum Malam Retak*
 
-### Setelah menang
+**Liora:** Aren, tasnya jangan di meja makan. Nyx juga mau duduk di situ.
 
-**Rana**
+**Aren:** Aku cuma mau mengambil roti.
 
-Nah. Tanganmu masih gemetar, tetapi kau sudah berhenti meminta maaf setiap kali mengambil kartu.
+**Liora:** Kalau begitu cuci tangan. Mengambil roti juga pakai tangan, kan?
 
-**Narasi**
 
-Rana menyelipkan serbet bersih ke dalam tas Aren. Di ujungnya, Liora pernah menjahit matahari kecil. Salah satu sinarnya lebih pendek.
+*Latar: kitchen_night. Tokoh: aren, rana. *
 
-**Rana**
+**Narasi:** Rana meletakkan mangkuk biru di depan Aren. Retak di tepinya kini tersambung oleh garis emas.
 
-Ia menjahit itu saat menunggumu pulang dari perjalanan pertama. Berkali-kali ia salah hitung karena menoleh ke jendela.
+**Aren:** Kakak belum sempat memperbaiki mangkuk ini.
 
-**Aren**
+**Rana:** Aku yang membetulkannya. Tidak sebagus pekerjaan Liora. Masih agak miring kalau diletakkan di meja.
 
-Waktu itu aku pulang terlambat dua hari. Aku tidak pernah tahu ia menunggu.
+**Aren:** Tidak apa-apa. Terima kasih.
 
-**Rana**
+**Rana:** Besok temui Iria di arsip. Dia tahu keadaan Suaka. Jangan langsung masuk menara tanpa bicara dengannya.
 
-Jangan buru-buru menghukum dirimu untuk hal yang baru kau ketahui. Temui Iria di arsip. Ia tahu apa yang sedang dinyalakan Nyx.
+**Aren:** Lalu sekarang?
+
+**Rana:** Sekarang habiskan supmu. Setelah itu, latihan kartu denganku. Aku perlu tahu kau masih bisa menjaga dirimu.
+
+**Narasi:** Rana mengeluarkan deck Fajar milik Liora. Duel latihan ini tidak melukai mereka; LP hanya menunjukkan kekuatan susunan kartu. Aren merapikan kartunya dan duduk berhadapan dengan Rana.
+
+### Sesudah menang
+
+
+*Latar: kitchen_night. Tokoh: aren, rana. *
+
+**Rana:** Lumayan. Kau masih suka menyerang sebelum membaca kartu lawan.
+
+**Aren:** Aku dulu juga begitu?
+
+**Rana:** Lebih parah. Liora harus menyuruhmu duduk lagi setiap kali kau merasa sudah menang.
+
+**Narasi:** Rana memasukkan serbet bersih ke tas Aren. Di ujungnya ada jahitan matahari dengan satu sinar terlalu pendek.
+
+**Aren:** Ini buatan Kakak.
+
+**Rana:** Ya. Bawa ke menara. Nyx mungkin belum makan sejak kemarin. Dan kali ini, pulanglah untuk makan malam.
 
 ### Jika kalah
 
-**Rana**
 
-Supnya belum dingin. Duduk dulu. Kalah latihan tidak membuatmu terlambat menjadi adiknya.
+*Latar: kitchen_night. Tokoh: aren, rana. *
 
-**Narasi**
+**Rana:** Kartu latihanmu jatuh, bukan harga dirimu. Ambil dulu. Kita coba pelan-pelan.
 
-Rana mengembalikan kartu satu per satu, menghadap ke arah Aren. Tidak ada yang diambil darinya. Ia boleh mencoba lagi.
+**Aren:** Aku sudah lupa banyak.
 
-## Bab 2 — Nama yang Tinggal Separuh
+**Rana:** Makanya kita latihan di dapur. Aku tidak mengirimmu ke menara dengan tangan gemetar seperti itu.
 
-Arsip di bawah observatorium. Duel: Iria. Deck pemain fajar melawan gerhana.
+## Bab 2: Nama yang Tinggal Separuh
+
+Tujuan: Cari tahu apa yang rusak di Suaka dan ambil catatan yang diperlukan untuk masuk menara.
+
+Alasan duel: Pintu arsip aether dipasangi susunan Gerhana. Aren membuka pengamannya sementara Iria menjaga aliran rekaman tetap stabil.
 
 ### Sebelum duel
 
-**Narasi**
 
-Di arsip, Iria sedang memberi label pada stoples kosong. Pada satu label tertulis aroma hujan di atap dapur. Pada yang lain: lagu yang dinyanyikan terlalu pelan.
+*Latar: archive. Tokoh: aren, iria. *
 
-**Iria**
+**Narasi:** Keesokan paginya, Aren tiba di arsip observatorium. Iria, arsiparis Eldoria, menunggunya dengan buku laporan terbuka.
 
-Ini bukan benda yang bisa kumasukkan ke stoples. Aku menuliskan apa yang mulai hilang dari ingatan warga. Supaya mereka tahu ada sesuatu yang pernah mereka miliki.
+**Iria:** Rana bilang kau akan datang. Kau Aren, adik Liora?
 
-**Aren**
+**Aren:** Ya. Aku ingin menemui Nyx. Aku dengar dia menyimpan suara kakakku.
 
-Suaka mengambil ingatan? Nyx tidak bilang apa-apa.
+**Iria:** Benar. Suaka merekam kejadian lewat aether. Seperti menyimpan gambar dan suara, bukan menyimpan orangnya.
 
-**Iria**
+**Aren:** Jadi itu bukan Liora.
 
-Saat menara retak, Nyx menemukan rekaman Liora di dalam aether. Ia menahan peluruhan rekaman itu. Setiap malam Suaka meminjam tenaga dari kenangan lingkungan ini. Cahaya pagi pun tertahan di balik selubungnya.
+**Iria:** Itu rekaman Liora saat ia masih hidup. Rekamannya tidak bisa menjawab pertanyaan baru.
 
-**Iria**
+**Narasi:** Iria menggeser buku laporan. Nama Rana tertulis di halaman pertama.
 
-Tidak ada orang hidup di dalamnya, Aren. Suaka tidak tahu apa yang terjadi setelah rekaman dibuat. Namun mengetahui itu tidak membuat Nyx lebih mudah mematikannya.
+**Iria:** Alat itu sudah rusak. Nyx menahannya tetap hidup. Akibatnya Suaka terus mengambil tenaga dari kenangan warga di sekitarnya.
 
-**Narasi**
+**Aren:** Mengambil kenangan?
 
-Iria memperlihatkan daftar Rana: wajah Liora masih diingat, rasa sup buatannya tidak. Aren memikirkan sup yang baru saja ia makan. Ia pun tidak yakin apakah rasanya sama.
+**Iria:** Rana ingat wajah Liora, tetapi tidak lagi ingat takaran sup yang mereka buat bersama. Ada warga yang lupa lagu yang selalu dinyanyikan ibunya. Laporannya bertambah.
 
-**Iria**
+**Aren:** Dan pagi yang katanya tidak datang?
 
-Segel arsip melindungi serpihan ingatan yang tersisa. Kita perlu membukanya dengan duel. Sebelum itu, tulis sesuatu tentang Liora yang sungguh milikmu. Tidak harus hari ketika ia meninggal.
+**Iria:** Waktunya berjalan biasa. Selubung Suaka menyerap cahaya untuk menjaga rekamannya. Jadi rumah-rumah dekat menara tetap remang meski matahari sudah terbit.
 
-**Aren / pilihanmu**
+**Aren:** Nyx tahu?
 
-Apa yang pertama kali Aren tulis?
+**Iria:** Aku sudah memperingatkannya. Dia menutup akses ke inti alat. Surat untukmu itu pertama kalinya dia meminta bantuan sejak itu.
 
-Pilihan memory:
-- Ia menyisakan bagian roti yang paling empuk untuk kami. (`care`)
-- Ia tertawa saat sinar matahari jahitannya salah hitung. (`laughter`)
+**Aren:** Kenapa kau tidak memutus tenaganya saja?
 
-### Setelah menang
+**Iria:** Aether yang tertahan bisa meluap ke permukiman. Kita perlu membuka pengamannya bertahap. Aku menyimpan petunjuknya di arsip tersegel.
 
-**Narasi**
+**Aren:** Apa yang harus kulakukan?
 
-Aren menulis tentang tangan Liora yang selalu mendorong bagian roti paling empuk ke piring orang lain. Ingatan itu tidak bersuara, tetapi ia tahu tangan siapa yang sedang diingatnya.
+**Iria:** Bantu aku membuka susunan Gerhana di pintu arsip. Tapi tulis satu kenanganmu tentang Liora dulu. Kita jangan hanya menyisakan rekaman di menara.
 
-Tanggapan sesuai pilihan `memory`:
-- **care**: Aren menulis tentang tangan Liora yang selalu mendorong bagian roti paling empuk ke piring orang lain. Ingatan itu tidak bersuara, tetapi ia tahu tangan siapa yang sedang diingatnya.
-- **laughter**: Aren menggambar matahari dengan satu sinar yang terlalu pendek. Ia teringat Liora menertawakan jahitannya sendiri, lalu menolak memperbaikinya karena menurutnya matahari juga boleh mengantuk.
+**Narasi:** Kenangan mana yang ingin kamu tulis tentang Liora?
 
-**Iria**
+- Dia selalu menyisihkan roti paling empuk untuk kami. → care
 
-Tulisanmu bisa tinggal di luar menara. Ini juga tulisan Liora, ditemukan di meja kerja Nyx. Ia menyimpannya di arsip sebelum berhenti turun.
+- Dia menertawakan jahitan mataharinya sendiri. → laughter
 
-**Narasi**
+### Sesudah menang
 
-Kertas itu bukan surat perpisahan. Di atasnya ada daftar belanja, jadwal mengantar obat, dan catatan tentang panci yang gagangnya mulai longgar.
 
-**Aren**
+*Latar: archive. Tokoh: aren, iria. *
 
-Ia masih punya rencana untuk besok.
+**Narasi:** Aren menulis tentang roti yang diam-diam dipindahkan Liora ke piringnya. Ia berhenti, lalu menambahkan: Liora juga selalu menyuruhku mencuci tangan.
 
-**Iria**
+*Jika memory = care:* Aren menulis tentang roti yang diam-diam dipindahkan Liora ke piringnya. Ia berhenti, lalu menambahkan: Liora juga selalu menyuruhku mencuci tangan.
 
-Ya. Jangan biarkan hari terakhir mengambil seluruh tempat dalam hidupnya. Bawa ini. Nyx mungkin sudah lupa bahwa ada hal lain yang bisa dibaca.
+*Jika memory = laughter:* Aren menggambar matahari dengan satu sinar pendek. Ia menulis bahwa Liora menolak memperbaikinya: mataharinya sedang mengantuk, katanya.
+
+**Iria:** Pintu arsipnya terbuka. Ini petunjuk pengamannya. Berikan pada Nyx. Dia akan tahu bagian mana yang belum dilepas.
+
+**Narasi:** Di dalam map ada selembar kertas lain: daftar belanja Liora, diselamatkan dari meja kerjanya.
+
+**Aren:** Obat, benang, beras... Dia masih menyusun pekerjaan untuk besok.
+
+**Iria:** Simpan. Menara itu hanya merekam sebagian kecil hidupnya. Ini juga bagian dari dia.
+
+**Aren:** Aku akan menemui Nyx. Kalau dia tetap menolak?
+
+**Iria:** Dengarkan dulu apa yang ia takutkan. Lalu ingatkan dia bahwa rumah-rumah di bawah menara juga masih dihuni orang.
 
 ### Jika kalah
 
-**Iria**
 
-Segelnya masih utuh. Kenangan yang kita lindungi juga. Tidak ada yang hilang karena percobaan ini.
+*Latar: archive. Tokoh: aren, iria. *
 
-**Iria**
+**Iria:** Susunannya belum terbuka. Aether di dalam masih aman.
 
-Perhatikan kartu tertutupku. Kau boleh mengambil waktu sebelum memutuskan. Aku akan menunggumu siap.
+**Aren:** Aku terlalu cepat menghabiskan kartu.
 
-## Bab 3 — Sembilan Belas Detik
+**Iria:** Perhatikan zona tertutupku. Kau boleh menunggu sebelum memilih serangan berikutnya. Kita coba lagi.
 
-Tangga menara Suaka. Duel: Nyx. Deck pemain fajar melawan gerhana.
+## Bab 3: Sembilan Belas Detik
+
+Tujuan: Temui Nyx, dengarkan alasannya, dan buka pengaman luar Suaka tanpa merusak rekaman di dalam.
+
+Alasan duel: Nyx menjaga pengaman dengan Gerhana; Aren memakai Fajar untuk membuka jalurnya. Kemenangan membuka akses, bukan menentukan hidup-mati Nyx.
 
 ### Sebelum duel
 
-**Narasi**
 
-Di tangga menara, suara sendok menyentuh cangkir. Lalu suara Liora: Aren sudah makan? Nyx, ambil roti itu. Suara itu berhenti. Sembilan belas detik kemudian, sendok kembali menyentuh cangkir.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Nyx**
+**Narasi:** Di ruang Suaka, kristal kecil menyala di tengah lingkaran logam. Nyx duduk di lantai dengan buku catatan di lutut.
 
-Rekamannya dari musim hujan sebelum Malam Retak. Ia sedang menyiapkan sarapan. Aku sudah mendengarnya begitu sering sampai tahu kapan ia menarik napas.
+**Nyx:** Ren. Kau benar-benar pulang.
 
-**Aren**
+**Aren:** Kau memintaku pulang. Aku menunggu penjelasan.
 
-Kau tidak menunggunya kembali. Kau tahu ini rekaman.
+**Nyx:** Sebentar. Rekamannya hampir selesai.
 
-**Nyx**
+**Narasi:** Terdengar sendok menyentuh cangkir. Lalu suara Liora dari kristal.
 
-Aku tahu. Tapi minggu lalu aku mencoba mengingat suaranya tanpa menyalakan Suaka. Yang kudengar cuma suara orang lain yang hampir mirip. Aku takut suatu hari aku tidak tahu bedanya.
 
-**Narasi**
+*Latar: tower. Tokoh: aren, nyx. Rekaman Liora / Dibuat sebelum Malam Retak*
 
-Aren melihat bantalan jari Nyx penuh bekas tinta. Di dinding ada sembilan belas garis, ditulis berulang-ulang. Di bawahnya, satu kalimat dicoret sampai kertasnya berlubang: jangan lupa.
+**Rekaman Liora:** Aren sudah makan? Nyx, ambil rotinya. Jangan tunggu disuruh dua kali.
 
-**Aren**
 
-Rana sudah lupa rasa sup Liora. Iria menuliskan kehilangan orang lain setiap pagi. Aku tidak bisa bilang ini baik-baik saja.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Nyx**
+**Narasi:** Kristal meredup. Setelah hening sejenak, bunyi sendok yang sama terdengar lagi.
 
-Kalau kau ingin mematikan Suaka, kau harus membuka segel yang kupasang. Aku belum sanggup membantumu melakukan itu. Aku ingin sanggup. Itu yang paling memalukan.
+**Nyx:** Sembilan belas detik. Sarapan biasa, setahun sebelum Malam Retak. Itu yang masih bisa kuselamatkan.
 
-**Aren / pilihanmu**
+**Aren:** Iria sudah menjelaskan cara kerja alat ini. Dia juga menunjukkan laporan warga.
 
-Apa yang Aren katakan kepada Nyx?
+**Nyx:** Aku membacanya.
 
-Pilihan reply:
-- Aku marah. Tapi aku tidak akan meninggalkanmu di sini. (`honest`)
-- Aku juga belum tahu caranya pulang setelah kehilangan dia. (`uncertain`)
+**Aren:** Lalu kenapa kau tetap menyalakannya?
 
-**Nyx**
+**Nyx:** Aku mencoba mematikannya sekali. Aku berusaha mengingat suara Liora sendiri, tapi... aku tidak yakin lagi mana suaranya, mana yang kubayangkan.
 
-Kalau begitu, jangan bilang kau tahu persis apa yang kurasakan. Duduklah satu putaran. Setelah itu, kita lihat apakah tanganku bisa melepaskan segelnya.
+**Nyx:** Aku tahu ini merugikan orang lain. Aku terus bilang: satu malam lagi. Lalu malam berikutnya aku bilang begitu lagi.
 
-### Setelah menang
+**Aren:** Rana sudah kehilangan sesuatu tentang Kakak. Kau tidak bisa mengambil kenangan orang lain untuk menjaga milikmu.
 
-**Narasi**
+**Nyx:** Aku tahu. Itu sebabnya aku mengirim surat. Tapi sekarang kau di sini, aku tetap belum sanggup menyentuh tuasnya.
 
-Segel pertama terbuka. Suara Liora berhenti di tengah bunyi cangkir. Nyx tetap menatap lantai, menunggu kalimat yang biasanya datang sesudahnya.
+**Narasi:** Apa yang ingin kamu katakan kepada Nyx?
 
-**Nyx**
+- Aku marah, Nyx. Tapi aku tidak akan pergi begitu saja. → honest
 
-Bukan aku yang berhasil ia jawab. Tak satu pun pertanyaanku berubah selama tiga tahun, dan tak satu pun jawabannya bertambah.
+- Aku juga takut lupa. Kita cari caranya bersama. → uncertain
 
-**Aren**
+**Nyx:** Baik. Kita mulai dari pengaman luar. Aku tahan arusnya dengan Gerhana. Buka jalurnya pakai Fajar.
 
-Kau bisa menanyakan sesuatu padaku. Aku mungkin tidak tahu jawabannya. Tapi aku bisa mendengarkan.
+**Aren:** Kalau susunanku gagal?
 
-**Nyx**
+**Nyx:** Pengamannya menutup lagi. Kita bisa mengulang. Yang penting jangan mencabut kristalnya.
 
-Ada rekaman latihan yang belum kubuka. Ia membuatnya untukmu, waktu kau ingin berhenti belajar karena selalu kalah. Aku takut kau menganggapnya sebagai kesempatan bertemu dia lagi.
+**Narasi:** Aren meletakkan petunjuk Iria di lantai. Untuk pertama kalinya malam itu, Nyx menggeser buku catatannya dan memberi tempat untuknya.
 
-**Narasi**
+### Sesudah menang
 
-Aren meletakkan daftar belanja di antara mereka. Nyx mengenali lipatan di sudutnya. Untuk pertama kali, ia turun satu anak tangga.
+
+*Latar: tower. Tokoh: aren, nyx. *
+
+**Narasi:** Pengaman luar terbuka. Rekaman berhenti di tengah bunyi cangkir. Nyx menahan napas, menunggu kalimat yang biasanya menyusul.
+
+**Nyx:** Dia tidak pernah menjawabku, ya.
+
+**Aren:** Rekamannya memang tidak bisa.
+
+**Nyx:** Aku menanyakan hal yang sama berkali-kali, meskipun aku tahu jawabannya akan tetap sama.
+
+**Aren:** Tanya padaku. Aku mungkin tidak tahu jawabannya, tapi aku bisa mendengarnya.
+
+**Nyx:** Ada satu rekaman latihan Liora untukmu. Aku belum berani membukanya.
+
+**Aren:** Kenapa?
+
+**Nyx:** Aku tidak ingin kau mengira dia menunggu di dalam alat ini.
+
+**Aren:** Aku mengerti. Tunjukkan. Aku ingin ingat hal lain tentang dia, bukan cuma bagaimana dia meninggal.
 
 ### Jika kalah
 
-**Nyx**
 
-Aku masih menahan segelnya. Itu saja yang terjadi. Aku tidak ingin kemenangan ini berarti kau harus pergi.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Narasi**
+**Nyx:** Pengaman menutup lagi. Tidak ada yang pecah.
 
-Aren duduk di anak tangga sebelahnya. Mereka menunggu sampai suara cangkir selesai berulang. Kali ini, Nyx tidak harus mendengarnya sendirian.
+**Aren:** Kau kelihatan lebih lega daripada aku.
 
-## Bab 4 — Tangan yang Menahan
+**Nyx:** Aku... belum siap tadi. Kita berhenti sebentar, lalu coba lagi. Kau tetap di sini?
 
-Ruang rekaman latihan. Duel: Rekaman Liora. Deck pemain gerhana melawan fajar.
+**Aren:** Iya. Geser sedikit. Aku juga ingin duduk.
+
+## Bab 4: Tangan yang Menahan
+
+Tujuan: Buka rekaman latihan Liora dan lihat kembali bagaimana ia mengajari Aren menjaga orang lain.
+
+Alasan duel: Lawan ini adalah pola latihan yang direkam, bukan arwah Liora. Aren meminjam Gerhana dari Nyx untuk menghadapi susunan Fajar lama.
 
 ### Sebelum duel
 
-**Nyx**
 
-Pakai Gerhana-ku. Rekaman ini memakai Fajar. Dulu Liora bilang kau selalu ingin segera menyerang karena tidak tahan melihat siapa pun menunggumu.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Aren**
+**Nyx:** Ini Gerhana-ku. Pinjam dulu. Rekaman latihannya memakai Fajar.
 
-Ia juga pernah bilang menahan pintu agar orang lain sempat lewat itu sebuah keterampilan. Waktu itu kukira ia cuma menyuruhku membantu belanja.
+**Aren:** Kakak memang suka menyuruhku menahan serangan sebelum boleh membalas.
 
-**Narasi**
+**Nyx:** Kau selalu bilang bertahan itu membosankan.
 
-Nyx tertawa kecil. Lalu mereka sama-sama terdiam, terkejut mendengar suara itu masih bisa keluar.
+**Aren:** Aku sembilan belas tahun dan merasa sudah tahu semuanya.
 
-**Nyx**
+**Nyx:** Ya. Menyebalkan sekali.
 
-Ini susunan latihan yang direkam, bukan pikirannya. Ia tidak bisa melihat kita sekarang. Kalau kau ingin berhenti, kita berhenti.
+**Narasi:** Aren tertawa pendek. Nyx ikut tersenyum, lalu menunduk untuk memasang kristal latihan.
 
-**Aren**
+**Nyx:** Pola ini akan menjalankan duel yang dulu ia siapkan. Suaranya juga sudah direkam. Dia tidak bisa melihat kita sekarang.
 
-Aku mengerti. Aku ingin melihat bagaimana ia mengajariku sebelum aku menjadikan semua kenangan tentangnya begitu berat.
+**Aren:** Aku tahu. Mulai saja.
 
-**Rekaman Liora**
 
-Tidak apa-apa menunggu satu giliran. Aku masih di sini. Kalau tanganmu sudah siap, kita mulai.
+*Latar: tower. Tokoh: aren, liora. Rekaman latihan • Liora semasa hidup*
 
-**Narasi**
+**Rekaman Liora:** Kalau bingung, jangan asal menyerang. Baca dulu. Aku tidak sedang mengejarmu.
 
-Di meja aether, kartu-kartu Fajar terbuka seperti kebiasaan yang lama tertidur. Aren memegang Gerhana, merasakan bekas lipatan yang ditinggalkan Nyx pada selubung deck-nya.
+**Aren (batin):** Persis seperti dulu. Bahkan nada kesalnya juga sama.
 
-### Setelah menang
+### Sesudah menang
 
-**Rekaman Liora**
 
-Nah, giliranmu menjaga.
+*Latar: tower. Tokoh: aren, liora. Rekaman latihan berakhir*
 
-**Narasi**
+**Rekaman Liora:** Nah. Sekarang giliranmu menjaga.
 
-Rekaman berakhir. Tidak ada ucapan selamat yang mengetahui apa yang baru mereka lalui. Hanya kalimat lama yang akhirnya didengar Aren dengan cara berbeda.
+**Narasi:** Rekaman berakhir di sana. Tidak ada sapaan baru atau jawaban untuk tiga tahun yang telah lewat.
 
-**Nyx**
 
-Pada Malam Retak, aku meminta Liora menunggu sampai tangga aman. Ia mendengar anak-anak terjebak di dapur umum. Ia pergi sebelum aku selesai bicara.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Aren**
+**Aren:** Aku hampir lupa dia sering kesal kalau aku tidak membaca kartu.
 
-Aku juga sering menyusun malam itu supaya ada keputusan yang bisa kuubah. Padahal aku tidak ada di sana. Kau ada. Aku seharusnya bertanya bagaimana kau pulang.
+**Nyx:** Orang-orang sekarang hanya bercerita tentang keberaniannya di Malam Retak.
 
-**Nyx**
+**Aren:** Kau bersamanya malam itu. Apa yang sebenarnya terjadi?
 
-Ia takut, Aren. Ia bilang begitu kepadaku. Aku lelah mendengar orang menyebutnya seolah ia tidak pernah takut.
+**Nyx:** Ada anak-anak terjebak di dapur umum. Liora mau menjemput mereka. Aku bilang tangganya belum aman.
 
-**Narasi**
+**Nyx:** Dia bilang dia juga takut. Lalu dia meminta aku menjaga jalan keluar. Aku terus memikirkan apa yang terjadi kalau aku menahannya lebih lama.
 
-Mereka membaca daftar belanja Liora. Di bawah obat dan benang ada catatan: jangan pakai panci kecil kalau Nyx datang. Ia selalu bilang sudah makan.
+**Aren:** Aku sering menyalahkan diriku karena waktu itu sedang bekerja di luar kota. Kita sama-sama mencari bagian yang bisa diubah, ya.
 
-**Nyx**
+**Narasi:** Aren membuka daftar belanja dari Iria. Nyx menunjuk satu catatan di bawah daftar obat.
 
-Aku lapar sekali malam itu. Aku masih ingat ia menyodorkan rotinya. Itu bagian yang tidak bisa kuambil dari rekaman.
+**Nyx:** Jangan pakai panci kecil kalau Nyx datang. Ia selalu bilang sudah makan.
+
+**Aren:** Kau memang selalu bilang begitu.
+
+**Nyx:** Karena aku malu datang terus. Padahal aku lapar. Dia tahu.
+
+**Aren:** Yang ini bisa kita simpan tanpa menyalakan Suaka. Kertasnya ada. Kita juga masih ingat.
 
 ### Jika kalah
 
-**Nyx**
 
-Kita matikan latihannya dulu. Kau tidak sedang mengecewakannya. Rekaman ini tidak menilai hidupmu.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Aren**
+**Nyx:** Latihannya bisa dimatikan dulu.
 
-Aku ingin mencoba lagi. Bukan supaya ia bangga. Aku ingin tahu apakah aku bisa melindungi sesuatu tanpa terus menahannya di tempat.
+**Aren:** Tidak perlu. Aku ingin mencoba lagi. Aku baru mulai ingat cara Kakak bermain.
 
-## Bab 5 — Jendela yang Menghadap Pagi
+**Nyx:** Baik. Perhatikan kapan perlu memasang trap. Aku bantu menjelaskan kalau kau mau.
 
-Puncak menara, menjelang fajar. Duel: Nyx. Deck pemain fajar melawan gerhana.
+## Bab 5: Jendela yang Menghadap Pagi
+
+Tujuan: Buka inti Suaka dengan aman agar menara berhenti mengambil tenaga dari lingkungan.
+
+Alasan duel: Fajar membuka jalur pelepasan, Gerhana menahan arus. Duel ini menata dua susunan kartu untuk mematikan mesin secara bertahap.
 
 ### Sebelum duel
 
-**Narasi**
 
-Menjelang pagi, Iria datang membawa catatan warga. Rana membawa termos. Tidak seorang pun menanyakan mengapa Nyx belum mematikan menara.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Iria**
+**Narasi:** Menjelang fajar, Iria tiba membawa petunjuk pelepasan inti. Rana menyusul dengan termos dan roti.
 
-Aku bisa menjaga arsipnya. Aku tidak bisa menjanjikan ingatan yang sudah habis akan kembali. Yang masih kita ingat bisa kita tuliskan bersama.
+**Iria:** Pengaman luar sudah terbuka. Tinggal inti. Jalur Fajar harus dibuka sambil arusnya ditahan susunan Gerhana.
 
-**Nyx**
+**Nyx:** Aku pegang Gerhana. Aren, kau buka jalurnya.
 
-Aku ingin membuka Suaka. Tapi inti segelnya harus dilepas oleh dua ikatan sekaligus. Satu membuka jalur, satu menahan aether agar tidak merusak rumah-rumah di bawah.
+**Aren:** Kau yakin?
 
-**Aren**
+**Nyx:** Tidak sepenuhnya. Tapi aku ingin berhenti mengambil kenangan orang lain.
 
-Aku membawa Fajar. Kau pegang Gerhana.
+**Iria:** Aku akan mengawasi alatnya. Kalau susunan kalian gagal, pengaman menutup dan kita ulangi. Jangan memaksa tuasnya.
 
-**Nyx**
+**Rana:** Dan jangan menahan napas terus. Kalian berdua pucat sekali.
 
-Duel terakhir ini mengurai segelnya, bukan menentukan siapa yang berhak merindukan Liora. Kalau aku takut di tengah jalan, jangan anggap aku berubah menjadi musuhmu.
+**Aren:** Sesudah ini kita makan di rumah, Nyx.
 
-**Aren**
+**Nyx:** Aku mungkin masih akan meminta kau menunggu sebentar.
 
-Aku tidak akan memintamu kuat sepanjang waktu.
+**Aren:** Aku bisa menunggu. Tapi Suaka tetap kita matikan.
 
-**Narasi**
+**Narasi:** Nyx mengangguk. Ia menutup buku catatannya, lalu meletakkan Gerhana di hadapannya. Aren mengeluarkan Fajar.
 
-Di bawah mereka, lampu dapur masih menyala. Aren menyentuh matahari kecil pada serbetnya. Satu sinarnya pendek. Ia tidak mencoba merapikannya.
+### Sesudah menang
 
-### Setelah menang
 
-**Narasi**
+*Latar: tower_dawn. Tokoh: aren, nyx. *
 
-Ketika jalur Fajar terbuka, Nyx menahan kedua sisi segel dengan Gerhana. Tangannya gemetar. Ia tidak melepaskan kartu sebelum arus terakhir melewati rumah-rumah.
+**Narasi:** Arus terakhir mengalir keluar dari inti. Nyx menahan susunannya sampai Iria memberi isyarat. Cahaya kristal padam.
 
-**Nyx**
+**Nyx:** Aku masih ingin mendengar suaranya sekali lagi.
 
-Aku mau mendengar suaranya sekali lagi.
+**Aren:** Aku tahu.
 
-**Aren**
+**Narasi:** Mereka tetap duduk beberapa saat. Kali ini bunyi cangkir tidak kembali. Dari bawah menara terdengar pedagang membuka tirai tokonya.
 
-Aku tahu.
+**Nyx:** Aku harus menemui Rana dan warga yang melapor ke arsip. Aku belum tahu harus bilang apa.
 
-**Narasi**
+**Aren:** Mulai dengan mengatakan yang sebenarnya.
 
-Suaka sudah padam. Mereka menunggu beberapa saat tanpa berpura-pura akan ada kalimat terakhir. Di luar, pedagang roti mengangkat tirai tokonya. Cahaya menyentuh anak tangga yang lama hanya mengenal lampu.
+**Nyx:** Temani aku besok? Setelah itu... mungkin aku masih ingin datang ke menara.
 
-**Nyx**
-
-Besok aku akan menemui Rana dan orang-orang di arsip. Aku harus menjelaskan yang kulakukan. Setelah itu... mungkin aku masih ingin kembali ke menara.
-
-**Aren**
-
-Besok aku temani. Kita bawa sarapan.
+**Aren:** Iya. Kita bawa sarapan.
 
 ### Jika kalah
 
-**Nyx**
 
-Jalur Fajar tertutup terlalu cepat. Aku menahan arusnya lagi. Tidak ada rumah yang rusak. Kita masih punya waktu.
+*Latar: tower. Tokoh: aren, nyx. *
 
-**Rana**
+**Iria:** Pengaman menutup. Arusnya masih tertahan dengan aman.
 
-Termosnya cukup untuk kita semua. Minum dulu, lalu coba lagi kalau sudah siap. Pagi tidak perlu kau tanggung sendirian.
+**Nyx:** Aku menahannya terlalu kuat. Bukan hanya salahmu, Ren.
+
+**Rana:** Minum dulu. Petunjuknya bisa kalian baca lagi sesudah tangan kalian berhenti gemetar.
 
 ## Epilog
 
-**Narasi**
 
-Beberapa hari kemudian, tidak semua kenangan kembali. Rana memasak sup dengan takaran baru. Nyx membantu Iria mencatat kehilangan warga. Ada yang belum mau berbicara dengannya. Ia belajar menerima itu tanpa meminta Aren membelanya.
+*Latar: kitchen_day. Tokoh: aren, rana. *
 
-**Narasi**
+**Narasi:** Beberapa hari kemudian, Rana mencoba takaran sup baru. Sebagian kenangan yang diambil Suaka belum kembali.
 
-Aren dan Nyx pulang ke dapur. Di jendela ada bekas minyak lampu. Aren membersihkannya dengan hati-hati, menyisakan tempat bagi sesuatu yang ingin ia mulai.
+**Rana:** Terlalu asin?
 
-**Aren / pilihanmu**
+**Aren:** Sedikit.
 
-Apa yang mereka putuskan untuk dilakukan bersama?
+**Rana:** Nyx bilang pas. Rupanya dia masih takut mengkritik makanan di rumah ini.
 
-Pilihan ritual:
-- Nyalakan lampu setiap senja untuk orang yang pulang terlambat. (`lamp`)
-- Buka dapur seminggu sekali untuk siapa pun yang ingin makan bersama. (`table`)
 
-**Narasi**
+*Latar: kitchen_day. Tokoh: aren, nyx. *
 
-Malam pertama, Rana melihat lampu itu dari gerbang dan mampir setelah tugasnya selesai. Ia tidak perlu mengetuk lama. Nyx sudah membuka pintu sebelum Aren mengangkat kepala.
+**Narasi:** Nyx membantu Iria mencatat laporan warga. Ada orang yang belum mau berbicara dengannya. Ia tidak meminta Aren membelanya.
 
-Tanggapan sesuai pilihan `ritual`:
-- **lamp**: Malam pertama, Rana melihat lampu itu dari gerbang dan mampir setelah tugasnya selesai. Ia tidak perlu mengetuk lama. Nyx sudah membuka pintu sebelum Aren mengangkat kepala.
-- **table**: Pada hari pertama dapur dibuka, Rana datang membawa sayur. Seorang anak dari rumah sebelah membantu menata mangkuk. Nyx menambah air ke panci sebelum ada yang perlu meminta.
+**Nyx:** Boleh aku membantu di sini juga? Aku tidak ingin terus menunggu di menara.
 
-**Narasi**
+**Aren:** Kita mulai dari sesuatu yang bisa kita lakukan setiap minggu.
 
-Aren menyisihkan bagian roti paling empuk. Kali ini ia menanyakan siapa yang menginginkannya, lalu mengambil satu bagian untuk dirinya sendiri.
+**Narasi:** Kegiatan apa yang ingin kalian mulai bersama?
 
-Tanggapan sesuai pilihan `memory`:
-- **care**: Aren menyisihkan bagian roti paling empuk. Kali ini ia menanyakan siapa yang menginginkannya, lalu mengambil satu bagian untuk dirinya sendiri.
-- **laughter**: Nyx menjahit matahari pada lap baru. Satu sinarnya terlalu pendek. Aren tertawa sampai harus meletakkan sendoknya, dan Nyx sengaja tidak memperbaikinya.
+- Nyalakan lampu untuk orang yang pulang terlambat. → lamp
 
-**Narasi**
+- Buka dapur untuk tetangga seminggu sekali. → table
 
-Aren masih marah ketika melihat beberapa baris kosong di buku arsip. Nyx tidak meminta amarah itu cepat selesai. Ia datang membantu menuliskan cerita yang masih mereka ingat.
+**Narasi:** Malam berikutnya, Rana melihat lampu dapur dari gerbang. Ia mampir setelah selesai berjaga. Nyx membukakan pintu sebelum ia perlu mengetuk lagi.
 
-Tanggapan sesuai pilihan `reply`:
-- **honest**: Aren masih marah ketika melihat beberapa baris kosong di buku arsip. Nyx tidak meminta amarah itu cepat selesai. Ia datang membantu menuliskan cerita yang masih mereka ingat.
-- **uncertain**: Mereka masih belajar bagaimana rasanya pulang. Kadang Nyx duduk lama di depan pintu. Aren membiarkannya duduk, lalu menaruh dua cangkir di dekat ambang.
+*Jika ritual = lamp:* Malam berikutnya, Rana melihat lampu dapur dari gerbang. Ia mampir setelah selesai berjaga. Nyx membukakan pintu sebelum ia perlu mengetuk lagi.
 
-**Narasi**
+*Jika ritual = table:* Pada hari pertama dapur dibuka, Rana membawa sayur. Nyx menambah air ke panci ketika tetangga berikutnya datang. Aren mengambil mangkuk tambahan.
 
-Mangkuk biru dipakai lagi. Retaknya tetap terlihat setiap kali terkena cahaya. Daftar belanja Liora disimpan di laci, bersama resep baru dan tagihan yang belum dibayar.
+**Narasi:** Aren menyisihkan bagian roti yang empuk. Ia membagikannya, lalu mengambil satu untuk dirinya sendiri.
 
-**Nyx**
+*Jika memory = care:* Aren menyisihkan bagian roti yang empuk. Ia membagikannya, lalu mengambil satu untuk dirinya sendiri.
 
-Aku belum makan.
+*Jika memory = laughter:* Nyx menjahit lap baru. Mataharinya punya satu sinar yang terlalu pendek. Aren tertawa saat melihatnya; kali ini tidak ada yang mencoba memperbaikinya.
 
-**Narasi**
+**Narasi:** Kadang Aren masih marah ketika membaca halaman laporan yang belum lengkap. Nyx tetap datang membantu. Mereka tidak memaksa percakapan itu cepat selesai.
 
-Aren menoleh. Nyx tidak menambahkan alasan untuk meminjam buku, atau mengatakan ia hanya sebentar. Ia menarik kursinya dan duduk.
+*Jika reply = honest:* Kadang Aren masih marah ketika membaca halaman laporan yang belum lengkap. Nyx tetap datang membantu. Mereka tidak memaksa percakapan itu cepat selesai.
 
-**Aren**
+*Jika reply = uncertain:* Kadang Nyx masih duduk lama di depan pintu sebelum masuk. Aren menaruh dua cangkir di ambang, lalu duduk di sebelahnya.
 
-Kalau begitu kita pakai panci besar.
+**Narasi:** Mangkuk biru dipakai lagi. Daftar belanja Liora disimpan di laci, bersama resep baru dan tagihan yang belum dibayar.
+
+**Nyx:** Ren. Aku belum makan.
+
+**Aren:** Bagus. Aku juga belum. Ambil panci besar, ya.
+
+**Narasi:** Nyx menarik kursinya. Kali ini ia tidak mengatakan hanya akan meminjam buku sebentar.

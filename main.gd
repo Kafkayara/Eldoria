@@ -393,7 +393,7 @@ func _build_menu() -> void:
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),_open_quick_guide)
 	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.17 / RIMBA DAN KEBUN YANG PULANG",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"VERSI 0.18 / ELDORIA VISUAL NOVEL",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -1707,6 +1707,7 @@ func _apply_comfort_preferences() -> void:
 	speed_select.select([1.0,1.5,2.0].find(collection_store.animation_speed))
 	reduced_check.set_pressed_no_signal(fx.reduced_motion)
 	_sync_sfx()
+	if is_instance_valid(story_view): story_view.apply_reader_preferences(collection_store.vn_preferences,collection_store.reduced_motion)
 
 func _open_settings() -> void:
 	_hide_hover()
@@ -1753,6 +1754,7 @@ func _build_story_ui() -> void:
 	story_view.progress_changed.connect(_save_story)
 	story_view.leave_requested.connect(_open_menu)
 	story_view.settings_requested.connect(_open_settings)
+	story_view.reader_preferences_changed.connect(_save_vn_preferences)
 	story_view.book_requested.connect(_open_story)
 	move_child(settings_layer,get_child_count()-1)
 	move_child(quick_guide_layer,get_child_count()-1)
@@ -1773,6 +1775,13 @@ func _open_story(book_id: String = "") -> void:
 	if book_id != "akar_esok" or not unlocked: book_id = "jendela_pagi"
 	collection_store.story_active_book = book_id
 	collection_store.story_books = StoryBooks.clean(collection_store.story_books,collection_store.story_progress)
+	story_view.reader_preferences = collection_store.vn_preferences.duplicate()
+	story_view.reader_blocked = func(): return settings_layer.visible or quick_guide_layer.visible or grave_layer.visible
+	story_view.external_known = []
+	for saved in collection_store.story_books.values():
+		for id in saved.get("known",[]):
+			if not story_view.external_known.has(id): story_view.external_known.append(id)
+	story_view.reduced_motion = collection_store.reduced_motion
 	story_view.configure_book(StoryBooks.data(book_id),unlocked)
 	story_view.open_book(collection_store.story_books[book_id])
 	_save_preferences()
@@ -1782,7 +1791,9 @@ func _save_story(progress: Dictionary) -> void:
 	if progress["book"] == "jendela_pagi": collection_store.story_progress = progress.duplicate(true)
 	collection_store.story_books[progress["book"]] = progress.duplicate(true)
 	collection_store.story_active_book = progress["book"]
-	if collection_store.save_data() != OK:
+	var saved: bool = collection_store.save_data() == OK
+	story_view.set_save_status(saved)
+	if not saved:
 		story_view.save_notice.text = "Progres belum tersimpan di perangkat. Kisah tetap bisa dilanjutkan selama game terbuka."
 	else: story_view.save_notice.text = "Dialog dan bab tersimpan otomatis. Duel yang terputus dimulai ulang."
 
@@ -1837,3 +1848,7 @@ func _open_grave(side: int) -> void:
 	grave_body.text = "\n".join(lines)
 	grave_body.scroll_to_line(0)
 	grave_layer.show()
+
+func _save_vn_preferences(value: Dictionary) -> void:
+	collection_store.vn_preferences = value.duplicate()
+	_save_preferences()

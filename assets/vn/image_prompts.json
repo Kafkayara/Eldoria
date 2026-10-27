@@ -1,0 +1,111 @@
+{
+  "version": "0.18",
+  "tool": "built-in image_gen",
+  "created": "2026-10-27",
+  "assets": [
+    {
+      "id": "aren",
+      "mode": "built-in image_gen",
+      "prompt": "Original character sprite for the Eldoria visual novel, AREN. Adult man age 22, warm medium brown skin, tousled chestnut brown hair, amber brown eyes, slim practical build. Wears a slate blue short travel cloak over an ivory linen shirt, dark brown waistcoat and courier satchel strap; small brass sun pin, worn gloves tucked at belt. Gentle alert expression with a little uncertainty, relaxed standing three-quarter frontal pose, one hand lightly holding satchel strap. Upper thighs to top of head, centered with all hair and hands fully visible and generous transparent margin, no scenery, floor, cast shadow or frame. Clean expressive anime visual novel character illustration, precise refined ink lines, soft painterly cel shading, believable fabric, restrained warm colors, adult facial proportions, not chibi or 3D. Clothes modest and functional. Genuine transparent background. No text, logos, weapons, card frame or glow clutter. Consistent production sprite for a serious tender fantasy story, readable face at 400px height.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-48cae494-9062-43ee-84cd-e7926468eea1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/aren.png",
+      "transparent_background": true
+    },
+    {
+      "id": "nyx",
+      "mode": "built-in image_gen",
+      "prompt": "Create a NEW original Eldoria visual novel character sprite: NYX. Attached Aren image is STYLE/PROPORTION reference only, not an edit target; create a distinct adult male age 23. Pale olive skin, straight dark indigo-black hair to nape with a loose fringe, gray-violet eyes, slender slightly tired face, faint dark under-eyes, thoughtful guarded expression rather than a villain. Dark charcoal long technician coat with muted plum lining over a high-collared slate shirt; simple brass fasteners, small tool pouch, one hand holding a closed worn notebook at waist. No armor, weapons or ornate crown. Standing three-quarter frontal pose, upper thighs to head, centered with all hair and hands visible, generous margins. Match refined anime VN ink lines, soft painterly cel shading and adult proportions of reference. Real transparent cutout background, no colored backdrop, vignette, scenery, text or floor shadow. Character must read as Aren's old friend and an exhausted observatory keeper, not an evil sorcerer.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-d9e11b0d-2121-44da-8e7d-d30974906ccb.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/nyx.png",
+      "transparent_background": true
+    },
+    {
+      "id": "liora",
+      "mode": "built-in image_gen",
+      "prompt": "Create a NEW original character sprite for Eldoria VN: LIORA, Aren's elder sister, adult woman age 25 at the time of the memories. Attached Aren is STYLE and sibling resemblance reference only, not an edit target. Warm medium brown skin, amber brown eyes, chestnut hair in a practical loose braid over one shoulder, a few flyaway strands, kind lively face with a small amused smile. Ivory rolled-sleeve linen blouse, muted terracotta skirt visible to upper thighs, dark teal simple apron tied at waist, small cloth tucked in apron pocket. One hand resting on apron knot, other relaxed. Ordinary capable young woman who ran the neighborhood kitchen, no angel wings or supernatural aura, not a princess. Refined expressive anime VN illustration matching reference ink lines and soft painterly cel shading. Standing three-quarter frontal, upper thighs to head, all hair/hands visible and generous clear margins. Genuine transparent cutout background, no scenery, vignette, cast shadow, text or card frame. Keep mature adult proportions and modest everyday clothes. Memories of a real person rather than a glowing ghost.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-1842d9d6-d8c6-4505-a3d9-21c025b87c32.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/liora.png",
+      "transparent_background": true
+    },
+    {
+      "id": "rana",
+      "mode": "built-in image_gen",
+      "prompt": "NEW original Eldoria visual novel sprite: RANA, age 52 adult woman, sturdy practical build, warm brown skin with visible smile lines, dark hair threaded with gray in a low braid, observant brown eyes. A rust-red wool shawl over a muted cream work blouse and dark navy long skirt, simple leather belt with a small gatekeeper key ring, one sleeve casually rolled. Relaxed hand on hip, other hand open as if beckoning a familiar visitor inside, warm no-nonsense half smile. She is a neighborhood caretaker and gate guard, not royalty or a mystical oracle. Upper thighs to head, centered complete hair and hands, genuine transparent background and generous empty margin. STYLE reference Aren only: refined anime VN ink outlines, soft painterly cel shading, modest grounded clothing and adult proportions. No scene, vignette, floor shadow, text, card border, dramatic aura, weapons or childlike face.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-a21fc5b5-0c4c-49ce-94ca-8fcbc1cef211.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/rana.png",
+      "transparent_background": true
+    },
+    {
+      "id": "iria",
+      "mode": "built-in image_gen",
+      "prompt": "NEW original Eldoria visual novel sprite: IRIA, adult woman age 34, slender medium-height build, light olive skin, long dark brown hair tied in a low neat ponytail, gray-green eyes behind small round brass glasses. A deep teal archivist's jacket over a high-neck ivory blouse, charcoal long skirt to upper thighs, ink-stained cuffs, simple brass chain holding a small seal. She holds a thick closed ledger against her waist and one finger marks a page; direct attentive expression, composed and a little stern, not smiling vacantly. Upper thighs to head, centered, all hair and hands visible, generous transparent margins. Reference Aren for style/proportions only: clean refined anime VN linework and soft painterly cel shading, grounded functional clothing, realistic adult expression. Genuine transparent cutout background, no floor, scenery, vignette, text, readable writing, card frame, weapons or glitter.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-817b75e1-4480-4f99-8790-a808a9c4037d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/iria.png",
+      "transparent_background": true
+    },
+    {
+      "id": "sera",
+      "mode": "built-in image_gen",
+      "prompt": "NEW original Eldoria VN character sprite: SERA, adult woman age 23, practical wiry gardener, warm tan skin, short tousled dark brown hair with tiny white flower tucked behind one ear, hazel-green eyes, determined slightly impatient expression. Moss-green short hooded cloak over an ivory work shirt with simple leather shoulder patches, brown trousers visible to upper thighs, muddy gardening gloves at belt, small seed pouch held in one hand. Standing three-quarter frontal, other hand on hip, complete hair and hands, centered with generous empty margin. STYLE reference Aren only: refined anime visual novel ink lines, painterly soft cel shading, adult proportions and grounded modest clothing. A capable working woman, not a child elf, not a warrior princess. Genuine transparent cutout, no background, vignette, floor shadow, tools sticking outside frame, text or card border. Same green-cloak / short brown hair identity as Eldoria's Penjaga Tunas card.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-0eba5c9d-482d-4bbb-9453-4aea6e49c178.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/sera.png",
+      "transparent_background": true
+    },
+    {
+      "id": "banyu",
+      "mode": "built-in image_gen",
+      "prompt": "NEW original Eldoria VN sprite: BANYU, adult man age 56, weathered warm brown skin, short curly salt-and-pepper hair and neat short gray beard, kind deep-set brown eyes, visible age lines, stocky ordinary build. Faded ochre gardener vest over a pale green linen shirt and dark brown trousers to upper thighs. LEFT wrist wrapped in a simple cream cloth brace, LEFT arm resting comfortably; right hand loosely holding a rolled irrigation sketch with no readable markings. Patient but firm expression, small tired smile. Standing three-quarter frontal, centered, all hair and hands visible, generous transparent margin. STYLE reference Aren only: refined expressive anime VN ink outlines, soft painterly cel shading and adult proportions. This is Sera's living father recovering from an injury, not an ancient wizard. Genuine transparent cutout, no scenery, vignette, floor shadow, text, fantasy weapons or card frame.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-1bccb402-542b-4db5-98b7-ae2ef9b2b9fd.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/characters/banyu.png",
+      "transparent_background": true
+    },
+    {
+      "id": "kitchen_night",
+      "mode": "built-in image_gen",
+      "prompt": "Edit this existing Eldoria kitchen illustration into a matching VISUAL NOVEL NIGHT background. Preserve exactly the kitchen architecture, open arched window on right, wooden table, repaired blue bowl with gold seam, lamp, bread, linens and composition. It is now evening after rainfall: outside window a dark deep-blue night sky with faint clouds and a few warm town windows, no sunrise or visible sun, tower silhouette faint. Warm amber lamp illuminates table and window frame while left wall stays softly shadowed. Clean up any letter markings so nothing readable. No people, sprites, text or UI. Widescreen landscape 16:9, painterly anime environmental art, consistent original colors/materials. Stage foreground remains usable behind standing characters and a bottom dialogue box. This is a new sibling night version; don't alter layout or turn it into a different room.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-1cc86a8c-a346-48a7-922d-236d4b70f0db.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/backgrounds/kitchen_night.png",
+      "transparent_background": false
+    },
+    {
+      "id": "archive",
+      "mode": "built-in image_gen",
+      "prompt": "Original wide landscape 16:9 VISUAL NOVEL background for Eldoria: interior of the town observatory archive in morning. Intimate stone vaulted room, tall shelves of bound ledgers and carefully labeled but ILLEGIBLE small storage boxes, an ordinary wooden reading desk in the middle distance, rolled mechanical diagrams, a brass lamp, arched frosted windows casting cool teal daylight. Clear floor area across foreground for character sprites. Shelves form calm balanced architectural depth, no giant throne, no floating books or fantasy particle clutter. Grounded hand-painted anime environmental art with refined soft linework, tactile materials, restrained teal/cream/warm wood palette matching a tender serious fantasy story. No characters, no text, logos, UI or border. Details should tell us this is a working archivist's office, not a magical library cathedral. Bottom quarter can sit behind a dark dialogue box.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-6f04ebfd-8c11-4b33-9466-cbdf9b2d9953.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/backgrounds/archive.png",
+      "transparent_background": false
+    },
+    {
+      "id": "tower",
+      "mode": "built-in image_gen",
+      "prompt": "Original wide 16:9 anime VISUAL NOVEL background for Eldoria: SUAKA memory-recording room at night inside a modest stone observatory tower. A small pale violet crystal held inside a brass ring apparatus sits on a waist-high central console in the middle distance; physical cables and a mechanical lever clearly suggest a machine that can record and replay memories. A worn stool and closed notebooks nearby. Arched windows show deep blue night and faint town rooftops. No floating human images or ghosts. Clear foreground floor for two standing character sprites, instrument details remain behind them. Painterly anime environment with refined linework and tactile stone/wood/brass, subdued blue-violet and warm lamp accents, intimate melancholic mood rather than apocalyptic battle chamber. No people, text, labels, UI, giant glowing magic circles, lightning or particle clutter. Bottom quarter suitable behind a dialogue box.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-7d3ac84c-46aa-4afa-a419-73a961a49d28.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/backgrounds/tower.png",
+      "transparent_background": false
+    },
+    {
+      "id": "tower_dawn",
+      "mode": "built-in image_gen",
+      "prompt": "Edit the attached Eldoria Suaka room into the SAME ROOM AFTER the memory machine has been safely switched off at dawn. Preserve exact architecture, console, crystal cage, stool, cables, notebooks and camera. The crystal is now dim translucent stone with NO glow. Arched windows reveal soft pale gold morning sky and brighter town rooftops; dawn sunlight gently falls across stone floor. Lamps may remain warm but subdued. Quiet relieved atmosphere, not a destroyed machine. Keep painterly anime VN environment style, widescreen 16:9, no people, ghosts, text, UI or new furnishings. Important: this is the matching after-scene of the same location, not a different observatory.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-6f18428c-4db6-434f-863e-9a4e2de0f62a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/backgrounds/tower_dawn.png",
+      "transparent_background": false
+    },
+    {
+      "id": "garden",
+      "mode": "built-in image_gen",
+      "prompt": "Original widescreen 16:9 anime VISUAL NOVEL background for Eldoria Book II: a small working vegetable garden beside a forest river after a past flood. Several empty rectangular beds, a simple timber bench and irrigation channel in middle distance, practical modest farmhouse to one side. In background a short damaged stone-and-wood footbridge is braced safely by thick living roots; missing planks and scattered timber show repair work still needed. Calm green woodland and blue daylight, warm ochre earth, clear foreground path for standing character sprites. Painterly anime environmental art with precise refined linework and tactile restrained materials, readable spatial layout, intimate lived-in rural setting not a vast epic fantasy city. No people, animals, monsters, text, writing, UI or frames. The bridge must be visibly under repair, not destroyed into a dangerous spectacle. Bottom quarter will sit behind a dialogue box.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-c8309a31-7a21-4642-b753-f56a21c8936f.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/backgrounds/garden.png",
+      "transparent_background": false
+    },
+    {
+      "id": "garden_restored",
+      "mode": "built-in image_gen",
+      "prompt": "Edit attached Eldoria garden VN background into the SAME LOCATION AFTER modest repairs. Preserve exact farmhouse, river, planting beds, irrigation channel, bridge position, camera and painterly anime style. The bridge now has a complete safe set of new wooden planks, repaired simple railings and living roots stably bracing its stone foundations. No scaffolding or debris on crossing. One or two planting beds show small young sprouts, not a magically fully grown garden. A clean bench beside beds, slightly warmer late-afternoon sunlight. A believable small accomplishment after cooperative work, no spectacle. Widescreen 16:9, no characters, monsters, text, UI or border. Keep foreground clear for standing VN sprites.",
+      "result_hint": "Generated images are saved to C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37 as C:\\Users\\Kafka\\.codex\\generated_images\\01a171dd-8d94-7772-adf5-464ee8cf6a37\\exec-360a5e8e-052d-4a11-a1d0-3d0de2a62a9d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "path": "assets/vn/backgrounds/garden_restored.png",
+      "transparent_background": false
+    }
+  ]
+}

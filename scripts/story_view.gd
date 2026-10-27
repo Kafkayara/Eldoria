@@ -1,6 +1,9 @@
 extends Control
 var Data = preload("res://scripts/story_data.gd")
 var book_two_unlocked: bool = false
+const Stage = preload("res://scripts/vn_stage.gd")
+const Cast = preload("res://scripts/vn_cast.gd")
+const Prefs = preload("res://scripts/vn_preferences.gd")
 const Flow = preload("res://scripts/story_flow.gd")
 const Art = preload("res://scripts/card_art.gd")
 const Catalog = preload("res://scripts/catalog.gd")
@@ -12,6 +15,7 @@ signal play_requested(config: Dictionary)
 signal progress_changed(progress: Dictionary)
 signal leave_requested
 signal book_requested(id: String)
+signal reader_preferences_changed(value: Dictionary)
 signal settings_requested
 var progress: Dictionary = {}
 var hub: Control
@@ -30,6 +34,12 @@ var hub_status: Label
 var save_notice: Label
 var journal_body: RichTextLabel
 var scene_image: TextureRect
+var reader
+var reader_preferences: Dictionary = Prefs.clean({})
+var external_known: Array = []
+var reader_blocked: Callable
+var reduced_motion: bool = false
+var roster_from_hub: bool = false
 func _ready() -> void:
 	progress = Flow.initial(Data)
 	_build()
@@ -102,6 +112,7 @@ func _build() -> void:
 	save_notice = _label(hub,"Dialog dan bab tersimpan otomatis. Duel yang terputus dimulai ulang.",Rect2(48,634,600,46),14,MUTED)
 	_button(hub,"Menu utama",Rect2(1035,30,220,40),func(): leave_requested.emit())
 	_button(hub,"Pengaturan",Rect2(795,30,220,40),func(): settings_requested.emit())
+	_button(hub,"Tokoh dan hubungan",Rect2(795,98,460,40),open_people)
 	_button(hub,"Buku I",Rect2(750,320,218,40),func(): book_requested.emit("jendela_pagi"))
 	var second := _button(hub,"Buku II / Rimba",Rect2(982,320,248,40),func(): book_requested.emit("akar_esok"))
 	second.disabled = not book_two_unlocked
@@ -110,28 +121,27 @@ func _build() -> void:
 	_panel(hub,Rect2(748,420,482,180))
 	_label(hub,"KAMU MEMAINKAN AREN",Rect2(772,441,434,25),16,GOLD)
 	_label(hub,Data.PREMISE,Rect2(772,482,434,95),19)
-	dialogue = Control.new()
+	dialogue = Stage.new()
 	_place(dialogue,self,Rect2(0,0,1280,720))
-	_panel(dialogue,Rect2(24,87,1232,609))
-	chapter_title = _label(dialogue,"",Rect2(40,24,900,44),24,GOLD)
-	_button(dialogue,"Bab / Jeda",Rect2(1071,25,185,41),show_hub)
-	_panel(dialogue,Rect2(46,111,266,555))
-	scene_image = TextureRect.new()
-	scene_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	scene_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	_place(scene_image,dialogue,Rect2(58,125,242,355))
-	_label(dialogue,"LAMBANG KENANGAN",Rect2(62,499,234,25),14,GOLD)
-	_label(dialogue,"Setiap kartu menyimpan kenangan yang pernah kita bawa.",Rect2(62,540,226,102),17,MUTED)
-	speaker = _label(dialogue,"",Rect2(348,121,864,42),27,GOLD)
-	body = _rich(dialogue,Rect2(348,181,864,278),25)
-	body.selection_enabled = true
-	for i in range(2):
-		var button := _button(dialogue,"",Rect2(348,477+i*55,864,46),choose.bind(i))
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		choice_buttons.append(button)
-	previous_button = _button(dialogue,"Sebelumnya",Rect2(348,610,180,44),previous_page)
-	page_counter = _label(dialogue,"",Rect2(548,618,340,28),15,MUTED)
-	next_button = _button(dialogue,"LANJUT",Rect2(962,610,250,44),advance,true)
+	reader = dialogue
+	reader.apply_preferences(reader_preferences)
+	reader.blocked = reader_blocked
+	reader.reduced_motion = reduced_motion
+	speaker = reader.speaker
+	body = reader.body
+	chapter_title = reader.chapter_title
+	next_button = reader.next_button
+	previous_button = reader.previous_button
+	choice_buttons.assign(reader.choice_buttons)
+	reader.next_requested.connect(advance)
+	reader.back_requested.connect(previous_page)
+	reader.choice_requested.connect(choose)
+	reader.hub_requested.connect(show_hub)
+	reader.line_revealed.connect(_remember_line)
+	reader.context_requested.connect(open_context)
+	reader.preferences_changed.connect(func(value): reader_preferences = value.duplicate(); reader_preferences_changed.emit(value))
+	reader.modal_closed.connect(func():
+		if roster_from_hub: roster_from_hub = false; dialogue.hide())
 	dialogue.hide()
 	journal = Control.new()
 	_place(journal,self,Rect2(0,0,1280,720))
@@ -145,9 +155,12 @@ func open_book(saved: Dictionary) -> void:
 	show()
 	show_hub()
 func commit() -> void:
+	var lines: Array = Flow.pages(progress,Data)
+	progress["page_id"] = lines[progress["line"]]["id"] if not lines.is_empty() else ""
 	progress = Flow.clean(progress,Data)
 	progress_changed.emit(progress.duplicate(true))
 func show_hub() -> void:
+	if is_instance_valid(reader): reader.stop_auto()
 	journal.hide()
 	dialogue.hide()
 	hub.show()
@@ -157,6 +170,7 @@ func show_hub() -> void:
 		var unlocked: bool = i <= done
 		chapter_buttons[i].disabled = not unlocked
 		chapter_buttons[i].text = "%02d  %s%s" % [i+1,Data.CHAPTERS[i]["title"] if unlocked else "Belum terbuka","  / SELESAI" if i < done else ""]
+	if progress.get("migration",false): save_notice.text = "Naskah diperbarui. Bab dan pilihan tetap; adegan lama dibuka dari awal. Baca ulang Bab 1 untuk pengantar baru."
 	resume_button.text = "BACA EPILOG" if progress["phase"] == "complete" else ("LANJUTKAN KISAH" if progress["started"] else "MULAI KISAH")
 func select_chapter(index: int) -> void:
 	if index < 0 or index >= Data.CHAPTERS.size() or index > int(progress["cleared"]): return
@@ -164,6 +178,7 @@ func select_chapter(index: int) -> void:
 	commit()
 	show_page()
 func resume_story() -> void:
+	progress["migration"] = false
 	progress["started"] = true
 	if progress["phase"] == "duel":
 		request_duel()
@@ -174,6 +189,7 @@ func resume_story() -> void:
 func current_config() -> Dictionary:
 	return Data.CHAPTERS[progress["chapter"]].duplicate(true)
 func show_page() -> void:
+	roster_from_hub = false
 	hub.hide()
 	journal.hide()
 	dialogue.show()
@@ -181,29 +197,53 @@ func show_page() -> void:
 	var lines: Array = Flow.pages(progress,Data)
 	if lines.is_empty(): show_hub(); return
 	var page: Dictionary = lines[progress["line"]]
-	chapter_title.text = "EPILOG / %s" % Data.TITLE if progress["phase"] == "ending" else "BAB %d / %s" % [progress["chapter"]+1,chapter["title"]]
-	speaker.text = page["speaker"]
-	body.text = Flow.page_text(page,progress)
-	body.scroll_to_line(0)
-	page_counter.text = "%d / %d  •  baca sesuai waktumu" % [progress["line"]+1,lines.size()]
-	previous_button.disabled = progress["line"] == 0
-	for i in range(choice_buttons.size()):
-		choice_buttons[i].visible = page.has("options") and i < page.get("options",[]).size()
-		if choice_buttons[i].visible: choice_buttons[i].text = page["options"][i]["text"]
-	next_button.disabled = page.has("options")
-	next_button.text = "LANJUT"
-	if progress["line"] == lines.size()-1:
+	for id in page.get("cast",[]):
+		if not progress["known"].has(id): progress["known"].append(id)
+	var who: String = Cast.id_for(page["speaker"])
+	if not who.is_empty() and not progress["known"].has(who): progress["known"].append(who)
+	commit()
+	var title: String = "EPILOG / %s" % Data.TITLE if progress["phase"] == "ending" else "BUKU %s / BAB %d / %s" % [Data.BOOK_NUMBER,progress["chapter"]+1,chapter["title"]]
+	var next_text := "LANJUT"
+	var boundary: bool = progress["line"] == lines.size()-1
+	if boundary:
 		match progress["phase"]:
-			"intro": next_button.text = "MENUJU DUEL"
-			"loss": next_button.text = "COBA LAGI"
-			"win": next_button.text = "BACA EPILOG" if progress["chapter"] == Data.CHAPTERS.size()-1 else "BAB BERIKUTNYA"
-			"ending": next_button.text = "BUKU %s TAMAT" % Data.BOOK_NUMBER
-	var ids: Array = Data.SCENE_CARDS
-	var c: Dictionary = Catalog.card(ids[progress["chapter"]])
-	var texture := AtlasTexture.new()
-	texture.atlas = Art.texture_for(c)
-	texture.region = Art.region_for(c)
-	scene_image.texture = texture
+			"intro": next_text = "MENUJU DUEL"
+			"loss": next_text = "COBA LAGI"
+			"win": next_text = "BACA EPILOG" if progress["chapter"] == Data.CHAPTERS.size()-1 else "BAB BERIKUTNYA"
+			"ending": next_text = "BUKU %s TAMAT" % Data.BOOK_NUMBER
+	reader.show_page(page,progress,title,next_text,known_people(),boundary)
+
+func known_people() -> Array:
+	var result: Array = progress.get("known",["aren"]).duplicate()
+	for id in external_known:
+		if Cast.PEOPLE.has(id) and not result.has(id): result.append(id)
+	return result
+
+func _remember_line() -> void:
+	var lines: Array = Flow.pages(progress,Data)
+	if lines.is_empty(): return
+	var page: Dictionary = lines[progress["line"]]
+	var key: String = Flow.read_key(page,progress)
+	if not progress["read"].has(key): progress["read"].append(key)
+	var entry := {"page":page["id"],"who":reader.speaker.text,"text":Flow.page_text(page,progress)}
+	if progress["history"].is_empty() or progress["history"].back() != entry:
+		progress["history"].append(entry)
+		if progress["history"].size() > 80: progress["history"].pop_front()
+	commit()
+	reader.state = progress.duplicate(true)
+
+func open_people() -> void:
+	roster_from_hub = hub.visible
+	dialogue.show()
+	reader.open_people(known_people())
+
+func open_context() -> void:
+	var cfg: Dictionary = current_config()
+	reader.show_info("Tujuan dan konteks bab", "TEMPAT\n"+cfg["place"]+"\n\nTUJUAN AREN\n"+cfg["goal"]+"\n\nMENGAPA ADA DUEL\n"+cfg["why_duel"]+"\n\nDECK\n"+cfg["player_deck"].to_upper()+" melawan "+cfg["enemy_deck"].to_upper())
+
+func reveal_all() -> void:
+	reader.reveal_all()
+
 func previous_page() -> void:
 	if not dialogue.visible or progress["line"] <= 0: return
 	progress["line"] -= 1
@@ -256,12 +296,11 @@ func open_journal() -> void:
 	journal_body.scroll_to_line(0)
 	journal.show()
 func handle_key(event: InputEvent) -> void:
+	if dialogue.visible and reader.handle_key(event): return
 	if event.is_action_pressed("ui_cancel"):
 		if journal.visible: journal.hide()
 		elif dialogue.visible: show_hub()
 		else: leave_requested.emit()
-	elif event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER,KEY_SPACE] and dialogue.visible:
-		advance()
 
 func configure_book(book, unlocked: bool) -> void:
 	Data = book
@@ -272,3 +311,15 @@ func configure_book(book, unlocked: bool) -> void:
 	chapter_buttons.clear()
 	choice_buttons.clear()
 	_build()
+
+func apply_reader_preferences(value: Dictionary, reduced: bool) -> void:
+	reader_preferences = Prefs.clean(value)
+	reduced_motion = reduced
+	if is_instance_valid(reader):
+		reader.apply_preferences(reader_preferences)
+		reader.reduced_motion = reduced
+
+func set_save_status(ok: bool) -> void:
+	if is_instance_valid(reader):
+		reader.stamp.text = "Tersimpan" if ok else "Belum tersimpan"
+		reader.stamp.add_theme_color_override("font_color",Color("#a8c8b5") if ok else Color("#edb3a5"))

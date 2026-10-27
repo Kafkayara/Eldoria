@@ -13,6 +13,7 @@ func check(ok: bool, why: String) -> void:
 		push_error(why)
 func _initialize() -> void: call_deferred("run")
 func capture(name_value: String) -> void:
+	if board.story_view.visible and board.story_view.dialogue.visible: board.story_view.reveal_all()
 	await process_frame
 	await process_frame
 	if DisplayServer.get_name() == "headless": return
@@ -26,14 +27,15 @@ func read_scene() -> void:
 	var v = board.story_view
 	var phase: String = v.progress["phase"]
 	var cap := 0
-	while v.dialogue.visible and v.progress["phase"] == phase and cap < 35:
+	while v.dialogue.visible and v.progress["phase"] == phase and cap < 100:
 		cap += 1
 		await process_frame
+		v.reveal_all()
 		check(v.body.get_content_height() <= v.body.size.y,"Book II page fits reading panel")
 		var page: Dictionary = Flow.pages(v.progress,v.Data)[v.progress["line"]]
 		if page.has("options"): v.choice_buttons[0].pressed.emit()
 		else: v.next_button.pressed.emit()
-	check(cap < 35,"Story scene exits")
+	check(cap < 100,"Story scene exits")
 func run() -> void:
 	root.size = Vector2i(1280,720)
 	board = load("res://main.tscn").instantiate()
@@ -66,7 +68,7 @@ func run() -> void:
 	board._render()
 	board.grave_buttons[0].pressed.emit()
 	check(board.grave_layer.visible and board.grave_body.text.contains("Fenrir Zamrud") and not board._can_input(),"Clickable Grave explains automatic recovery target and blocks background input")
-	await capture("eldoria-v17-grave")
+	await capture("eldoria-v18-grave")
 	board.grave_layer.hide()
 	board._hand_clicked(0)
 	check(d.hands[0][0]["id"] == "fenrir" and board.fx.last_cue["card_id"] == "renewal","One-click spell recovers correct monster with visual")
@@ -80,13 +82,13 @@ func run() -> void:
 	board._inspect(d.fields[0][0])
 	check(board.detail_desc.text.contains("Bonus saat summon: +450"),"Ace detail explains fixed bonus")
 	board._open_card_zoom(Catalog.card("verdant"))
-	await capture("eldoria-v17-naga-akar")
+	await capture("eldoria-v18-naga-akar")
 	board.zoom_layer.hide()
 	board._open_menu()
 	board._open_gallery()
 	board.gallery.select_card("grove")
 	check(board.gallery.tiles.size() == 25,"Gallery includes all new card types")
-	await capture("eldoria-v17-rimba-gallery")
+	await capture("eldoria-v18-rimba-gallery")
 	board._close_gallery()
 	var old := Flow.initial()
 	old.merge({"cleared":5,"chapter":4,"phase":"complete","choices":{"memory":"care","reply":"honest","ritual":"lamp"}},true)
@@ -94,7 +96,7 @@ func run() -> void:
 	board._open_story("akar_esok")
 	var v = board.story_view
 	check(v.Data.BOOK_ID == "akar_esok" and v.chapter_buttons.size() == 3,"New book has three chapters")
-	await capture("eldoria-v17-book-two")
+	await capture("eldoria-v18-book-two")
 	v.resume_story()
 	for chapter in range(3):
 		await read_scene()

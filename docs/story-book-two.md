@@ -1,249 +1,248 @@
-# Eldoria — Buku II: Kebun untuk yang Pulang
+# Kebun untuk yang Pulang
 
-**Naskah lengkap; mengandung spoiler.**
+**SPOILER: naskah visual novel v0.18.** Memuat semua cabang pilihan dan respons kalah.
 
-Tokoh baru: Sera dan Banyu. Aren serta Nyx mengunjungi jalan kebun setelah peristiwa Buku I.
+## Bab 1: Benih di Lipatan Kain
 
-## Bab 1 — Benih di Lipatan Kain
+Tujuan: Antarkan benih titipan Rana kepada Sera dan buka jalur pejalan kaki menuju kebunnya.
 
-Jalan kebun di utara Eldoria. Deck pemain fajar melawan rimba.
-
-### Sebelum duel
-
-**Narasi**
-
-Beberapa pekan setelah Suaka padam, Rana menyelipkan kantong benih ke tas Aren. Di lipatannya tertulis nama Banyu. Ia pernah mengantar sayur ke dapur Liora, sebelum banjir memutus jalan kebun.
-
-**Rana**
-
-Kalau bertemu putrinya, bilang tidak apa-apa kalau musim ini ia belum bisa mengirim apa pun. Jangan pulang membawa janji yang belum sanggup ia buat.
-
-**Narasi**
-
-Di ujung jalan, Aren dan Nyx menemukan seorang penjaga sedang mengangkat tunas dari sela batu. Sera tidak meminta mereka menunggu. Ia menunjuk dua sekop yang tersandar di pohon.
-
-**Sera**
-
-Kalau mau lewat, bantu pindahkan tanah ini. Akar sudah menyambung jalannya, tetapi segel aether di bawah jembatan belum stabil.
-
-**Aren**
-
-Kami membawa benih untuk Banyu. Rana bilang ia belum kembali ke rumah.
-
-**Sera**
-
-Ayah tinggal di kota seberang sekarang. Katanya kebun ini milikku. Aku ingin mengembalikannya seperti dulu sebelum menjemputnya.
-
-**Nyx**
-
-Seperti dulu itu banyak sekali pekerjaan untuk dua tangan.
-
-**Sera**
-
-Itulah gunanya Rimba. Kartu yang sudah jatuh masih bisa menjadi bekal. Mari buka jalurnya dengan duel. Kalian pegang Fajar; aku menahan akar di sisi kebun.
-
-### Setelah menang
-
-**Narasi**
-
-Segel pertama terbuka. Sera mengambil kartu yang kembali ke tangannya, meluruskan sudutnya, lalu memasukkannya ke selubung. Bukan sudut yang sama dengan sebelum ia jatuh.
-
-**Sera**
-
-Pemulihan mengembalikan monster ke tangan, bukan langsung ke papan. Aku masih harus menunggu giliran untuk memanggilnya. Hutan pun tidak bisa dipaksa tumbuh dua kali lebih cepat.
-
-**Aren**
-
-Kenapa kau masih bekerja di dekat jalan yang runtuh, bukan di kebun?
-
-**Sera**
-
-Karena dari jalan inilah Ayah biasanya pulang. Aku terus membenahinya lebih dulu. Kebunku sendiri belum sempat kutanami.
-
-### Jika kalah
-
-**Sera**
-
-Akar menutup jalurnya lagi. Tidak apa-apa. Tunas yang tadi kita pindahkan masih aman.
-
-**Narasi**
-
-Mereka duduk di sisi jalan. Sera membagi air dari botolnya, lalu menunggu Aren mengumpulkan kartu. Tak satu pun benih harus dibuang karena duel ini.
-
-## Bab 2 — Tanah yang Tidak Sama
-
-Saluran air di bawah kebun. Deck pemain rimba melawan gerhana.
+Alasan duel: Akar penjaga mengunci akses jembatan. Fajar membuka jalan setapak sementara Rimba menjaga fondasi. Jembatan belum aman untuk gerobak.
 
 ### Sebelum duel
 
-**Narasi**
 
-Banyu datang ke saluran dengan gerobak kecil berisi papan. Sera langsung meraih cangkul untuknya, lalu berhenti ketika melihat pergelangan tangan ayahnya yang dibalut.
+*Latar: garden. Tokoh: aren, nyx. *
 
-**Banyu**
+**Narasi:** Beberapa pekan setelah Suaka dimatikan, Aren dan Nyx mengantar kantong benih titipan Rana ke kebun utara.
 
-Bawa cangkul itu untukmu. Aku menggambar alur airnya. Tanganku belum kuat untuk menggali, tetapi aku masih ingat ke mana air mencari jalan.
+**Aren:** Untuk Banyu dan putrinya, Sera. Dulu Banyu mengirim sayur ke dapur Kakak.
 
-**Sera**
+**Nyx:** Rana menitipkan pesan juga?
 
-Kalau jembatannya sudah pulih, Ayah bisa pulang. Aku bisa membetulkan bagian lainnya.
+**Aren:** Katanya, mereka tidak perlu mengirim hasil panen kalau kebunnya belum siap. Kita hanya mengantar ini.
 
-**Banyu**
 
-Aku senang kau menyisakan tempat untukku. Tapi aku juga perlu tempat untuk diriku yang sekarang. Aku belum sanggup tinggal di rumah dekat sungai itu lagi.
+*Latar: garden. Tokoh: aren, sera. *
 
-**Narasi**
+**Narasi:** Di ujung jalan, seorang perempuan mengangkat tunas dari sela batu. Sera mengibaskan tanah dari sarung tangannya ketika melihat mereka.
 
-Sera mengusap kantong benih yang dibawa Aren. Ada cukup tanah kering untuk satu petak kecil; petak yang lain masih perlu dibersihkan bersama.
+**Sera:** Kalian yang membawa benih? Taruh di bangku. Jangan di tanah, masih basah.
 
-**Aren**
+**Aren:** Kau Sera? Aku Aren. Ini Nyx. Rana yang menyuruh kami mengantar.
 
-Apa yang ingin kita mulai dari petak ini?
+**Sera:** Aku sudah menunggu kantong itu. Ayah menyimpannya sebelum banjir.
 
-**Aren / pilihanmu**
+**Aren:** Banyu belum kembali?
 
-Benih mana yang mereka tanam lebih dulu?
+**Sera:** Dia tinggal di kota seberang. Tangannya cedera. Aku ingin kebun ini rapi sebelum menjemputnya.
 
-- Simpan benih keluarga di petak yang sudah siap. (`save`)
-- Bagikan sebagian benih ke kebun tetangga. (`share`)
+**Narasi:** Hampir semua petak belum ditanami, tetapi jalan menuju rumah sudah disapu berkali-kali.
 
-**Nyx**
+**Aren:** Apa yang bisa kami bantu?
 
-Kita bisa menjaga benih yang belum ditanam. Tidak semua yang dibawa pulang harus segera dipakai.
+**Sera:** Jembatannya. Akar penjaga mengunci aksesnya. Bantu buka jalan setapak dulu. Gerobak belum boleh lewat sampai papan dan talinya diperbaiki.
 
-**Sera**
+**Aren:** Dengan duel kartu?
 
-Pinjam Rimba-ku, Aren. Segel saluran ini memakai pertahanan Gerhana. Kali ini aku ingin melihat jalan yang kau pilih dengan kartu-kartuku, bukan mengerjakannya sendiri.
+**Sera:** Ya. Kau pegang Fajar. Aku tahan akarnya dengan Rimba. Kalau gagal, jalurnya menutup lagi. Fondasinya tetap aman.
 
-### Setelah menang
+### Sesudah menang
 
-**Narasi**
 
-Aliran air mencapai petak pertama tanpa menggerus tanah di tepinya. Banyu meminta papan gambarnya digeser sedikit. Sera menggesernya tanpa menyodorkan cangkul lagi.
+*Latar: garden. Tokoh: aren, sera. *
 
-**Banyu**
+**Narasi:** Jalan setapak menuju kebun terbuka. Di sisi lain, papan jembatan yang rusak masih ditandai tali. Sera merapikan kartu yang kembali ke tangannya.
 
-Kau mengembalikan salurannya dengan baik. Bagian lama yang runtuh tidak perlu kau bangun di tempat yang sama.
+**Sera:** Pemulihan Rimba mengembalikan monster ke tangan. Aku tetap harus menunggu giliran untuk memanggilnya lagi.
 
-**Sera**
+**Aren:** Kau sudah membersihkan jalan sampai ke rumah. Kenapa petak kebunnya belum ditanami?
 
-Aku takut kalau kebunnya berubah, Ayah tidak akan mengenali jalan pulang.
+**Sera:** Aku selalu mengerjakan jalan itu dulu. Ayah biasa pulang lewat sana.
 
-**Banyu**
+**Aren:** Kau sudah bilang dia boleh datang sebelum semuanya selesai?
 
-Tulis namaku di bangku dekat petak itu. Aku bisa datang duduk. Untuk sekarang, itu caraku pulang.
-
-**Narasi**
-
-Nyx memeriksa tali gerobak agar Banyu tidak perlu mengangkat papan dengan tangan yang sakit. Ia tidak mengatakan bahwa ia mengerti semuanya. Ia hanya mengikatnya sedikit lebih longgar.
+**Sera:** Belum. Aku pikir... seharusnya aku bisa menyiapkan tempatnya dulu.
 
 ### Jika kalah
 
-**Sera**
 
-Airnya belum bisa lewat. Kita tahan dulu. Mengambil kartu dari Grave terlalu cepat juga bisa membuat bonus naga lebih kecil.
+*Latar: garden. Tokoh: aren, sera. *
 
-**Banyu**
+**Sera:** Jalurnya menutup. Akar di bawah masih menahan fondasi.
 
-Ada bagian gambarku yang kurang jelas. Coba lihat bersamaku sebelum kita mulai lagi. Ini bukan pekerjaan satu orang.
+**Aren:** Kita coba lagi?
 
-## Bab 3 — Jembatan untuk Esok
+**Sera:** Bisa. Minum dulu. Aku juga perlu mengistirahatkan tangan.
 
-Jembatan akar di atas sungai. Deck pemain rimba melawan rimba.
+## Bab 2: Tanah yang Tidak Sama
+
+Tujuan: Bantu Banyu dan Sera mengaktifkan saluran air untuk petak tanam pertama.
+
+Alasan duel: Penjaga Saluran adalah susunan pengaman aether, bukan orang baru. Pola Gerhana-nya harus dibuka agar air tidak menggerus tanah.
 
 ### Sebelum duel
 
-**Narasi**
 
-Akar purba menopang jembatan dari bawah. Di atasnya, papan-papan baru menunggu dipasang. Sera datang membawa daftar pekerjaan, dengan namanya tertulis di hampir setiap baris.
+*Latar: garden. Tokoh: aren, banyu. *
 
-**Aren**
+**Narasi:** Esoknya, Banyu datang dengan gerobak kecil. Ayah Sera itu membawa papan gambar; pergelangan tangan kirinya masih dibalut.
 
-Siapa yang boleh membantu kalau semua baris ini sudah kau isi?
+**Banyu:** Aren? Aku mengenali pin di mantelmu. Dulu Liora yang memakainya.
 
-**Sera**
+**Aren:** Iya. Rana menitipkan benih untuk kalian. Sera sudah menyimpannya.
 
-Aku belum terbiasa menulis nama orang lain untuk pekerjaan yang takut kutinggalkan.
 
-**Nyx**
+*Latar: garden. Tokoh: sera, banyu. *
 
-Tulis namaku di bagian tali. Aku bisa memeriksanya bersama Banyu.
+**Sera:** Ayah datang lebih awal. Aku belum selesai membetulkan pagar.
 
-**Narasi**
+**Banyu:** Aku datang karena kau mengundangku. Pagarnya bisa menunggu.
 
-Sera menghapus beberapa baris. Serpihan penghapus jatuh di antara tulisan yang masih terlalu rapat. Aren menunggu sampai ia mengangkat kepala.
+**Sera:** Aku bawakan cangkul. Yang ringan.
 
-**Aren / pilihanmu**
+**Banyu:** Tolong pakai untukmu dulu. Tanganku belum kuat menggali. Aku bisa menggambar jalur airnya.
 
-Bagaimana Aren menawarkan bantuan?
+**Sera:** Kalau jembatan dan rumahnya sudah pulih, Ayah bisa tinggal di sini lagi.
 
-- Kita kerjakan satu bagian dulu, lalu beristirahat bersama. (`slow`)
-- Bagikan pekerjaannya; kau tidak harus memeriksa semuanya sendiri. (`together`)
+**Banyu:** Sera, aku belum siap tinggal dekat sungai itu. Bukan karena pekerjaanmu kurang baik.
 
-**Sera**
+**Narasi:** Sera meletakkan cangkul di samping bangku. Ia membuka kantong benih, tetapi tidak langsung menuangkannya.
 
-Baik. Dua ikatan Rimba untuk menata akar jembatan. Satu menahan fondasi, satu membuka jalur baru. Kali ini, kalau ada yang jatuh, kita punya cara membawanya kembali.
 
-**Narasi**
+*Latar: garden. Tokoh: aren, sera. *
 
-Aren mengambil deck pinjaman itu. Di tepi sungai, Banyu duduk dengan papan gambar di lutut. Ia sudah menulis namanya sendiri pada bangku yang belum selesai dicat.
+**Aren:** Tanah keringnya cukup untuk satu petak. Kita mulai dari mana?
 
-### Setelah menang
+**Narasi:** Apa langkah pertamamu untuk benih itu?
 
-**Narasi**
+- Tanam benih keluarga di petak yang sudah siap. → save
 
-Naga Akar Purba mengangkat punggungnya sampai papan terakhir terpasang. Ketika segel terbuka, ia tidak menarik akar dari tanah lama. Ia merentangkannya ke sisi sungai yang baru.
+- Bagikan sebagian benih ke petak milik tetangga. → share
 
-**Sera**
+**Sera:** Baik. Pinjam Rimba-ku. Aku bantu Ayah membaca arah airnya.
 
-Aku kira Ayah mau pulang kalau aku bisa memperbaiki semuanya.
+**Aren:** Siapa Penjaga Saluran yang tertulis di papan itu?
 
-**Banyu**
+**Sera:** Bukan orang. Itu nama pengaman lama. Susunan Gerhana menahan pintu air sampai jalurnya aman. Buka dengan Rimba, pelan-pelan.
 
-Aku datang karena kau mengundangku. Bukan karena kau sudah selesai.
+### Sesudah menang
 
-**Narasi**
 
-Sera meletakkan cangkul di samping bangku. Ia duduk bersama ayahnya sementara Aren dan Nyx menyingkirkan serpihan papan dari jalur pejalan kaki.
+*Latar: garden. Tokoh: sera, banyu. *
+
+**Narasi:** Air mencapai petak pertama tanpa mengikis tepinya. Banyu menggeser papan gambarnya agar Sera bisa melihat bagian yang ia ubah.
+
+**Sera:** Alurnya berbeda dari gambar lama.
+
+**Banyu:** Dasar sungainya sudah berubah. Kalau dipaksa ke jalur lama, petak ini kebanjiran lagi.
+
+**Sera:** Aku juga terus mencoba membuat tempat ini sama seperti sebelum banjir.
+
+**Banyu:** Beri aku bangku di dekat petak itu. Aku bisa datang duduk dan memeriksa air. Untuk sekarang, itu cukup.
+
+**Narasi:** Sera menandai tempat bangku di gambar. Kali ini ia menulis nama Banyu di sana, bukan daftar pekerjaan untuknya.
 
 ### Jika kalah
 
-**Sera**
 
-Fondasinya masih menahan kita. Kita belum selesai, tetapi kita juga tidak kembali ke awal.
+*Latar: garden. Tokoh: aren, sera. *
 
-**Narasi**
+**Sera:** Salurannya belum terbuka. Jangan memulihkan semua kartu sebelum memanggil naga; bonusnya dihitung dari ALAM yang masih di Grave.
 
-Sera meminta orang-orang memeriksa bagian mereka masing-masing. Kali ini ia tidak mendahului semua jawaban. Aren menyimpan kartu, lalu membuka botol air untuk dibagi.
+**Banyu:** Ada bagian gambarku yang kurang jelas juga. Kita periksa bersama sebelum mengulang.
+
+## Bab 3: Jembatan untuk Esok
+
+Tujuan: Perbaiki papan dan tali jembatan, lalu atur akar penopangnya agar gerobak hasil panen bisa lewat.
+
+Alasan duel: Dua susunan Rimba bekerja dari sisi berlawanan: satu menahan fondasi dan satu membuka jalur. Sera tidak lagi mengerjakannya sendirian.
+
+### Sebelum duel
+
+
+*Latar: garden. Tokoh: aren, sera. *
+
+**Narasi:** Papan baru ditumpuk di dekat jembatan. Sera membawa daftar pekerjaan. Namanya tertulis di hampir setiap baris.
+
+**Aren:** Bagian mana yang boleh kukerjakan?
+
+**Sera:** Aku perlu memeriksa tali, fondasi, papan...
+
+**Aren:** Aku tanya bagian untukku, Sera.
+
+**Sera:** Oh. Maaf. Aku terbiasa memeriksa semuanya sendiri.
+
+**Nyx:** Aku bisa memeriksa tali bersama Banyu. Dia sudah menggambar simpul yang perlu diganti.
+
+**Narasi:** Sera mengambil penghapus. Beberapa baris di daftarnya akhirnya kosong.
+
+**Narasi:** Bagaimana kamu menawarkan bantuan kepada Sera?
+
+- Kita selesaikan satu bagian dulu, lalu istirahat bersama. → slow
+
+- Bagi pekerjaannya. Percayakan satu bagian pada kami. → together
+
+**Sera:** Baik. Kau pegang Rimba di sisi jalan. Aku menahan akar di sisi kebun.
+
+**Aren:** Bonus naga dihitung saat summon, kan? Setelah itu aku bisa memulihkan kartu tanpa mengurangi bonusnya.
+
+**Sera:** Betul. Siapkan giliran berikutnya juga. Kalau ada akar yang lepas, kita punya kartu untuk menyambungnya lagi.
+
+### Sesudah menang
+
+
+*Latar: garden_restored. Tokoh: sera, banyu. *
+
+**Narasi:** Papan terakhir terpasang. Akar penjaga merentang ke sisi sungai yang baru, sementara orang-orang menyingkirkan serpihan dari jalan.
+
+**Sera:** Aku kira Ayah baru mau datang kalau aku sudah memperbaiki semuanya.
+
+**Banyu:** Kau hanya perlu bilang aku boleh datang. Bangku yang catnya belum kering juga boleh.
+
+**Sera:** Kalau begitu jangan duduk dulu. Aku benar-benar baru mengecatnya.
+
+**Narasi:** Banyu tertawa. Sera meletakkan cangkul, lalu mencari kain untuk menutup bangku.
+
+### Jika kalah
+
+
+*Latar: garden. Tokoh: aren, sera. *
+
+**Sera:** Fondasinya masih aman. Kita periksa lagi dari dua sisi.
+
+**Narasi:** Sera menunggu Nyx selesai melaporkan bagian talinya. Ia tidak lagi berlari memeriksa semua bagian sebelum orang lain sempat menjawab.
 
 ## Epilog
 
-**Narasi**
 
-Petak kecil keluarga tumbuh lebih dulu. Sera menulis tanggal di tepinya, bukan janji kapan seluruh kebun harus selesai. Benih yang tersisa disimpan untuk musim berikutnya.
+*Latar: garden_restored. Tokoh: aren, sera. *
 
-- **save**: Petak kecil keluarga tumbuh lebih dulu. Sera menulis tanggal di tepinya, bukan janji kapan seluruh kebun harus selesai. Benih yang tersisa disimpan untuk musim berikutnya.
-- **share**: Tetangga datang membawa pot yang berbeda-beda. Beberapa benih keluarga Sera tumbuh jauh dari kebunnya sendiri. Ketika ia menyusuri jalan, ia mengenali daun yang sama di jendela orang lain.
+**Narasi:** Petak keluarga tumbuh lebih dulu. Sera menuliskan tanggal tanam, lalu menyimpan benih sisanya untuk petak yang belum siap.
 
-**Narasi**
+*Jika seed = save:* Petak keluarga tumbuh lebih dulu. Sera menuliskan tanggal tanam, lalu menyimpan benih sisanya untuk petak yang belum siap.
 
-Setiap sore, Sera berhenti ketika matahari menyentuh bangku. Ada hari ketika pekerjaan belum banyak berubah. Di bangku itu, ia mulai bisa membicarakan hal selain bagian yang rusak.
+*Jika seed = share:* Tetangga membawa pot dan wadah yang berbeda-beda. Saat melewati rumah mereka, Sera mengenali daun yang sama dengan yang tumbuh di kebunnya.
 
-- **slow**: Setiap sore, Sera berhenti ketika matahari menyentuh bangku. Ada hari ketika pekerjaan belum banyak berubah. Di bangku itu, ia mulai bisa membicarakan hal selain bagian yang rusak.
-- **together**: Daftar pekerjaan ditempel di dekat jembatan. Beberapa nama ditulis dengan huruf miring, beberapa terlalu besar. Sera menahan diri untuk tidak menuliskan namanya di setiap ruang kosong.
 
-**Narasi**
+*Latar: garden_restored. Tokoh: sera, banyu. *
 
-Banyu tetap tinggal di kota seberang. Dua kali seminggu ia datang memeriksa air dan duduk di bangku. Sera belajar menanyakan kabarnya sebelum menanyakan kapan ia akan pulang.
+**Narasi:** Sore itu Sera berhenti bekerja ketika cahaya mencapai bangku. Pekerjaannya belum selesai. Ia tetap duduk bersama ayahnya.
 
-**Sera**
+*Jika route = slow:* Sore itu Sera berhenti bekerja ketika cahaya mencapai bangku. Pekerjaannya belum selesai. Ia tetap duduk bersama ayahnya.
 
-Bawa ini untuk Rana. Panennya belum banyak. Jangan bilang ia harus menunggu kiriman berikutnya.
+*Jika route = together:* Daftar pekerjaan ditempel dekat jembatan. Ada nama Aren, Nyx, Banyu, dan beberapa tetangga. Sera tidak mengisi kembali ruang kosong dengan namanya sendiri.
 
-**Narasi**
+**Narasi:** Banyu tetap tinggal di kota seberang. Dua kali seminggu ia datang memeriksa air dan duduk di bangku. Sera mulai menanyakan kabarnya sebelum menanyakan kapan ia akan pulang.
 
-Aren menerima segenggam daun sup dan deck Rimba yang kini boleh ia bawa. Nyx menyelipkan selembar kertas bersih di sampingnya, untuk daftar pekerjaan yang belum mereka tahu.
 
-**Aren**
+*Latar: garden_restored. Tokoh: aren, sera. *
 
-Kita tulis namamu sebagai pengirim. Tidak perlu kata maaf di bawahnya.
+**Sera:** Ini daun sup untuk Rana. Belum banyak. Tolong bilang tidak perlu menunggu kiriman berikutnya.
+
+**Aren:** Akan kusampaikan. Deck Rimba-nya juga kukembalikan.
+
+**Sera:** Bawa saja dulu. Kalian masih akan membantu warga lain, kan? Aku punya susunan cadangan.
+
+**Nyx:** Kami akan menjaganya.
+
+**Aren:** Kutulis namamu di kantongnya. Rana pasti senang mendapat kabar darimu.

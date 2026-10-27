@@ -36,10 +36,15 @@ func run() -> void:
 	for page in Data.ENDING:
 		total_pages += 1
 		if page.has("choice"): choice_counts[page["choice"]] = true
-	check(total_pages == 90 and choice_counts.size() == 3,"Complete manuscript and three meaningful dialogue choices")
+	check(total_pages >= 150 and choice_counts.size() == 3,"Complete manuscript and three meaningful dialogue choices")
 	var st := Flow.initial()
 	st["choices"] = {"memory":"laughter","reply":"uncertain","ritual":"table"}
-	check(Flow.page_text(Data.ENDING[3],st).contains("dapur") and Flow.page_text(Data.ENDING[4],st).contains("menjahit"),"Earlier choices alter epilogue callbacks")
+	var callbacks := 0
+	for page in Data.ENDING:
+		if page.has("variant"):
+			check(Flow.page_text(page,st) == page["variants"][st["choices"][page["variant"]]],"Earlier choice selects authored epilogue callback")
+			callbacks += 1
+	check(callbacks >= 2,"Epilogue keeps meaningful callbacks")
 	var store := Store.new()
 	store.path = "user://eldoria_story_model_test.json"
 	store.story_progress = st
