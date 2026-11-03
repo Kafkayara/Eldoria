@@ -7,6 +7,8 @@ static func points(raw: Array, center: Vector2, scale_value: float, angle: float
 	return result
 
 static func draw(canvas: CanvasItem, id: String, center: Vector2, radius: float, color: Color, angle: float = 0.0, width: float = 1.5) -> void:
+	var aliases := {"cinder":"ember","oath":"solar_lance","bastion":"warden","weaver":"thorns","mirror_step":"mirror","archive":"hourglass","tender":"grove","roots":"verdant","trail":"compost"}
+	if aliases.has(id): id = aliases[id]
 	var path: Array = []
 	match id:
 		"grove":

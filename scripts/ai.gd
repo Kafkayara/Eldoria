@@ -29,6 +29,9 @@ static func main_action(duel) -> Dictionary:
 					for m in duel.fields[side]:
 						if not m.is_empty(): weakest = mini(weakest,int(m["atk"]))
 					value -= weakest / 2
+			if c["effect"] == "weave" and duel.has_monsters(1-side): value += 250
+			if c["effect"] in ["tend","grove_recover"] and duel.recover_index(side) >= 0: value += 350
+			if c["effect"] == "root_power": value += duel.root_bonus(side,c)
 			if c["effect"] == "draw":
 				value += 350
 			if c["effect"] == "twilight_setup" and not duel.sentinel_used[side] and duel.empty_backrow(side) >= 0:
@@ -52,6 +55,16 @@ static func main_action(duel) -> Dictionary:
 		if card["kind"] != "spell" or duel.empty_backrow(side) < 0:
 			continue
 		match card["effect"]:
+			"oath","roots","bounce":
+				var best: int = -1
+				for z in range(3):
+					if not duel.spell_target_legal(card,z,side): continue
+					if card["effect"] in ["oath","roots"] and duel.fields[side][z]["defending"]: continue
+					var board_side: int = 1-side if card["effect"] == "bounce" else side
+					if best < 0 or duel.fields[board_side][z]["atk"] > duel.fields[board_side][best]["atk"]: best = z
+				if best >= 0: return {"type":"play","index":i,"target":best}
+			"archive":
+				if duel.archive_turn[side] != duel.turn_number and not duel.grave_options(side,true).is_empty(): return {"type":"play","index":i,"target":-1}
 			"recover","compost":
 				if duel.recover_index(side) >= 0: return {"type":"play","index":i,"target":-1}
 			"insight":
@@ -86,7 +99,7 @@ static func main_action(duel) -> Dictionary:
 				safe = false
 		if safe:
 			return {"type":"position", "zone":z}
-	return {"type":"battle"}
+	return {"type":"end"} if duel.turn_number == 1 else {"type":"battle"}
 
 static func battle_action(duel) -> Dictionary:
 	var side: int = duel.turn
@@ -95,6 +108,7 @@ static func battle_action(duel) -> Dictionary:
 		if source.is_empty() or source["defending"] or source["attacked"]:
 			continue
 		if not duel.has_monsters(1-side):
+			if source.get("no_direct",false): continue
 			return {"type":"attack", "zone":z, "target":-1}
 		var best: int = -1
 		var best_score: int = -100000

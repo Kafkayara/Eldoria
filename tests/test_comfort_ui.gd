@@ -19,7 +19,7 @@ func capture(name_value: String) -> void:
 	await process_frame
 	if DisplayServer.get_name() == "headless": return
 	RenderingServer.force_draw(false)
-	root.get_texture().get_image().save_png("C:/Users/Kafka/Documents/Codex/2026-10-25/jadi-kan-aku-mau-buat-game/outputs/"+name_value+".png")
+	root.get_texture().get_image().save_png("user://"+name_value+".png")
 func escape() -> void:
 	var key := InputEventKey.new()
 	key.keycode = KEY_ESCAPE

@@ -17,7 +17,7 @@ func shot(name_value: String) -> void:
  await process_frame
  if DisplayServer.get_name() == "headless": return
  RenderingServer.force_draw(false)
- root.get_texture().get_image().save_png("C:/Users/Kafka/Documents/Codex/2026-10-25/jadi-kan-aku-mau-buat-game/outputs/eldoria-v18-"+name_value+".png")
+ root.get_texture().get_image().save_png("user://eldoria-v18-"+name_value+".png")
 func run() -> void:
  root.size = Vector2i(1280,720)
  var view = load("res://scripts/story_view.gd").new()

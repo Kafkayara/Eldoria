@@ -18,7 +18,7 @@ func capture(name_value: String) -> void:
 	await process_frame
 	if DisplayServer.get_name() == "headless": return
 	RenderingServer.force_draw(false)
-	root.get_texture().get_image().save_png("C:/Users/Kafka/Documents/Codex/2026-10-25/jadi-kan-aku-mau-buat-game/outputs/"+name_value+".png")
+	root.get_texture().get_image().save_png("user://"+name_value+".png")
 func unit(id: String) -> Dictionary:
 	var c: Dictionary = Catalog.card(id)
 	c.merge({"uid":7,"defending":false,"attacked":false,"switched":false,"summoned_turn":1,"shield":false})
@@ -67,11 +67,13 @@ func run() -> void:
 	d.backrows = [[{},{},{}],[{},{},{}]]
 	board._render()
 	board.grave_buttons[0].pressed.emit()
-	check(board.grave_layer.visible and board.grave_body.text.contains("Fenrir Zamrud") and not board._can_input(),"Clickable Grave explains automatic recovery target and blocks background input")
+	check(board.grave_layer.visible and board.grave_body.text.contains("Fenrir Zamrud") and not board._can_input(),"Clickable Grave explains recovery targets and blocks background input")
 	await capture("eldoria-v18-grave")
 	board.grave_layer.hide()
 	board._hand_clicked(0)
-	check(d.hands[0][0]["id"] == "fenrir" and board.fx.last_cue["card_id"] == "renewal","One-click spell recovers correct monster with visual")
+	check(board.target_layer.visible,"Recovery opens target selection")
+	board._choose_target(0)
+	check(d.hands[0][0]["id"] == "fenrir" and board.fx.last_cue["card_id"] == "renewal","Selected recovery resolves with visual")
 	board._undo_action()
 	check(d.hands[0][0]["id"] == "renewal" and d.graves[0][0]["id"] == "fenrir","UI Undo restores recovery")
 	d.hands[0] = [Catalog.card("verdant")]
@@ -87,7 +89,7 @@ func run() -> void:
 	board._open_menu()
 	board._open_gallery()
 	board.gallery.select_card("grove")
-	check(board.gallery.tiles.size() == 25,"Gallery includes all new card types")
+	check(board.gallery.tiles.size() == 34,"Gallery includes all new card types")
 	await capture("eldoria-v18-rimba-gallery")
 	board._close_gallery()
 	var old := Flow.initial()

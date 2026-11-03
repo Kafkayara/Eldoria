@@ -115,6 +115,14 @@ var displayed_lp: Array = [4000.0,4000.0]
 var lp_targets: Array = [4000,4000]
 var lp_tweens: Array = [null,null]
 var gallery
+var builder
+var target_layer: Control
+var target_title: Label
+var target_list: VBoxContainer
+var target_cancel: Button
+var target_signature: String = ""
+var story_comment: Label
+var story_comment_waiting: bool = false
 var effects_button: Button
 var impact_until: float = 0.0
 var collection_store = DeckStore.new()
@@ -149,7 +157,7 @@ func _ready() -> void:
 	app_theme.default_font_size = 17
 	theme = app_theme
 	collection_store.load_data()
-	if not Catalog.PRESETS.has(collection_store.active): collection_store.active = "fajar"
+	if not collection_store.entries().has(collection_store.active): collection_store.active = "fajar"
 	_build_ui()
 	_build_audio()
 	_apply_comfort_preferences()
@@ -361,6 +369,7 @@ func _build_ui() -> void:
 	_build_comfort_ui()
 	_build_story_ui()
 	_build_grave_ui()
+	_build_expansion_ui()
 
 func _overlay() -> Control:
 	var node := Control.new()
@@ -392,8 +401,8 @@ func _build_menu() -> void:
 	_button(menu_layer,"MULAI DUEL",Rect2(99,479,508,58),_start_free_duel,true)
 	_button(menu_layer,"GALERI KARTU",Rect2(99,552,246,45),_open_gallery)
 	_button(menu_layer,"Cara bermain",Rect2(361,552,246,45),_open_quick_guide)
-	_label(menu_layer,"DECK BAWAAN / 20 KARTU / KOLEKSI DI GALERI",Rect2(99,606,508,26),14,MUTED)
-	_label(menu_layer,"VERSI 0.18 / ELDORIA VISUAL NOVEL",Rect2(65,663,600,29),14,MUTED)
+	_label(menu_layer,"34 JENIS KARTU / SEMUA LANGSUNG TERSEDIA",Rect2(99,606,508,26),14,MUTED)
+	_label(menu_layer,"VERSI 0.19 / JEJAK STRATEGI",Rect2(65,663,600,29),14,MUTED)
 
 func _build_help() -> void:
 	help_layer = _overlay()
@@ -410,7 +419,7 @@ func _build_help() -> void:
 	body.text += "\n\n[color=#dfbf81]12  FAJAR VS GERHANA[/color]\nFajar memakai 13 monster, 6 spell, dan 1 trap. Naga Bara kini 2500 ATK dan tetap memberi 300 damage saat summon. Penjaga Fajar 1700 ATK. Tiga Peri Astral membantu mengambil kartu; Pasang Segel Hening terlebih dahulu agar mulai giliran berikutnya bisa membalas Cermin atau Belenggu. Naga Noctis tetap 2300 ATK dan bertahan dari kehancuran battle sekali. Bara unggul dalam tekanan serangan; Noctis unggul dalam ketahanan. Perhatikan trap dan gunakan Berkah Fajar sebelum Battle.\n"
 	body.text += "\n\n[color=#dfbf81]13  KOMBINASI DECK[/color]\nFAJAR: Tombak Surya memberi +500 ATK, -300 DEF, dan MENEMBUS selama monster di papan. Selisih ATK atas DEF mengurangi LP meskipun target memakai perisai. Contoh: Penjaga Fajar 1700 + Tombak 500 melawan Burung Hantu DEF 2000 memberikan 200 damage. Berkah Fajar dapat ditambahkan; siapkan Segel Hening untuk melawan trap. DEF yang turun membuat perubahan ke posisi bertahan lebih berisiko.\n\nGERHANA: Selubung Gerhana memberi +400 ATK/DEF dan satu perisai. Pakai pada Noctis setelah perisainya habis untuk bertahan lalu menyerang balik. Perisai tidak menumpuk dan tidak melindungi LP atau penghancuran oleh spell. Cermin membatalkan serangan menembus; Belenggu mengurangi ATK sebelum selisih dihitung; Segel dapat membatalkan kedua spell baru.\n\nMasing-masing deck tetap 20 kartu dan memuat satu kartu baru. Lihat ilustrasi, cerita, serta efek lengkap di Galeri Kartu."
 	body.text += "\n\n[color=#dfbf81]14  PENGATURAN & HASIL[/color]\nBuka Pengaturan di menu atau kanan papan. Volume musik dan efek suara terpisah. Kecepatan animasi 1x / 1,5x / 2x tidak mengubah tempo musik. Efek ringkas mengurangi gerakan; pilihan tersimpan otomatis. Panduan singkat menjelaskan inti duel dalam tiga halaman. Layar hasil merangkum LP, kerusakan, pemulihan, trap, serangan terbesar, dan momen terakhir. Aksi yang di-Undo ikut dihapus dari ringkasan.\n"
-	body.text += "\n\n[color=#dfbf81]15  RIMBA / GRAVE[/color]\nKlik GRAVE / LIHAT untuk membaca kartu yang sudah terpakai. Benih Pulang mengembalikan monster ALAM level 4 ke bawah ke tangan, bukan langsung ke papan. Target otomatis adalah ATK dasar tertinggi, lalu kartu yang paling akhir masuk Grave jika seri. Penjaga Tunas memulihkan sekali per duel untuk semua salinannya. Lingkar Musim mengembalikan target ke dasar deck, draw satu, dan heal 400. Naga Akar Purba mendapat +150 ATK per ALAM di Grave saat summon, maksimal tiga; bonus tidak berubah setelahnya. Memulihkan monster sebelum summon naga mengurangi isi Grave. Buku II memperkenalkan Sera dan Rimba setelah lima bab Buku I selesai.\n"
+	body.text += "\n\n[color=#dfbf81]15  RIMBA / GRAVE[/color]\nKlik GRAVE / LIHAT untuk membaca kartu yang sudah terpakai. Benih Pulang mengembalikan monster ALAM level 4 ke bawah ke tangan, bukan langsung ke papan. Pilih sendiri target yang legal dari Grave saat efek digunakan. Penjaga Tunas memulihkan sekali per duel untuk semua salinannya. Lingkar Musim mengembalikan target ke dasar deck, draw satu, dan heal 400. Naga Akar Purba mendapat +150 ATK per ALAM di Grave saat summon, maksimal tiga; bonus tidak berubah setelahnya. Memulihkan monster sebelum summon naga mengurangi isi Grave. Buku II memperkenalkan Sera dan Rimba setelah lima bab Buku I selesai.\n"
 	_place(body,help_layer,Rect2(252,135,776,443))
 	_button(help_layer,"MENGERTI",Rect2(252,600,776,45),func(): help_layer.hide(),true)
 	help_layer.hide()
@@ -474,6 +483,10 @@ func _toggle_audio() -> void:
 	audio_button.text = "AUDIO: OFF" if muted else "AUDIO: ON"
 
 func _new_duel(first_side: int = 0) -> void:
+	duel.interactive_targets = true
+	target_layer.hide()
+	target_signature = ""
+	story_comment.hide()
 	session += 1
 	_reset_visuals()
 	if is_instance_valid(response_layer): response_layer.hide()
@@ -498,7 +511,7 @@ func _new_duel(first_side: int = 0) -> void:
 	player_label.text = "AREN / "+player_key.to_upper() if story_mode else "KAMU"
 	arena_mode_label.text = "BUKU %s / BAB %d / %s" % [story_view.Data.BOOK_NUMBER,story_view.progress["chapter"]+1,player_key.to_upper()] if story_mode else "ARENA ASTRAL / DUEL SOLO"
 	arena_mode_label.tooltip_text = cfg.get("focus","")
-	duel.start(-1,first_side,Catalog.PRESETS.get(player_key,Catalog.PRESETS["fajar"])["cards"],Catalog.PRESETS.get(enemy_key,Catalog.PRESETS["gerhana"])["cards"])
+	duel.start(-1,first_side,collection_store.cards(player_key),collection_store.cards(enemy_key))
 	starting = false
 	_inspect(duel.hands[0][0] if story_mode and not duel.hands[0].is_empty() else Catalog.card("dawn"))
 	_render()
@@ -566,6 +579,9 @@ func _begin_duel(first_side: int) -> void:
 		_run_ai(session)
 
 func _open_menu() -> void:
+	if is_instance_valid(target_layer): target_layer.hide()
+	if is_instance_valid(builder): builder.hide()
+	if is_instance_valid(story_comment): story_comment.hide()
 	grave_layer.hide()
 	story_mode = false
 	story_view.hide()
@@ -607,6 +623,8 @@ func _render() -> void:
 				var effect: String = chosen["effect"]
 				if chosen["kind"] == "monster" and side == 0:
 					view.selected = (view.data.is_empty() or int(chosen["level"]) > 4) and Hints.hand_reason(duel,chosen).is_empty()
+				elif effect in ["oath","roots","bounce"] and side == (1 if effect == "bounce" else 0):
+					view.selected = duel.spell_target_legal(chosen,index,0)
 				elif effect == "buff" and side == 0 and Hints.hand_reason(duel,chosen).is_empty():
 					view.selected = not view.data.is_empty()
 				elif effect == "destroy" and side == 1 and Hints.hand_reason(duel,chosen).is_empty():
@@ -642,7 +660,7 @@ func _render() -> void:
 	battle_button.visible = duel.phase == "MAIN"
 	battle_button.disabled = not active or duel.turn_number == 1
 	direct_button.visible = duel.phase == "BATTLE"
-	direct_button.disabled = not active or not _attacker_ready() or duel.has_monsters(1)
+	direct_button.disabled = not active or not _attacker_ready() or duel.has_monsters(1) or (selected_zone >= 0 and duel.fields[0][selected_zone].get("no_direct",false))
 	end_button.disabled = not active
 	skill_button.disabled = not active or duel.phase != "MAIN" or duel.skill_used[0] or int(duel.lp[0]) > 2500
 	skill_button.text = "SKILL SUDAH DIPAKAI" if duel.skill_used[0] else "Kebangkitan Fajar"
@@ -662,7 +680,9 @@ func _render() -> void:
 	undo_button.text = "UNDO (%d) / Ctrl+Z" % duel.undo_stack.size()
 	if is_instance_valid(result_undo_button): result_undo_button.visible = duel.can_undo()
 	_render_backrows()
+	_sync_targets()
 	_sync_response()
+	if not story_comment_waiting: _flush_story_comments()
 	_sync_music()
 
 func _inspect(card: Dictionary) -> void:
@@ -678,7 +698,7 @@ func _inspect(card: Dictionary) -> void:
 	if card.get("shield",false): detail_desc.text += "\n\nSTATUS PAPAN: PERISAI aktif (1 kehancuran akibat serangan)."
 	if card["effect"] in ["recover","compost","grove_recover"] and not menu_layer.visible and not gallery.visible:
 		var index: int = duel.recover_index(0)
-		detail_desc.text += "\n\nGrave kamu: " + ("target otomatis: "+duel.graves[0][index]["name"] if index >= 0 else "belum ada target yang sesuai.")
+		detail_desc.text += "\n\nGrave kamu: " + ("pilihan target tersedia, misalnya "+duel.graves[0][index]["name"] if index >= 0 else "belum ada target yang sesuai.")
 		if card["effect"] == "grove_recover" and duel.grove_used[0]: detail_desc.text += " Pemulihan Penjaga Tunas sudah dipakai pada duel ini."
 	if card["effect"] == "root_power" and not menu_layer.visible and not gallery.visible:
 		detail_desc.text += ("\n\nBonus saat summon: +%d ATK (tetap selama di papan)." % card.get("root_bonus",0)) if card.has("uid") else ("\n\nBonus dari isi Grave sekarang: +%d ATK. Tribute ALAM ikut dihitung ketika summon." % duel.root_bonus(0,card))
@@ -704,7 +724,7 @@ func _zone_hover(side: int, zone: int) -> void:
 			_queue_hover(card)
 
 func _can_input() -> bool:
-	return not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible and not grave_layer.visible
+	return duel.pending_choice.is_empty() and not builder.visible and not _ace_active() and not trap_presenting and duel.chain.is_empty() and not coin_layer.visible and duel.turn == 0 and not duel.over and not menu_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible and not grave_layer.visible
 
 func _hand_clicked(index: int) -> void:
 	if not _can_input() or index < 0 or index >= duel.hands[0].size():
@@ -729,11 +749,11 @@ func _hand_clicked(index: int) -> void:
 		_message("Pilihan kartu dibatalkan.")
 	elif card["kind"] == "trap":
 		_message("Klik PASANG DI SINI di kanan papanmu. Aktif mulai giliran berikutnya." if duel.empty_backrow(0) >= 0 else "Ketiga zona spell/trap penuh. Jebakan ini belum dapat dipasang.")
-	elif card["kind"] == "spell" and card["effect"] not in ["buff","destroy"]:
+	elif card["kind"] == "spell" and card["effect"] not in ["buff","destroy","oath","roots","bounce"]:
 		if duel.play(index):
 			selected_hand = -1
 	elif card["kind"] == "spell":
-		_message("Pilih monster %s sebagai target %s." % ["milikmu" if card["effect"] == "buff" else "lawan",card["name"]])
+		_message("Pilih monster %s sebagai target %s." % ["milikmu" if card["effect"] in ["buff","oath","roots"] else "lawan",card["name"]])
 	else:
 		_message("Pilih zona milikmu untuk summon %s%s." % [card["name"]," (perlu 1 tribute)" if int(card["level"]) > 4 else ""])
 	_render()
@@ -745,7 +765,7 @@ func _zone_clicked(side: int, zone: int) -> void:
 	_inspect(duel.fields[side][zone])
 	if selected_hand >= 0 and selected_hand < duel.hands[0].size() and duel.phase == "MAIN":
 		var card: Dictionary = duel.hands[0][selected_hand]
-		if (card["kind"] == "monster" and side == 0) or (card["effect"] == "buff" and side == 0) or (card["effect"] == "destroy" and side == 1):
+		if (card["kind"] == "monster" and side == 0) or (card["effect"] in ["buff","oath","roots"] and side == 0) or (card["effect"] in ["destroy","bounce"] and side == 1):
 			if duel.play(selected_hand,zone,summon_defense):
 				selected_hand = -1
 				selected_zone = -1
@@ -813,7 +833,7 @@ func _run_ai(token: int) -> void:
 	await get_tree().create_timer(_pace(0.8)).timeout
 	var steps: int = 0
 	while token == session and duel.turn == 1 and not duel.over and steps < 45:
-		if _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible or grave_layer.visible:
+		if not duel.pending_choice.is_empty() or _ace_active() or trap_presenting or not duel.chain.is_empty() or help_layer.visible or zoom_layer.visible or gallery.visible or settings_layer.visible or quick_guide_layer.visible or story_view.visible or grave_layer.visible:
 			await get_tree().create_timer(0.2).timeout
 			continue
 		steps += 1
@@ -913,6 +933,14 @@ func _attacker_ready() -> bool:
 	return not monster.is_empty() and not monster["defending"] and not monster["attacked"]
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if target_layer.visible:
+		if event.is_action_pressed("ui_cancel"): _choose_target(-1)
+		get_viewport().set_input_as_handled()
+		return
+	if builder.visible and not zoom_layer.visible:
+		if event.is_action_pressed("ui_cancel"): _close_builder()
+		get_viewport().set_input_as_handled()
+		return
 	if grave_layer.visible:
 		if event.is_action_pressed("ui_cancel"): grave_layer.hide()
 		get_viewport().set_input_as_handled()
@@ -1402,7 +1430,7 @@ func _save_preferences() -> void:
 
 func _refresh_deck_choices() -> void:
 	deck_select.clear()
-	var all: Dictionary = Catalog.PRESETS
+	var all: Dictionary = collection_store.entries()
 	for key in all:
 		deck_select.add_item(all[key]["name"])
 		deck_select.set_item_metadata(deck_select.item_count-1,key)
@@ -1456,6 +1484,9 @@ func _backrow_clicked(side: int, z: int) -> void:
 		_open_card_zoom(card)
 
 func _sync_response() -> void:
+	if not duel.pending_choice.is_empty():
+		response_layer.hide()
+		return
 	if not is_instance_valid(response_layer): return
 	if duel.chain.is_empty() or duel.priority < 0 or menu_layer.visible or coin_layer.visible:
 		response_layer.hide()
@@ -1613,10 +1644,12 @@ func _ace_active() -> bool:
 
 func _finish_ace(token: int) -> void:
 	await get_tree().create_timer(_pace(1.08)).timeout
-	if token == session: _render()
+	if token == session:
+		ace_active_until = 0.0
+		_render()
 
 func _can_undo_input() -> bool:
-	return duel.can_undo() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible and not grave_layer.visible
+	return duel.can_undo() and not builder.visible and duel.pending_choice.is_empty() and not menu_layer.visible and not coin_layer.visible and not help_layer.visible and not zoom_layer.visible and not gallery.visible and not settings_layer.visible and not quick_guide_layer.visible and not story_view.visible and not grave_layer.visible
 
 func _undo_action() -> void:
 	if _can_undo_input(): duel.undo()
@@ -1625,6 +1658,7 @@ func _capture_undo_ui(snapshot: Dictionary) -> void:
 	snapshot["ui"] = {"history":history.duplicate(),"inspected":inspected_card.duplicate(true),"aces":ace_seen.duplicate(true),"summon_defense":summon_defense,"summary":duel_summary.snapshot()}
 
 func _restore_undo_ui(snapshot: Dictionary) -> void:
+	story_comment.hide()
 	# Invalidate pending AI replies, impacts, LP tweens, and victory timers.
 	session += 1
 	combat_serial += 1
@@ -1838,7 +1872,7 @@ func _open_grave(side: int) -> void:
 	grave_title.text = "GRAVE / "+duel.who(side).to_upper()
 	var lines: Array[String] = ["%d kartu / %d monster ALAM" % [duel.graves[side].size(),duel.nature_count(side)],""]
 	var index: int = duel.recover_index(side)
-	if index >= 0: lines.append("Target pemulihan otomatis: "+duel.graves[side][index]["name"]+"\n")
+	if index >= 0: lines.append("Salah satu target pemulihan: "+duel.graves[side][index]["name"]+"\n")
 	for card in duel.graves[side]:
 		var base: Dictionary = Catalog.card(card["id"])
 		lines.append(base["name"]+" / "+Catalog.type_text(base))
@@ -1852,3 +1886,91 @@ func _open_grave(side: int) -> void:
 func _save_vn_preferences(value: Dictionary) -> void:
 	collection_store.vn_preferences = value.duplicate()
 	_save_preferences()
+
+func _build_expansion_ui() -> void:
+	_button(menu_layer,"RACIK DECK / SEMUA KARTU TERBUKA",Rect2(700,608,420,42),_open_builder)
+	builder = preload("res://scripts/deck_builder.gd").new()
+	_place(builder,self,Rect2(0,0,1280,720))
+	builder.closed.connect(_close_builder)
+	builder.saved.connect(_refresh_deck_choices)
+	builder.inspect_requested.connect(_open_card_zoom)
+	builder.hide()
+	target_layer = _overlay()
+	_panel(target_layer,Rect2(235,65,810,590),GOLD)
+	target_title = _label(target_layer,"PILIH TARGET",Rect2(270,88,740,58),23,GOLD)
+	target_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var scroll := ScrollContainer.new()
+	_place(scroll,target_layer,Rect2(270,161,740,395))
+	target_list = VBoxContainer.new()
+	target_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target_list.add_theme_constant_override("separation",12)
+	scroll.add_child(target_list)
+	target_cancel = _button(target_layer,"BATAL",Rect2(270,580,740,42),_choose_target.bind(-1))
+	target_layer.hide()
+	story_comment = _label(self,"",Rect2(399,97,480,58),16,GOLD)
+	story_comment.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	story_comment.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	story_comment.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	story_comment.hide()
+	move_child(zoom_layer,get_child_count()-1)
+
+func _open_builder() -> void:
+	menu_layer.hide()
+	builder.show_builder(collection_store)
+
+func _close_builder() -> void:
+	builder.hide()
+	_refresh_deck_choices()
+	menu_layer.show()
+
+func _sync_targets() -> void:
+	if not is_instance_valid(target_layer): return
+	if duel.pending_choice.is_empty():
+		target_layer.hide()
+		target_signature = ""
+		return
+	var signature: String = JSON.stringify(duel.pending_choice)
+	if signature != target_signature:
+		target_signature = signature
+		_clear_children(target_list)
+		target_title.text = duel.pending_choice["title"]
+		target_cancel.text = "LEWATI EFEK" if duel.pending_choice["kind"] == "summon" else "BATAL / KEMBALI"
+		for index in duel.choice_options(0):
+			var c: Dictionary = duel.fields[1][index] if duel.pending_choice.get("board",false) else duel.graves[0][index]
+			var button := Button.new()
+			var shown: Dictionary = c if duel.pending_choice.get("board",false) else Catalog.card(c["id"])
+			var stats: String = " / %d ATK / %d DEF" % [shown["atk"],shown["def"]] if c["kind"] == "monster" else ""
+			button.text = c["name"]+" / "+Catalog.type_text(c)+stats+"\n"+c["text"]
+			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			button.custom_minimum_size = Vector2(700,110)
+			button.add_theme_font_size_override("font_size",17)
+			button.pressed.connect(_choose_target.bind(index))
+			target_list.add_child(button)
+	target_layer.show()
+
+func _choose_target(index: int) -> void:
+	duel.choose_target(0,index)
+	selected_hand = -1
+	selected_zone = -1
+	_render()
+
+func _flush_story_comments() -> void:
+	if not story_mode or story_view.Data.BOOK_ID != "jendela_pagi" or story_view.progress["chapter"] != 2: return
+	if duel.over or menu_layer.visible or story_view.visible: return
+	story_comment_waiting = true
+	var token: int = session
+	await get_tree().process_frame
+	while token == session and (trap_presenting or not duel.chain.is_empty() or not duel.pending_choice.is_empty() or Time.get_ticks_msec()/1000.0 < impact_until):
+		await get_tree().create_timer(0.1).timeout
+	if token == session and not duel.over:
+		var lines := {"nyx_archive":"Nyx: Kalau masih bisa kuambil kembali... aku belum harus melepaskannya.","aren_breakthrough":"Aren: Aku juga mengingatnya, Nyx. Tapi kita masih punya giliran berikutnya."}
+		for key in lines:
+			if duel.story_flags.get(key,false) and not duel.story_flags.get(key+"_shown",false):
+				duel.story_flags[key+"_shown"] = true
+				story_comment.text = lines[key]
+				story_comment.show()
+				_message(lines[key])
+				await get_tree().create_timer(5.0).timeout
+				if token != session: break
+				story_comment.hide()
+	story_comment_waiting = false

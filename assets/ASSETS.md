@@ -65,3 +65,8 @@ Lima ilustrasi orisinal dibuat dengan built-in image_gen: assets/art/grove.png, 
 ## v0.18 — Visual novel
 
 13 ilustrasi baru dibuat dengan built-in image_gen: `assets/vn/characters/{aren,nyx,liora,rana,iria,sera,banyu}.png` (potret transparan) dan `assets/vn/backgrounds/{kitchen_night,archive,tower,tower_dawn,garden,garden_restored}.png` (latar). Seluruh prompt final, mode tool, dan lokasi sumber ada di `assets/vn/image_prompts.json`. Latar dapur siang `assets/story/window_morning.png` digunakan kembali; versi malam diturunkan dengan referensi gambar tersebut, begitu juga variasi menara/kebun. Desain tokoh/latar orisinal, tidak menggunakan aset visual novel lain. Dialog/potret/latar disusun oleh kode Godot, tanpa animasi wajah atau pengisi suara.
+
+
+## Jejak Strategi / v0.19
+
+Sembilan ilustrasi orisinal dibuat dengan image_gen bawaan untuk Pembawa Bara, Sumpah Fajar, Benteng Cahaya, Penenun Senja, Langkah ke Balik Cermin, Arsip Rembulan, Perawat Akar, Jalinan Akar, dan Jejak yang Tumbuh. Prompt: prompts/expansion_v19.json. Semua tersimpan sebagai PNG di art/ dan digunakan langsung oleh card_art.gd.

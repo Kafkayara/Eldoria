@@ -19,7 +19,7 @@ func capture(name_value: String) -> void:
 	await process_frame
 	if DisplayServer.get_name() == "headless": return
 	RenderingServer.force_draw(false)
-	root.get_texture().get_image().save_png("C:/Users/Kafka/Documents/Codex/2026-10-25/jadi-kan-aku-mau-buat-game/outputs/"+name_value+".png")
+	root.get_texture().get_image().save_png("user://"+name_value+".png")
 func run() -> void:
 	root.size = Vector2i(1280,720)
 	board = load("res://main.tscn").instantiate()
@@ -27,7 +27,7 @@ func run() -> void:
 	await process_frame
 	board._open_gallery()
 	board.gallery.select_card("solar_lance")
-	check(board.gallery.tiles.size() == 25 and board.gallery.description.text.contains("MENEMBUS"),"New spell visible in complete gallery")
+	check(board.gallery.tiles.size() == 34 and board.gallery.description.text.contains("MENEMBUS"),"New spell visible in complete gallery")
 	board.gallery.inspect_selected()
 	check(board.zoom_title.text == "Tombak Surya" and board.zoom_description.text.contains("-300"),"Zoom explains offense drawback")
 	await capture("eldoria-v14-tombak-surya")

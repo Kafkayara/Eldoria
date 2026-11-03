@@ -1,0 +1,61 @@
+{
+  "generator": "Built-in image_gen",
+  "date": "2026-11-03",
+  "common_prompt": "Original anime fantasy trading card illustration for Eldoria. Portrait composition, no text, no card border, no logos. Detailed painted fantasy, luminous magic, ivory and brass observatory / emerald forest aesthetic, melancholy yet hopeful. Clear central subject readable when small.",
+  "illustrations": [
+    {
+      "id": "cinder",
+      "name": "Pembawa Bara",
+      "file": "assets/art/cinder.png",
+      "subject": "a young fire courier carrying a glowing ember lantern, ivory cloak, copper armor, volcanic dawn"
+    },
+    {
+      "id": "oath",
+      "name": "Sumpah Fajar",
+      "file": "assets/art/oath.png",
+      "subject": "a knight solemnly raising a blazing sword at sunrise, armor opening to radiant light, risky vow"
+    },
+    {
+      "id": "bastion",
+      "name": "Benteng Cahaya",
+      "file": "assets/art/bastion.png",
+      "subject": "a luminous golden bulwark protecting a knight from a dark spear, crystalline sunlight shield"
+    },
+    {
+      "id": "weaver",
+      "name": "Penenun Senja",
+      "file": "assets/art/weaver.png",
+      "subject": "an elegant moon witch weaving silver threads that bind an armored knight into a kneeling defensive stance"
+    },
+    {
+      "id": "mirror_step",
+      "name": "Langkah ke Balik Cermin",
+      "file": "assets/art/mirror_step.png",
+      "subject": "an armored warrior stepping backward into a tall fractured silver mirror, violet moonlight observatory"
+    },
+    {
+      "id": "archive",
+      "name": "Arsip Rembulan",
+      "file": "assets/art/archive.png",
+      "subject": "an ancient open moonlit archive book holding floating silver trap sigils, deep violet observatory shelves"
+    },
+    {
+      "id": "tender",
+      "name": "Perawat Akar",
+      "file": "assets/art/tender.png",
+      "subject": "a gentle forest herbalist kneeling beside a young tree, glowing roots, moss robes, emerald twilight"
+    },
+    {
+      "id": "roots",
+      "name": "Jalinan Akar",
+      "file": "assets/art/roots.png",
+      "subject": "ancient luminous emerald roots intertwining around a forest guardian armor, strength flowing from buried memories"
+    },
+    {
+      "id": "trail",
+      "name": "Jejak yang Tumbuh",
+      "file": "assets/art/trail.png",
+      "subject": "glowing leaf footprints growing into protective root vines beneath an incoming sword, emerald woodland"
+    }
+  ]
+}

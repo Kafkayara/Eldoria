@@ -849,12 +849,12 @@ const CHAPTERS = [
 		"player_deck": "fajar",
 		"enemy_deck": "gerhana",
 		"difficulty": "normal",
-		"focus": "Perisai tidak mencegah kerusakan LP. Cermin dan Belenggu dapat mengubah hasil serangan.",
+		"focus": "Nyx memakai Arsip Rembulan untuk mengambil kembali jebakan. Pancing responsnya, lalu pilih waktu untuk menembus pertahanannya.",
 		"memory": "Nyx mempertahankan sembilan belas detik sarapan biasa karena takut tak lagi dapat mengingat suara Liora.",
 		"intro": [
 			{
 				"speaker": "Narasi",
-				"text": "Di ruang Suaka, kristal kecil menyala di tengah lingkaran logam. Nyx duduk di lantai dengan buku catatan di lutut.",
+				"text": "Nyx duduk dekat kristal Suaka. Kartu Arsip Rembulan menindih catatannya. Seperti rekaman Liora, halaman itu ia buka berulang kali.",
 				"bg": "tower",
 				"cast": [
 					"aren",

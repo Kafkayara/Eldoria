@@ -3,6 +3,15 @@ const Sigils = preload("res://scripts/sigils.gd")
 const Painter = preload("res://scripts/effects_painter.gd")
 const MAX_EVENTS: int = 8
 const PROFILES = {
+	"cinder":{"shape":"cinder_signature","color":Color("#eaa15c"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"oath":{"shape":"oath_signature","color":Color("#ffd07d"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"bastion":{"shape":"bastion_signature","color":Color("#ffe4a0"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"weaver":{"shape":"weaver_signature","color":Color("#b8a5df"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"mirror_step":{"shape":"mirror_step_signature","color":Color("#a9c2ee"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"archive":{"shape":"archive_signature","color":Color("#c4a9ec"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"tender":{"shape":"tender_signature","color":Color("#a9d6a0"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"roots":{"shape":"roots_signature","color":Color("#82c39b"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
+	"trail":{"shape":"trail_signature","color":Color("#92d1b1"),"light":Color("#edf5e9"),"impact":0.42,"duration":0.95},
 	"grove":{"shape":"grove_growth","color":Color("#83b866"),"light":Color("#ecf2bf"),"impact":0.4,"duration":1.05},
 	"stag":{"shape":"stag_growth","color":Color("#a4c68e"),"light":Color("#ecf2bf"),"impact":0.45,"duration":1.05},
 	"verdant":{"shape":"verdant_growth","color":Color("#68ac80"),"light":Color("#ecf2bf"),"impact":0.52,"duration":1.05},
@@ -190,6 +199,9 @@ func _draw_event(event: Dictionary) -> void:
 		Sigils.draw(painter,event["card_id"],center,15+18*travel,color,event["time"]*0.5,2)
 		if hit:
 			painter.draw_arc(b,18+after*45,0,TAU,40,_color(light,1-after),2,true)
+		return
+	if event["card_id"] in ["cinder","oath","bastion","weaver","mirror_step","archive","tender","roots","trail"]:
+		_draw_expansion(event,a,b,color,light,travel,after,hit)
 		return
 	match event["card_id"]:
 		"grove":
@@ -574,3 +586,45 @@ func _draw_lunar(event: Dictionary, a: Vector2, b: Vector2, color: Color, light:
 				var point: Vector2 = b+Vector2.from_angle(angle)*(20+after*20)
 				painter.draw_circle(point,1.6,light)
 			Sigils.draw(painter,"hourglass",b,25,color,0,2.5)
+
+func _draw_expansion(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: Color, travel: float, after: float, hit: bool) -> void:
+	var point: Vector2 = b if hit else a.lerp(b,travel)
+	match event["card_id"]:
+		"cinder":
+			_draw_flame(a,b,travel,after,hit,color,light,event["time"])
+			painter.draw_arc(point,16,0,TAU,24,light,2,true)
+		"oath":
+			painter.draw_line(b+Vector2(-33,35)*travel,b+Vector2(33,-35)*travel,light,5,true)
+			_rays(b,40*travel,color,6,PI/6)
+		"bastion":
+			_draw_guard(b,color,light,travel)
+			for x in [-30,0,30]: painter.draw_line(b+Vector2(x,32),b+Vector2(x,32-65*travel),light,2,true)
+		"weaver":
+			for i in range(5):
+				var offset := Vector2((i-2)*11,0)
+				painter.draw_line(a+offset,point-offset,color,1.5,true)
+			Sigils.draw(painter,"thorns",b,28*travel,light,event["time"],2)
+		"mirror_step":
+			for i in range(3): painter.draw_rect(Rect2(b-Vector2(22+i*7,36),Vector2(44+i*14,72)),_color(color,1-i*.25),false,2)
+			painter.draw_line(b,b+(a-b)*travel,light,2,true)
+		"archive":
+			for i in range(4):
+				var offset := Vector2((i-1.5)*13,-sin(travel*PI+i*.3)*25)
+				painter.draw_rect(Rect2(b+offset-Vector2(8,15),Vector2(16,30)),color,false,2)
+			Sigils.draw(painter,"hourglass",b,14,light,0,2)
+		"tender":
+			for i in range(3): _leaf(point+Vector2.from_angle(i*TAU/3)*16,10,event["time"]+i,color)
+			painter.draw_arc(b,28*travel,PI,TAU,28,light,2,true)
+		"roots":
+			for i in range(4):
+				var path := PackedVector2Array()
+				for step in range(16):
+					var u: float = step/15.0*travel
+					path.append(b+Vector2(sin(u*TAU+i)*20+(i-1.5)*12,35-u*78))
+				_line(path,color,2.5)
+		"trail":
+			for i in range(5):
+				var u: float = minf(travel,(i+1)/5.0)
+				var center: Vector2 = a.lerp(b,u)+Vector2((i%2*2-1)*9,0)
+				_leaf(center,8,event["time"]+i,light)
+			Sigils.draw(painter,"grove",b,23*travel,color,0,2)

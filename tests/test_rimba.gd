@@ -30,7 +30,7 @@ func trap(d):
 	d.backrows[1][0].merge({"set_turn":1,"faceup":false})
 func _initialize() -> void: call_deferred("run")
 func run() -> void:
-	check(Catalog.CARDS.size() == 25 and Catalog.PRESETS.size() == 3,"Five new cards and third deck")
+	check(Catalog.CARDS.size() == 34 and Catalog.PRESETS.size() == 3,"Expanded collection and three decks")
 	check(Catalog.validate(Catalog.RIMBA).is_empty(),"20-card Rimba preset legal")
 	var d = fresh()
 	d.hands[0] = [Catalog.card("renewal")]

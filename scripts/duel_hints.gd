@@ -4,6 +4,7 @@ const Catalog = preload("res://scripts/catalog.gd")
 static func hand_reason(d, card: Dictionary) -> String:
 	if d.over: return "Duel sudah selesai."
 	if d.turn != 0: return "Tunggu giliranmu."
+	if not d.pending_choice.is_empty(): return "Pilih target atau batalkan pilihan terlebih dahulu."
 	if not d.chain.is_empty(): return "Selesaikan respons terlebih dahulu."
 	if d.phase != "MAIN": return "Kartu tangan hanya dimainkan pada Main Phase."
 	if card["kind"] == "monster":
@@ -13,6 +14,12 @@ static func hand_reason(d, card: Dictionary) -> String:
 	else:
 		if d.empty_backrow(0) < 0: return "Zona spell/trap penuh. Sisakan 1 zona kosong."
 		if card["effect"] in ["recover","compost"] and d.recover_index(0) < 0: return "Butuh monster ALAM level 4 atau kurang di Grave."
+		if card["effect"] == "archive" and (d.archive_turn[0] == d.turn_number or d.grave_options(0,true).is_empty()): return "Butuh trap di Grave; Arsip hanya sekali per giliran."
+		if card["effect"] in ["oath","roots","bounce"]:
+			var legal := false
+			for z in range(3):
+				if d.spell_target_legal(card,z,0): legal = true
+			if not legal: return "Belum ada target atau syarat yang sesuai. "+card["text"]
 		if card["effect"] == "buff" and not d.has_monsters(0): return "Butuh monster milikmu sebagai target."
 		if card["effect"] == "destroy":
 			var found := false
@@ -24,6 +31,7 @@ static func hand_reason(d, card: Dictionary) -> String:
 static func monster_status(d, c: Dictionary) -> String:
 	if c.is_empty(): return ""
 	if d.over: return "DUEL SELESAI"
+	if not d.pending_choice.is_empty(): return "Pilih target atau batalkan pilihan terlebih dahulu."
 	if not d.chain.is_empty(): return "TUNGGU RESPONS"
 	if c.get("defending",false): return "BERTAHAN"
 	if c.get("attacked",false): return "SUDAH MENYERANG"
@@ -35,7 +43,10 @@ static func monster_status(d, c: Dictionary) -> String:
 static func stats(c: Dictionary) -> String:
 	if c.is_empty() or c["kind"] != "monster": return ""
 	var base: Dictionary = Catalog.card(c["id"])
-	return "ATK %d (%+d) / DEF %d (%+d) dari awal" % [c["atk"],int(c["atk"])-int(base["atk"]),c["def"],int(c["def"])-int(base["def"])]
+	var text: String = "ATK %d (%+d) / DEF %d (%+d) dari awal" % [c["atk"],int(c["atk"])-int(base["atk"]),c["def"],int(c["def"])-int(base["def"])]
+	if c.has("temp_atk") or c.has("temp_def"): text += "\nBonus/penurunan sementara berakhir saat giliran selesai."
+	if c.get("no_direct",false): text += "\nTidak bisa menyerang langsung giliran ini."
+	return text
 
 static func forecast(d, source: Dictionary, target: Dictionary) -> String:
 	var result := ""

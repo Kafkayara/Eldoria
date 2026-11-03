@@ -31,10 +31,10 @@ func run() -> void:
 	check(Catalog.CARDS["noctis"]["atk"] == 2300 and Catalog.CARDS["noctis"]["effect"] == "shield","Noctis retains defensive identity")
 	check(Catalog.validate(Catalog.DECK).is_empty() and Catalog.validate(Catalog.GERHANA).is_empty(),"Both presets valid")
 	check(Catalog.DECK.count("sprite") == 3 and Catalog.DECK.count("oracle") == 1,"Fajar has more card access")
-	check(Catalog.DECK.count("seal") == 1 and Catalog.DECK.count("sanctuary") == 1,"Fajar trades excess healing for counterplay")
+	check(Catalog.DECK.count("seal") == 1 and Catalog.DECK.count("bastion") == 1,"Fajar retains counters and gains defensive trap")
 	var types := {"monster":0,"spell":0,"trap":0}
 	for id in Catalog.DECK: types[Catalog.CARDS[id]["kind"]] += 1
-	check(types == {"monster":13,"spell":6,"trap":1},"Exact new Fajar composition")
+	check(types == {"monster":13,"spell":5,"trap":2},"Exact new Fajar composition")
 	var d = matchup()
 	check(d.attack(0,0),"Bara can challenge Noctis")
 	check(not d.fields[0][0].is_empty() and not d.fields[1][0].is_empty() and not d.fields[1][0]["shield"] and d.lp[1] == 3800,"Bara wins first exchange; Noctis spends shield")

@@ -34,6 +34,10 @@ var grove_used: Array = [false,false]
 var undo_stack: Array = []
 const UNDO_LIMIT = 64
 var rng := RandomNumberGenerator.new()
+var interactive_targets: bool = false
+var pending_choice: Dictionary = {}
+var archive_turn: Array = [-1,-1]
+var story_flags: Dictionary = {}
 
 func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalog.DECK, enemy_ids: Array = Catalog.DECK) -> void:
 	if seed_value < 0:
@@ -41,6 +45,9 @@ func start(seed_value: int = -1, first_side: int = 0, player_ids: Array = Catalo
 	else:
 		rng.seed = seed_value
 	undo_stack.clear()
+	pending_choice.clear()
+	archive_turn = [-1,-1]
+	story_flags.clear()
 	decks = [Catalog.deck(player_ids), Catalog.deck(enemy_ids)]
 	backrows = [[{},{},{}],[{},{},{}]]
 	chain.clear()
@@ -100,8 +107,8 @@ func empty_zone(side: int) -> int:
 			return i
 	return -1
 
-func play(index: int, target: int = -1, defending: bool = false) -> bool:
-	if over or not chain.is_empty() or phase != "MAIN":
+func play(index: int, target: int = -1, defending: bool = false, grave_target: int = -1) -> bool:
+	if over or not pending_choice.is_empty() or not chain.is_empty() or phase != "MAIN":
 		return reject("Kartu hanya bisa dimainkan pada Main Phase.")
 	if index < 0 or index >= hands[turn].size():
 		return false
@@ -109,7 +116,7 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	if card["kind"] == "trap":
 		return set_trap(index,target)
 	if card["kind"] == "spell":
-		return _spell(index, target)
+		return _spell(index, target, grave_target)
 	if summoned:
 		return reject("Normal summon hanya sekali setiap giliran.")
 	if target < 0 or target > 2:
@@ -126,6 +133,7 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	elif not fields[turn][target].is_empty():
 		return reject("Zona itu sudah terisi.")
 	_remember_action("Summon %s" % card["name"])
+	var tribute_bonus: int = 400 if tribute >= 0 and fields[turn][tribute]["effect"] == "tribute_ember" else 0
 	if tribute >= 0:
 		var tribute_name: String = fields[turn][tribute]["name"]
 		_remove(turn, tribute)
@@ -138,6 +146,7 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	monster["switched"] = false
 	monster["summoned_turn"] = turn_number
 	monster["shield"] = monster["effect"] == "shield"
+	monster["atk"] += tribute_bonus
 	if monster["effect"] == "root_power":
 		monster["root_bonus"] = root_bonus(turn,monster)
 		monster["atk"] += monster["root_bonus"]
@@ -148,18 +157,21 @@ func play(index: int, target: int = -1, defending: bool = false) -> bool:
 	visual.emit("summon", turn, target, 0)
 	if monster["effect"] == "twilight_setup":
 		_sentinel_setup(turn)
-	if monster["effect"] in ["burn","heal","draw","grove_recover"]:
-		_queue({"action":"summon","side":turn,"zone":target,"card":monster.duplicate(true)})
+	_finish_summon(monster,turn,target)
 	_check_end()
 	changed.emit()
 	return true
 
-func _spell(index: int, target: int) -> bool:
+func _spell(index: int, target: int, grave_target: int = -1) -> bool:
 	var card: Dictionary = hands[turn][index]
 	var effect: String = card["effect"]
 	if effect in ["recover","compost"] and recover_index(turn) < 0:
 		return reject("%s: butuh monster ALAM level 4 atau kurang di Grave." % card["name"])
-	if effect not in ["buff","destroy"]:
+	if effect == "archive" and (archive_turn[turn] == turn_number or grave_options(turn,true).is_empty()):
+		return reject("Arsip Rembulan: butuh trap di Grave dan belum dipakai giliran ini.")
+	if effect == "bounce" and lp[turn] <= 500: return reject("Butuh lebih dari 500 LP.")
+	if effect in ["oath","roots","bounce"] and not spell_target_legal(card,target,turn): return reject("Target atau syarat kartu belum sesuai.")
+	if effect not in ["buff","destroy","oath","roots","bounce"]:
 		target = -1
 	if effect == "buff":
 		if target < 0 or target > 2 or fields[turn][target].is_empty():
@@ -172,14 +184,25 @@ func _spell(index: int, target: int) -> bool:
 	var slot: int = empty_backrow(turn)
 	if slot < 0:
 		return reject("Ketiga zona spell/trap terisi. Sisakan zona untuk mengaktifkan spell.")
+	if effect in ["recover","compost","archive"]:
+		var options: Array = grave_options(turn,effect == "archive")
+		if grave_target < 0 and interactive_targets and turn == 0:
+			pending_choice = {"kind":"play","side":turn,"index":index,"target":target,"options":options,"title":card["name"]+" — dari Grave ke "+("dasar deck" if effect == "compost" else "tangan")}
+			changed.emit()
+			return true
+		if grave_target < 0: grave_target = options.back() if effect == "archive" else recover_index(turn)
+		if not options.has(grave_target): return false
 	_remember_action("Aktifkan %s" % card["name"])
+	var grave_uid: int = mark_grave(turn,grave_target) if grave_target >= 0 else -1
+	if effect == "bounce": _damage(turn,500)
+	if effect == "archive": archive_turn[turn] = turn_number
 	var played: Dictionary = hands[turn].pop_at(index)
 	played["faceup"] = true
 	backrows[turn][slot] = played
 	message.emit("%s mengaktifkan %s." % [who(turn),card["name"]])
-	var target_side: int = turn if effect in ["restore","buff","insight","recover","compost"] else 1-turn
+	var target_side: int = turn if effect in ["restore","buff","insight","recover","compost","archive","oath","roots"] else 1-turn
 	var target_uid: int = int(fields[target_side][target].get("uid",-1)) if target >= 0 else -1
-	_queue({"action":"spell","side":turn,"card":played,"slot":slot,"target":target,"target_side":target_side,"target_uid":target_uid})
+	_queue({"action":"spell","side":turn,"card":played,"slot":slot,"target":target,"target_side":target_side,"target_uid":target_uid,"grave_uid":grave_uid})
 	changed.emit()
 	return true
 
@@ -205,16 +228,32 @@ func _resolve_spell(event: Dictionary) -> void:
 			fields[side][target]["def"] = maxi(0,int(fields[side][target]["def"])+int(card.get("def_gain",400)))
 			if card.get("grants_piercing",false): fields[side][target]["piercing"] = true
 			if card.get("grants_shield",false): fields[side][target]["shield"] = true
-		"recover": _recover(side)
+		"oath":
+			temporary(fields[side][target],700,0)
+			fields[side][target]["oath_turn"] = turn_number
+			fields[side][target]["no_direct"] = true
+		"roots":
+			var gain: int = mini(3,nature_count(side))*400
+			temporary(fields[side][target],gain,gain)
+			fields[side][target]["roots_turn"] = turn_number
+		"bounce":
+			hands[1-side].append(Catalog.card(fields[1-side][target]["id"]))
+			fields[1-side][target] = {}
+		"archive":
+			var g: int = grave_by_uid(side,event.get("grave_uid",-1))
+			if g >= 0:
+				hands[side].append(Catalog.card(graves[side].pop_at(g)["id"]))
+				if side == 1: story_flags["nyx_archive"] = true
+		"recover": _recover(side,false,event.get("grave_uid",-1))
 		"compost":
-			if _recover(side,true):
+			if _recover(side,true,event.get("grave_uid",-1)):
 				_draw(side)
 				if not over: _heal(side,400)
 		"destroy": _remove(1-side,target)
 
 
 func battle() -> bool:
-	if over or not chain.is_empty() or phase != "MAIN":
+	if over or not pending_choice.is_empty() or not chain.is_empty() or phase != "MAIN":
 		return false
 	if turn_number == 1:
 		return reject("Pemain pertama belum bisa menyerang pada giliran pertama.")
@@ -225,7 +264,7 @@ func battle() -> bool:
 	return true
 
 func switch_position(zone: int) -> bool:
-	if over or not chain.is_empty() or phase != "MAIN" or zone < 0 or zone > 2:
+	if over or not pending_choice.is_empty() or not chain.is_empty() or phase != "MAIN" or zone < 0 or zone > 2:
 		return false
 	var monster: Dictionary = fields[turn][zone]
 	if monster.is_empty():
@@ -303,7 +342,7 @@ func _heal(side: int, amount: int) -> void:
 	visual.emit("heal", side, -1, actual)
 
 func skill() -> bool:
-	if over or not chain.is_empty() or phase != "MAIN" or skill_used[turn]:
+	if over or not pending_choice.is_empty() or not chain.is_empty() or phase != "MAIN" or skill_used[turn]:
 		return reject("Skill hanya sekali per duel, saat Main Phase.")
 	if int(lp[turn]) > 2500:
 		return reject("Skill Kebangkitan Fajar terbuka saat LP 2500 atau kurang.")
@@ -316,8 +355,16 @@ func skill() -> bool:
 	return true
 
 func end_turn() -> bool:
-	if over or not chain.is_empty():
+	if over or not pending_choice.is_empty() or not chain.is_empty():
 		return false
+	for board in fields:
+		for m in board:
+			if not m.is_empty():
+				m["atk"] = maxi(0,int(m["atk"])-int(m.get("temp_atk",0)))
+				m["def"] = maxi(0,int(m["def"])-int(m.get("temp_def",0)))
+				m.erase("temp_atk")
+				m.erase("temp_def")
+				m.erase("no_direct")
 	undo_stack.clear()
 	turn = 1 - turn
 	turn_number += 1
@@ -349,7 +396,7 @@ func empty_backrow(side: int) -> int:
 	return -1
 
 func set_trap(index: int, slot: int = -1) -> bool:
-	if over or not chain.is_empty() or phase != "MAIN" or index < 0 or index >= hands[turn].size():
+	if over or not pending_choice.is_empty() or not chain.is_empty() or phase != "MAIN" or index < 0 or index >= hands[turn].size():
 		return false
 	if hands[turn][index]["kind"] != "trap":
 		return false
@@ -367,11 +414,12 @@ func set_trap(index: int, slot: int = -1) -> bool:
 	return true
 
 func attack(attacker: int, target: int = -1) -> bool:
-	if over or not chain.is_empty() or phase != "BATTLE" or attacker < 0 or attacker > 2:
+	if over or not pending_choice.is_empty() or not chain.is_empty() or phase != "BATTLE" or attacker < 0 or attacker > 2:
 		return false
 	var source: Dictionary = fields[turn][attacker]
 	if source.is_empty() or source["defending"] or source["attacked"]:
 		return false
+	if target == -1 and source.get("no_direct",false): return reject("Sumpah Fajar: tidak dapat menyerang langsung giliran ini.")
 	if target < -1 or target > 2 or (target == -1 and has_monsters(1-turn)) or (target >= 0 and fields[1-turn][target].is_empty()):
 		return false
 	_remember_action("Serangan %s" % source["name"])
@@ -393,8 +441,10 @@ func response_options(side: int) -> Array:
 		var legal: bool = false
 		if card["effect"] == "negate":
 			legal = last["side"] != side and last["action"] in ["spell","trap"]
-		elif card["effect"] in ["reflect","weaken"]:
+		elif card["effect"] in ["reflect","weaken","bastion","trail"]:
 			legal = last["action"] == "attack" and last["side"] != side
+			if card["effect"] == "bastion": legal = legal and int(last.get("target",-1)) >= 0
+			if card["effect"] == "trail": legal = legal and not grave_options(side).is_empty()
 		if legal:
 			options.append(z)
 	return options
@@ -415,10 +465,18 @@ func _advance_response() -> void:
 			_resolve_chain()
 			break
 
-func respond(side: int, slot: int = -1) -> bool:
-	if side not in [0,1] or over or chain.is_empty() or side != priority:
+func respond(side: int, slot: int = -1, grave_target: int = -1) -> bool:
+	if side not in [0,1] or over or not pending_choice.is_empty() or chain.is_empty() or side != priority:
 		return false
 	if slot != -1 and not response_options(side).has(slot): return false
+	if slot >= 0 and backrows[side][slot]["effect"] == "trail":
+		var options: Array = grave_options(side)
+		if grave_target < 0 and interactive_targets and side == 0:
+			pending_choice = {"kind":"respond","side":side,"slot":slot,"options":options,"title":"Jejak yang Tumbuh — pilih ALAM dari Grave"}
+			changed.emit()
+			return true
+		if grave_target < 0: grave_target = recover_index(side)
+		if not options.has(grave_target): return false
 	if side == 0:
 		_remember_action("Lewati respons" if slot == -1 else "Respons %s" % backrows[side][slot]["name"],true)
 	if slot == -1:
@@ -430,7 +488,7 @@ func respond(side: int, slot: int = -1) -> bool:
 		backrows[side][slot] = {}
 		graves[side].append(card)
 		message.emit("Respons %s: %s (rantai %d)." % [who(side),card["name"],chain.size()+1])
-		chain.append({"action":"trap","side":side,"card":card,"source_slot":slot,"negates":chain.size()-1})
+		chain.append({"action":"trap","side":side,"card":card,"source_slot":slot,"negates":chain.size()-1,"grave_uid":mark_grave(side,grave_target) if grave_target >= 0 else -1})
 		passes = 0
 	priority = 1-side
 	if passes >= 2:
@@ -450,7 +508,11 @@ func _resolve_chain() -> void:
 		if action == "trap":
 			var original: Dictionary = chain[event["negates"]]
 			var target_zone: int = int(original.get("zone",-1)) if original["action"] == "attack" else -1
-			card_cue.emit({"id":card["id"],"action":"cast","side":side,"source_slot":event.get("source_slot",0),"target_side":1-side,"target_zone":target_zone,"target_card":fields[1-side][target_zone].duplicate(true) if target_zone >= 0 else {},"cancelled":event.get("cancelled",false)})
+			var cue_side: int = 1-side
+			if card["effect"] == "bastion":
+				cue_side = side
+				target_zone = int(original.get("target",-1))
+			card_cue.emit({"id":card["id"],"action":"cast","side":side,"source_slot":event.get("source_slot",0),"target_side":cue_side,"target_zone":target_zone,"target_card":fields[cue_side][target_zone].duplicate(true) if target_zone >= 0 else {},"cancelled":event.get("cancelled",false)})
 		if not event.get("cancelled",false) and not over:
 			message.emit("Selesaikan: %s." % card["name"])
 			match action:
@@ -460,17 +522,32 @@ func _resolve_chain() -> void:
 						"burn": _damage(1-side,300)
 						"heal": _heal(side,400)
 						"draw": _draw(side)
+						"weave":
+							var z: int = event.get("choice",-1)
+							if z >= 0 and not fields[1-side][z].is_empty(): fields[1-side][z]["defending"] = true
+						"tend":
+							if _recover(side,true,event.get("grave_uid",-1)): _draw(side)
 						"grove_recover":
-							if not grove_used[side] and _recover(side):
+							if not grove_used[side] and _recover(side,false,event.get("grave_uid",-1)):
 								grove_used[side] = true
 								card_cue.emit({"id":"grove","action":"recover","side":side,"target_side":side,"target_zone":event.get("zone",-1)})
 				"trap":
 					var previous: Dictionary = chain[event["negates"]]
 					match card["effect"]:
-						"negate": previous["cancelled"] = true
+						"negate":
+							previous["cancelled"] = true
+							if side == 0 and previous["side"] == 1 and previous["action"] == "trap": story_flags["aren_counter"] = true
 						"reflect":
 							previous["cancelled"] = true
 							_damage(1-side,300)
+						"bastion":
+							var t: int = previous["target"]
+							if t >= 0 and not fields[side][t].is_empty() and int(fields[side][t].get("uid",-1)) == previous["target_uid"]:
+								temporary(fields[side][t],700,700)
+						"trail":
+							if _recover(side,false,event.get("grave_uid",-1)):
+								var z: int = previous["zone"]
+								if not fields[1-side][z].is_empty() and fields[1-side][z].get("uid",-1) == previous["card"].get("uid",-2): temporary(fields[1-side][z],-400,0)
 						"weaken":
 							var z: int = previous["zone"]
 							if not fields[1-side][z].is_empty():
@@ -481,6 +558,7 @@ func _resolve_chain() -> void:
 					if not fields[side][z].is_empty() and (t < 0 or (not fields[1-side][t].is_empty() and int(fields[1-side][t].get("uid",-1)) == event["target_uid"])):
 						fields[side][z]["attacked"] = false
 						_attack_now(z,t)
+						if side == 0 and story_flags.get("aren_counter",false): story_flags["aren_breakthrough"] = true
 		else:
 			if event.get("cancelled",false):
 				message.emit("Efek/serangan %s dibatalkan." % card["name"])
@@ -511,7 +589,7 @@ func _sentinel_setup(side: int) -> void:
 		return
 	message.emit("Penjaga Senja: tidak ada Cermin Pembalasan di deck; efek tidak terpakai.")
 
-const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","enemy_name","next_uid","sentinel_used","grove_used"]
+const SNAPSHOT_FIELDS = ["decks","hands","fields","graves","lp","skill_used","turn","turn_number","phase","summoned","over","winner","backrows","chain","priority","passes","difficulty","enemy_name","next_uid","sentinel_used","grove_used","pending_choice","archive_turn","story_flags"]
 
 func _remember_action(label: String, during_response: bool = false) -> void:
 	if turn != 0 or over or (not chain.is_empty() and not during_response): return
@@ -551,8 +629,8 @@ func recover_index(side: int) -> int:
 			best_atk = int(base["atk"])
 	return best
 
-func _recover(side: int, to_deck: bool = false) -> bool:
-	var index: int = recover_index(side)
+func _recover(side: int, to_deck: bool = false, token: int = -1) -> bool:
+	var index: int = recover_index(side) if token < 0 else grave_by_uid(side,token)
 	if index < 0:
 		message.emit("Tidak ada monster ALAM level 4 atau kurang yang bisa dipulihkan.")
 		return false
@@ -571,3 +649,94 @@ func nature_count(side: int) -> int:
 
 func root_bonus(side: int, card: Dictionary) -> int:
 	return mini(nature_count(side),int(card.get("root_cap",3)))*int(card.get("root_step",150))
+
+func grave_options(side: int, traps: bool = false) -> Array:
+	var result: Array = []
+	for i in range(graves[side].size()):
+		var c: Dictionary = Catalog.card(graves[side][i]["id"])
+		if (traps and c["kind"] == "trap") or (not traps and c["kind"] == "monster" and c["element"] == "ALAM" and c["level"] <= 4): result.append(i)
+	return result
+
+func mark_grave(side: int, index: int) -> int:
+	if index < 0 or index >= graves[side].size(): return -1
+	if not graves[side][index].has("grave_uid"):
+		next_uid += 1
+		graves[side][index]["grave_uid"] = next_uid
+	return int(graves[side][index]["grave_uid"])
+
+func grave_by_uid(side: int, token: int) -> int:
+	for i in range(graves[side].size()):
+		if int(graves[side][i].get("grave_uid",-2)) == token: return i
+	return -1
+
+func temporary(monster: Dictionary, atk_gain: int, def_gain: int) -> void:
+	var actual_atk: int = maxi(0,int(monster["atk"])+atk_gain)-int(monster["atk"])
+	var actual_def: int = maxi(0,int(monster["def"])+def_gain)-int(monster["def"])
+	monster["atk"] += actual_atk
+	monster["def"] += actual_def
+	monster["temp_atk"] = int(monster.get("temp_atk",0))+actual_atk
+	monster["temp_def"] = int(monster.get("temp_def",0))+actual_def
+
+func spell_target_legal(card: Dictionary, target: int, side: int) -> bool:
+	if target < 0 or target > 2: return false
+	var effect: String = card["effect"]
+	var m: Dictionary = fields[1-side if effect == "bounce" else side][target]
+	if m.is_empty(): return false
+	match effect:
+		"bounce": return lp[side] > 500 and m["level"] <= 4
+		"oath": return has_monsters(1-side) and not m["attacked"] and int(m.get("oath_turn",-1)) != turn_number
+		"roots": return m["element"] == "ALAM" and nature_count(side) > 0 and int(m.get("roots_turn",-1)) != turn_number
+	return false
+
+func _finish_summon(monster: Dictionary, side: int, zone: int) -> void:
+	var effect: String = monster["effect"]
+	if effect in ["grove_recover","tend","weave"]:
+		if effect == "grove_recover" and grove_used[side]: return
+		var options: Array = []
+		if effect == "weave":
+			for z in range(3):
+				if not fields[1-side][z].is_empty() and not fields[1-side][z]["defending"]: options.append(z)
+		else: options = grave_options(side)
+		if options.is_empty(): return
+		var event := {"action":"summon","side":side,"zone":zone,"card":monster.duplicate(true)}
+		if interactive_targets and side == 0:
+			pending_choice = {"kind":"summon","side":side,"event":event,"options":options,"board":effect == "weave","title":monster["name"]+" — "+("ubah lawan ke posisi bertahan" if effect == "weave" else ("Grave ke dasar deck, lalu ambil 1" if effect == "tend" else "Grave ke tangan"))}
+		else:
+			var selected: int = recover_index(side)
+			if effect == "weave":
+				selected = -1
+				var gain: int = 0
+				for z in options:
+					var m: Dictionary = fields[1-side][z]
+					if int(m["atk"])-int(m["def"]) > gain:
+						gain = int(m["atk"])-int(m["def"])
+						selected = z
+				if selected < 0: return
+			event["choice"] = selected
+			event["grave_uid"] = mark_grave(side,selected) if effect != "weave" else -1
+			_queue(event)
+	elif effect in ["burn","heal","draw"]:
+		_queue({"action":"summon","side":side,"zone":zone,"card":monster.duplicate(true)})
+
+func choice_options(side: int) -> Array:
+	if pending_choice.is_empty() or pending_choice["side"] != side: return []
+	return pending_choice["options"].duplicate()
+
+func choose_target(side: int, index: int) -> bool:
+	if pending_choice.is_empty() or pending_choice["side"] != side: return false
+	if index != -1 and not choice_options(side).has(index): return false
+	var choice: Dictionary = pending_choice.duplicate(true)
+	pending_choice.clear()
+	if index == -1:
+		changed.emit()
+		return true
+	match choice["kind"]:
+		"play": return play(choice["index"],choice["target"],false,index)
+		"respond": return respond(side,choice["slot"],index)
+		"summon":
+			var event: Dictionary = choice["event"]
+			event["choice"] = index
+			event["grave_uid"] = -1 if choice.get("board",false) else mark_grave(side,index)
+			_queue(event)
+	changed.emit()
+	return true

@@ -40,7 +40,7 @@ func run() -> void:
 	var traps := 0
 	for id in Catalog.GERHANA:
 		if Catalog.CARDS[id]["kind"] == "trap": traps += 1
-	check(traps == 4 and Catalog.GERHANA.size() == 20,"Gerhana has four traps in twenty cards")
+	check(traps == 3 and Catalog.GERHANA.size() == 20,"Gerhana has three traps in twenty cards")
 	var d = Duel.new()
 	d.start(19,0,Catalog.GERHANA,Catalog.GERHANA)
 	d.decks[0] = [Catalog.card("mirror"),Catalog.card("mirror"),Catalog.card("storm")]
@@ -67,14 +67,14 @@ func run() -> void:
 	board = load("res://main.tscn").instantiate()
 	root.add_child(board)
 	await process_frame
-	check(not board.has_method("_open_builder"),"No deck-builder game entry point")
+	check(board.has_method("_open_builder"),"Deck builder available")
 	board.collection_store.customs["custom_legacy"] = {"name":"Old deck","cards":Catalog.GERHANA}
 	board.collection_store.active = "custom_legacy"
 	board._refresh_deck_choices()
-	check(board.deck_select.item_count == 3,"Three preset decks are selectable")
+	check(board.deck_select.item_count == 4,"Presets and legacy custom deck selectable")
 	board._begin_duel(0)
 	var total_pool: Array = board.duel.hands[0]+board.duel.decks[0]
-	check(total_pool.filter(func(c): return c["id"] == "dawn").size() == 3,"Legacy custom selection cannot enter duel")
+	check(total_pool.filter(func(c): return c["id"] == "noctis").size() == Catalog.GERHANA.count("noctis"),"Legacy custom deck enters duel unchanged")
 	board._open_menu()
 	await capture("eldoria-v09-menu")
 	board.collection_store.active = "gerhana"

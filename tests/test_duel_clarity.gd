@@ -65,7 +65,7 @@ func run() -> void:
 	await process_frame
 	if DisplayServer.get_name() != "headless":
 		RenderingServer.force_draw(false)
-		root.get_texture().get_image().save_png("C:/Users/Kafka/Documents/Codex/2026-10-25/jadi-kan-aku-mau-buat-game/outputs/eldoria-v13-duel-clarity.png")
+		root.get_texture().get_image().save_png("user://eldoria-v13-duel-clarity.png")
 	board._open_menu()
 	board.queue_free()
 	await process_frame
