@@ -243,10 +243,11 @@ func _build_ui() -> void:
 	detail_card = CardView.new()
 	detail_card.large = true
 	detail_card.disabled = true
-	detail_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	detail_card.mouse_filter = Control.MOUSE_FILTER_STOP
+	detail_card.gui_input.connect(_scroll_card_description.bind(detail_card))
 	_place(detail_card,self,Rect2(32,136,232,230))
 	detail_type = _label(self,"",Rect2(34,377,226,23),14,CYAN)
-	_label(self,"EFEK KARTU",Rect2(34,409,226,22),14,CYAN)
+	_label(self,"EFEK KARTU / GULIR",Rect2(34,409,226,22),14,CYAN)
 	detail_desc = RichTextLabel.new()
 	detail_desc.add_theme_font_size_override("normal_font_size",17)
 	detail_desc.add_theme_color_override("default_color",LIGHT)
@@ -254,7 +255,7 @@ func _build_ui() -> void:
 	_label(self,"CERITA",Rect2(34,530,226,22),14,GOLD)
 	detail_lore = _reading_text(self,Rect2(34,558,226,61),15,MUTED)
 	_button(self,"PERBESAR KARTU",Rect2(34,625,226,40),func(): _open_card_zoom(inspected_card))
-	_label(self,"Klik kanan / E untuk detail besar.",Rect2(34,674,226,21),12,MUTED)
+	_label(self,"Gulir di kartu / teks. E: detail.",Rect2(34,674,226,21),12,MUTED)
 	for side in range(2):
 		var x: float = 298 if side == 0 else 747
 		_panel(self,Rect2(x,81,245,58),Color("#486575"))
@@ -283,6 +284,7 @@ func _build_ui() -> void:
 			view.mouse_entered.connect(_zone_hover.bind(side,index))
 			view.mouse_exited.connect(_hide_hover)
 			view.inspect_requested.connect(_open_card_zoom)
+			view.gui_input.connect(_scroll_card_description.bind(view))
 			zone_views[side].append(view)
 	for side in range(2):
 		var x: int = 302 if side == 0 else 903
@@ -645,6 +647,7 @@ func _render() -> void:
 		card.mouse_entered.connect(_hand_hover.bind(index))
 		card.mouse_exited.connect(_hide_hover)
 		card.inspect_requested.connect(_open_card_zoom)
+		card.gui_input.connect(_scroll_card_description.bind(card))
 		var reason: String = Hints.hand_reason(duel,card.data)
 		card.action_hint = "BISA DIMAINKAN" if reason.is_empty() else "BELUM BISA"
 		card.tooltip_text = reason if not reason.is_empty() else "Klik kiri: pilih / Klik kanan: detail besar"
@@ -688,23 +691,32 @@ func _render() -> void:
 func _inspect(card: Dictionary) -> void:
 	if card.is_empty():
 		return
+	var same_card: bool = inspected_card.get("id","") == card["id"] and inspected_card.get("uid",-1) == card.get("uid",-1)
 	inspected_card = card.duplicate(true)
 	detail_card.data = inspected_card
 	detail_card.queue_redraw()
 	detail_type.text = Catalog.type_text(card)
 	detail_type.tooltip_text = Hints.stats(card)
-	detail_desc.text = card["text"]
-	if card.get("piercing",false): detail_desc.text += "\n\nSTATUS PAPAN: MENEMBUS DEF. Selisih ATK terhadap DEF mengurangi LP lawan."
-	if card.get("shield",false): detail_desc.text += "\n\nSTATUS PAPAN: PERISAI aktif (1 kehancuran akibat serangan)."
+	var description: String = card["text"]
+	if card.get("piercing",false): description += "\n\nSTATUS PAPAN: MENEMBUS DEF. Selisih ATK terhadap DEF mengurangi LP lawan."
+	if card.get("shield",false): description += "\n\nSTATUS PAPAN: PERISAI aktif (1 kehancuran akibat serangan)."
 	if card["effect"] in ["recover","compost","grove_recover"] and not menu_layer.visible and not gallery.visible:
 		var index: int = duel.recover_index(0)
-		detail_desc.text += "\n\nGrave kamu: " + ("pilihan target tersedia, misalnya "+duel.graves[0][index]["name"] if index >= 0 else "belum ada target yang sesuai.")
-		if card["effect"] == "grove_recover" and duel.grove_used[0]: detail_desc.text += " Pemulihan Penjaga Tunas sudah dipakai pada duel ini."
+		description += "\n\nGrave kamu: " + ("pilihan target tersedia, misalnya "+duel.graves[0][index]["name"] if index >= 0 else "belum ada target yang sesuai.")
+		if card["effect"] == "grove_recover" and duel.grove_used[0]: description += " Pemulihan Penjaga Tunas sudah dipakai pada duel ini."
 	if card["effect"] == "root_power" and not menu_layer.visible and not gallery.visible:
-		detail_desc.text += ("\n\nBonus saat summon: +%d ATK (tetap selama di papan)." % card.get("root_bonus",0)) if card.has("uid") else ("\n\nBonus dari isi Grave sekarang: +%d ATK. Tribute ALAM ikut dihitung ketika summon." % duel.root_bonus(0,card))
-	detail_desc.scroll_to_line(0)
-	detail_lore.text = card.get("lore", "")
-	detail_lore.scroll_to_line(0)
+		description += ("\n\nBonus saat summon: +%d ATK (tetap selama di papan)." % card.get("root_bonus",0)) if card.has("uid") else ("\n\nBonus dari isi Grave sekarang: +%d ATK. Tribute ALAM ikut dihitung ketika summon." % duel.root_bonus(0,card))
+	if detail_desc.text != description:
+		detail_desc.text = description
+		detail_desc.scroll_to_line(0)
+	elif not same_card:
+		detail_desc.scroll_to_line(0)
+	var lore: String = card.get("lore", "")
+	if detail_lore.text != lore:
+		detail_lore.text = lore
+		detail_lore.scroll_to_line(0)
+	elif not same_card:
+		detail_lore.scroll_to_line(0)
 
 func _hand_hover(index: int) -> void:
 	if index >= 0 and index < duel.hands[0].size():
@@ -1406,6 +1418,7 @@ func _build_strategy_ui() -> void:
 			button.add_theme_font_size_override("font_size",11)
 			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			button.mouse_entered.connect(_backrow_hover.bind(side,z))
+			button.gui_input.connect(_backrow_description_scroll.bind(side,z))
 			backrow_views[side].append(button)
 	# Backrow controls belong below modal layers in the scene tree.
 	for side in range(2):
@@ -1974,3 +1987,27 @@ func _flush_story_comments() -> void:
 				if token != session: break
 				story_comment.hide()
 	story_comment_waiting = false
+
+func _scroll_card_description(event: InputEvent, source: Control) -> void:
+	if not event is InputEventMouseButton or not event.pressed or event.shift_pressed:
+		return
+	if event.button_index not in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:
+		return
+	if inspected_card.is_empty() or _effects_obscured() or builder.visible or target_layer.visible:
+		return
+	if source is CardView and source.data.is_empty():
+		return
+	var bar: VScrollBar = detail_desc.get_v_scroll_bar()
+	if bar.max_value <= bar.page:
+		return
+	var direction: float = -1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0
+	var step: float = detail_desc.get_theme_font("normal_font").get_height(detail_desc.get_theme_font_size("normal_font_size"))*3.0
+	var factor: float = event.factor if event.factor > 0.0 else 1.0
+	bar.value = clampf(bar.value+direction*step*factor,bar.min_value,maxf(bar.min_value,bar.max_value-bar.page))
+	source.accept_event()
+
+func _backrow_description_scroll(event: InputEvent, side: int, zone: int) -> void:
+	var card: Dictionary = duel.backrows[side][zone]
+	if card.is_empty() or (side == 1 and not card.get("faceup",false)):
+		return
+	_scroll_card_description(event,backrow_views[side][zone])
