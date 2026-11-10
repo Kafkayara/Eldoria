@@ -305,16 +305,24 @@ func _build_ui() -> void:
 	enemy_hand.add_theme_constant_override("separation",4)
 	_place(enemy_hand,self,Rect2(791,145,200,16))
 	status_label = _label(self,"",Rect2(298,480,694,34),16,CYAN)
-	hand_label = _label(self,"",Rect2(298,522,477,22),14,GOLD)
-	mode_button = _button(self,"Summon: MENYERANG",Rect2(779,516,213,31),_toggle_summon_mode)
+	hand_label = _label(self,"",Rect2(298,512,477,22),14,GOLD)
+	mode_button = _button(self,"Summon: MENYERANG",Rect2(779,512,213,24),_toggle_summon_mode)
 	mode_button.add_theme_font_size_override("font_size",13)
 	hand_scroll = ScrollContainer.new()
 	hand_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	hand_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_place(hand_scroll,self,Rect2(297,555,695,154))
+	_place(hand_scroll,self,Rect2(297,527,695,192))
 	hand_box = HBoxContainer.new()
 	hand_box.add_theme_constant_override("separation",12)
-	hand_scroll.add_child(hand_box)
+	var hand_padding := MarginContainer.new()
+	hand_padding.add_theme_constant_override("margin_top",34)
+	hand_padding.add_theme_constant_override("margin_left",6)
+	hand_padding.add_theme_constant_override("margin_right",6)
+	hand_padding.add_theme_constant_override("margin_bottom",6)
+	hand_scroll.add_child(hand_padding)
+	hand_padding.add_child(hand_box)
+	hand_box.sort_children.connect(func(): call_deferred("_animate_hand_selection"))
+	move_child(mode_button,hand_scroll.get_index()+1)
 	_panel(self,Rect2(1010,80,252,624),Color("#4d6672"))
 	_label(self,"KOMANDO DUEL",Rect2(1028,97,216,26),16,GOLD)
 	context_label = _label(self,"",Rect2(1028,133,216,114),14,LIGHT)
@@ -888,7 +896,7 @@ func _visual(kind: String, side: int, zone: int, amount: int) -> void:
 		"trap_set":
 			_float_text("TRAP DIPASANG",Vector2(800,400) if side == 0 else Vector2(300,200),GOLD)
 		"spell": _sound("spell")
-		"attack": _sound("attack")
+		"attack": pass # Impact sound is scheduled with the combat report.
 		"damage": _health_change(side,amount,false)
 		"heal": _health_change(side,amount,true)
 		"shield": _shield_at_impact(side,zone)
@@ -1168,15 +1176,25 @@ func _animate_summon(side: int, zone: int) -> void:
 		origin = hand_box.get_child(selected_hand).global_position
 	var target: Vector2 = _zone_center(side,zone)-Vector2(73,71)
 	_place(ghost,fx,Rect2(origin,Vector2(146,142)))
+	ghost.pivot_offset = ghost.size/2.0
+	ghost.scale = Vector2(0.84,0.84)
+	ghost.rotation = -0.07 if side == 0 else 0.07
 	var view = zone_views[side][zone]
 	view.self_modulate.a = 0.0
 	var tween := ghost.create_tween()
-	tween.tween_property(ghost,"position",target,_pace(0.42)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.set_parallel(true)
+	tween.tween_property(ghost,"position",target,_pace(0.42)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(ghost,"scale",Vector2.ONE,_pace(0.42)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(ghost,"rotation",0.0,_pace(0.42))
+	tween.set_parallel(false)
 	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
 	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.12))
 	tween.tween_callback(ghost.queue_free)
 
 func _combat_explained(report: Dictionary) -> void:
+	# Capture before damage changes the model; trap presentation may replay this later.
+	var damage: int = int(report["attack"]) if report["direct"] else (maxi(0,int(report["difference"])) if not report["defending"] or report.get("piercing",false) else 0)
+	report["finisher"] = report.get("finisher",damage > 0 and damage >= int(duel.lp[1-int(report["side"])]))
 	if trap_presenting:
 		delayed_combats.append(report.duplicate(true))
 		return
@@ -1214,8 +1232,9 @@ func _animate_attack(report: Dictionary) -> void:
 	var delay: float = fx.impact_delay(card_id,"attack")
 	impact_until = Time.get_ticks_msec()/1000.0+delay
 	var shatter: bool = not report["direct"] and not report.get("target_card",{}).get("shield",false) and (int(report["difference"]) > 0 or (int(report["difference"]) == 0 and not report["defending"]))
-	fx.play_card(card_id,"attack",source,target,{"shatter":shatter})
-	if int(report["attack"]) >= 2000: _delayed_sound("heavy_impact",delay,session)
+	var lethal: bool = report.get("finisher",false)
+	fx.play_card(card_id,"attack",source,target,{"shatter":shatter,"power":int(report["attack"]),"finisher":lethal})
+	_delayed_sound("heavy_impact" if int(report["attack"]) >= 2000 else "attack",delay,session)
 	if fx.reduced_motion:
 		return
 	var ghost := CardView.new()
@@ -1226,18 +1245,25 @@ func _animate_attack(report: Dictionary) -> void:
 	ghost.set_meta("card_visual",true)
 	var origin: Vector2 = source-Vector2(73,71)
 	_place(ghost,fx,Rect2(origin,Vector2(146,142)))
+	ghost.pivot_offset = ghost.size/2.0
 	var source_view = zone_views[side][zone]
 	source_view.self_modulate.a = 0
 	var direction: Vector2 = (target-source).normalized()
 	var tween := ghost.create_tween()
-	tween.tween_property(ghost,"position",origin-direction*4,_pace(0.1))
-	tween.tween_property(ghost,"position",origin+direction*10,_pace(0.12)).set_trans(Tween.TRANS_QUAD)
-	tween.tween_interval(maxf(0.01,delay-_pace(0.22)))
-	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.13))
+	var lunge: float = minf(42.0,source.distance_to(target)*0.24)
+	tween.tween_property(ghost,"position",origin-direction*12,_pace(0.13)).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(ghost,"scale",Vector2(1.06,1.06),_pace(0.13))
+	tween.parallel().tween_property(ghost,"rotation",0.035*direction.y,_pace(0.13))
+	tween.tween_property(ghost,"position",origin+direction*lunge,maxf(0.02,delay-_pace(0.13))).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(ghost,"rotation",-0.025*direction.y,maxf(0.02,delay-_pace(0.13)))
+	tween.tween_property(ghost,"position",origin,_pace(0.16)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(ghost,"scale",Vector2.ONE,_pace(0.16))
+	tween.parallel().tween_property(ghost,"rotation",0.0,_pace(0.16))
+	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.06))
 	tween.tween_callback(func(): source_view.self_modulate = Color.WHITE)
 	tween.tween_callback(ghost.queue_free)
 	if report["target"] >= 0:
-		_hold_target(report.get("target_card",{}),1-side,report["target"],delay)
+		_hold_target(report.get("target_card",{}),1-side,report["target"],delay,direction)
 
 func _build_gallery() -> void:
 	gallery = Gallery.new()
@@ -1291,7 +1317,7 @@ func _card_visual(cue: Dictionary) -> void:
 	if action == "cast" and target_zone >= 0 and not fx.reduced_motion:
 		_hold_target(cue.get("target_card",{}),target_side,target_zone,delay)
 
-func _hold_target(card: Dictionary, side: int, zone: int, delay: float) -> void:
+func _hold_target(card: Dictionary, side: int, zone: int, delay: float, recoil: Vector2 = Vector2.ZERO) -> void:
 	if card.is_empty():
 		return
 	var ghost := CardView.new()
@@ -1304,7 +1330,13 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float) -> void:
 	view.self_modulate.a = 0
 	var tween := ghost.create_tween()
 	tween.tween_interval(delay)
-	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.14))
+	if recoil != Vector2.ZERO:
+		ghost.pivot_offset = ghost.size/2.0
+		tween.tween_property(ghost,"position",ghost.position+recoil*10,_pace(0.065)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(ghost,"scale",Vector2(0.97,0.97),_pace(0.065))
+		tween.tween_property(ghost,"position",ghost.position,_pace(0.10))
+		tween.parallel().tween_property(ghost,"scale",Vector2.ONE,_pace(0.10))
+	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.10))
 	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
 	tween.tween_callback(ghost.queue_free)
 
@@ -1562,22 +1594,27 @@ func _play_trap_visuals(token: int) -> void:
 		ghost.disabled = true
 		ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ghost.set_meta("card_visual",true)
+		var slot: int = cue.get("source_slot",0)
+		var source := Vector2(948,355+49*slot) if side == 0 else Vector2(342,186+49*slot)
 		_place(ghost,fx,Rect2(412,538,132,169))
 		ghost.pivot_offset = ghost.size/2.0
 		if not fx.reduced_motion:
-			ghost.scale.x = 0.05
-			ghost.create_tween().tween_property(ghost,"scale:x",1.0,_pace(0.18))
+			ghost.position = source-ghost.size/2
+			ghost.scale = Vector2(0.05,0.65)
+			ghost.rotation = -0.08
+			var flip := ghost.create_tween().set_parallel(true)
+			flip.tween_property(ghost,"position",Vector2(412,538),_pace(0.23)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			flip.tween_property(ghost,"scale",Vector2.ONE,_pace(0.23)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			flip.tween_property(ghost,"rotation",0.0,_pace(0.23))
 		var note := _panel(fx,Rect2(555,548,436,145),GOLD)
 		note.set_meta("card_visual",true)
 		_label(note,("DIBATALKAN / " if cancelled else "TRAP AKTIF / ")+duel.who(side),Rect2(12,8,410,23),15,GOLD)
 		_label(note,card["name"],Rect2(12,34,410,28),22,LIGHT)
 		_label(note,"Efek dibatalkan oleh respons lawan." if cancelled else card["text"],Rect2(12,69,410,67),16,MUTED)
-		var slot: int = cue.get("source_slot",0)
-		var source := Vector2(948,355+49*slot) if side == 0 else Vector2(342,186+49*slot)
 		var target := Vector2(645,309) if cue["id"] == "seal" else _zone_center(cue["target_side"],maxi(0,int(cue["target_zone"])))
 		fx.play_card(cue["id"],"cancel" if cancelled else "cast",source,target)
 		_sound("trap_reveal")
-		await get_tree().create_timer(_pace(0.38 if fx.reduced_motion else 1.15)).timeout
+		await get_tree().create_timer(_pace(0.38 if fx.reduced_motion else 0.85)).timeout
 		if token != session: return
 		if is_instance_valid(ghost): ghost.queue_free()
 		if is_instance_valid(note): note.queue_free()
@@ -1603,7 +1640,7 @@ func _show_ace_intro(card: Dictionary, side: int) -> void:
 	var key: String = "%d:%s" % [side,card["id"]]
 	if ace_seen.has(key): return
 	ace_seen[key] = true
-	ace_active_until = Time.get_ticks_msec()/1000.0+_pace(1.05)
+	ace_active_until = Time.get_ticks_msec()/1000.0+_pace(AceCutin.DURATION)
 	_finish_ace(session)
 	var cutin := AceCutin.new()
 	cutin.animation_speed = collection_store.animation_speed
@@ -1611,10 +1648,11 @@ func _show_ace_intro(card: Dictionary, side: int) -> void:
 	cutin.owner_text = "KAMU" if side == 0 else duel.who(1).to_upper()
 	cutin.accent = Effects.PROFILES[card["id"]]["color"]
 	cutin.occlusion_check = _effects_obscured
+	cutin.impact.connect(_sound.bind("heavy_impact"))
 	cutin.z_index = 3
 	cutin.set_meta("card_visual",true)
 	cutin.set_meta("ace_cutin",true)
-	_place(cutin,fx,Rect2(296,174,696,240))
+	_place(cutin,fx,Rect2(0,0,1280,720))
 	_sound("ace_summon")
 
 func _delayed_sound(name_value: String, delay: float, token: int) -> void:
@@ -1656,7 +1694,7 @@ func _ace_active() -> bool:
 	return Time.get_ticks_msec()/1000.0 < ace_active_until
 
 func _finish_ace(token: int) -> void:
-	await get_tree().create_timer(_pace(1.08)).timeout
+	await get_tree().create_timer(_pace(AceCutin.DURATION+0.03)).timeout
 	if token == session:
 		ace_active_until = 0.0
 		_render()
@@ -2011,3 +2049,15 @@ func _backrow_description_scroll(event: InputEvent, side: int, zone: int) -> voi
 	if card.is_empty() or (side == 1 and not card.get("faceup",false)):
 		return
 	_scroll_card_description(event,backrow_views[side][zone])
+
+func _animate_hand_selection() -> void:
+	for card in hand_box.get_children():
+		if not card.selected: continue
+		if card.get_meta("selection_lift_started",false):
+			card.position.y = -22.0
+			continue
+		card.set_meta("selection_lift_started",true)
+		if collection_store.reduced_motion:
+			card.position.y = -22.0
+		else:
+			card.create_tween().tween_property(card,"position:y",-22.0,_pace(0.16)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

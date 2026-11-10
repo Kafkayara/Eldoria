@@ -61,7 +61,7 @@ func run() -> void:
 	for child in board.fx.get_children():
 		if child.get_meta("ace_cutin",false): check(not child.visible,"Cut-in respects help modal")
 	board.help_layer.hide()
-	await create_timer(1.0).timeout
+	await create_timer(1.8).timeout
 	check(ace_count() == 0 and not board._ace_active() and board._can_input(),"Cut-in expires and input resumes")
 	board._show_ace_intro(Catalog.card("noctis"),0)
 	check(ace_count() == 0,"Same ace does not replay repeatedly in one duel")

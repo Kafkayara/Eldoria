@@ -166,6 +166,8 @@ func _draw_event(event: Dictionary) -> void:
 		Sigils.draw(painter,event["card_id"],b,18+_phase(t,0,duration)*5,color,0,2)
 		return
 	_draw_cinema(event,a,b,color,light,travel,after,hit)
+	if event["action"] == "attack":
+		_draw_impact_depth(event,a,b,color,light,travel,after,hit)
 	if event["action"] == "cancel":
 		var half: float = 17+travel*12
 		painter.draw_line(b-Vector2(half,half),b+Vector2(half,half),_color(Color("#c7a8b2"),fade),3,true)
@@ -553,6 +555,42 @@ func _draw_cinema(event: Dictionary, a: Vector2, b: Vector2, color: Color, light
 				var radius_value: float = 4*(1-after)+1
 				var shard := Sigils.points([Vector2(0,-1),Vector2(0.65,0.3),Vector2(-0.5,0.7)],point,radius_value,angle+after)
 				painter.draw_colored_polygon(shard,_color(color,1-after))
+
+func _draw_impact_depth(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: Color, travel: float, after: float, hit: bool) -> void:
+	var weight: float = clampf(float(event.get("power",1500))/2200.0,0.55,1.35)
+	if event.get("finisher",false): weight *= 1.35
+	var direction: Vector2 = (b-a).normalized()
+	var normal := Vector2(-direction.y,direction.x)
+	if not hit:
+		var head: Vector2 = a.lerp(b,pow(travel,1.8))
+		for i in [-1,1]:
+			var offset: Vector2 = normal*i*(12+travel*9)*weight
+			painter.draw_line(head+offset-direction*38*travel,head+offset,_color(light,travel*0.42),1.5,true)
+		return
+	var flash: float = pow(1-after,3)
+	# Keep profile hits below the toolbar and above the hand.
+	var edge_scale: float = clampf(minf(b.y-124,500-b.y)/110.0,0.15,1.0)
+	weight *= edge_scale
+	# Local impact light instead of a full-screen white flash or shaking text.
+	for i in range(4,0,-1):
+		painter.draw_circle(b,(9+i*10)*weight,_color(color,flash*0.035))
+	var ring := PackedVector2Array()
+	for i in range(49):
+		var angle: float = i*TAU/48
+		ring.append(b+Vector2(cos(angle),sin(angle)*0.46)*(15+after*92)*weight)
+	painter.draw_polyline(ring,_color(light,(1-after)*0.65),2.0,true)
+	for i in range(10):
+		var angle: float = i*TAU/10+0.23
+		var ray := Vector2.from_angle(angle)
+		var start: Vector2 = b+ray*(8+after*30)*weight
+		painter.draw_line(start,start+ray*(14+after*37)*(1-after)*weight,_color(light,flash),2.0,true)
+	if event.get("finisher",false):
+		for i in range(3):
+			var wave := PackedVector2Array()
+			for j in range(65):
+				var angle: float = j*TAU/64
+				wave.append(Vector2(646,322)+Vector2(cos(angle)*1.8,sin(angle))*(45+after*90+i*12))
+			painter.draw_polyline(wave,_color(color,(1-after)*0.24),2,true)
 
 func _draw_lunar(event: Dictionary, a: Vector2, b: Vector2, color: Color, light: Color, travel: float, after: float, hit: bool) -> void:
 	var id: String = event["card_id"]

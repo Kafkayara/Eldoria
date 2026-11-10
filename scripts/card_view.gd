@@ -100,7 +100,14 @@ func _draw() -> void:
 	var spent: bool = data.get("attacked",false)
 	var defending: bool = data.get("defending",false)
 	if selected:
-		_box(Rect2(Vector2(-3,-3),size+Vector2(6,6)),Color("#d3be91"),Color("#fff0c9"),1,3)
+		for margin in [6,4]:
+			var glow := StyleBoxFlat.new()
+			glow.bg_color = Color.TRANSPARENT
+			glow.border_color = Color(0.35,0.88,1.0,0.20 if margin == 6 else 0.45)
+			glow.set_border_width_all(2)
+			glow.set_corner_radius_all(5)
+			draw_style_box(glow,Rect2(Vector2(-margin,-margin),size+Vector2(margin*2,margin*2)))
+		_box(Rect2(Vector2(-2,-2),size+Vector2(4,4)),Color("#d3be91"),Color("#8defff"),2,3)
 	_box(outer,Color("#ddd0dc") if trap else (Color("#d3dfd4") if spell else Color("#e7dec7")),Color("#f7eccd") if selected or hover else edge,2,2)
 	var element_colors: Dictionary = {"CAHAYA":Color("#a28a54"),"API":Color("#b46c4d"),"BULAN":Color("#89819e"),"ALAM":Color("#618774"),"SPELL":Color("#64897b")}
 	draw_rect(Rect2(5,4,maxf(1,size.x-10),2),element_colors.get(data["element"],edge))
@@ -130,6 +137,15 @@ func _draw() -> void:
 		region.position += margin+art_offset*margin*0.70
 		region.size -= margin*2
 	draw_texture_rect_region(art_texture,art_rect,region,Color(0.72,0.73,0.70) if spent else Color(0.96,0.94,0.89))
+	if hover and allow_art_motion and not spent:
+		# Foil is confined to the illustration, leaving the printed text still and clear.
+		var bounds := PackedVector2Array([art_rect.position,Vector2(art_rect.end.x,art_rect.position.y),art_rect.end,Vector2(art_rect.position.x,art_rect.end.y)])
+		var sweep: float = art_rect.position.x+art_rect.size.x*(0.5+art_offset.x*0.35)
+		for i in range(5):
+			var x: float = sweep+(i-2)*6
+			var strip := PackedVector2Array([Vector2(x,art_rect.position.y),Vector2(x+7,art_rect.position.y),Vector2(x-18,art_rect.end.y),Vector2(x-25,art_rect.end.y)])
+			for clipped in Geometry2D.intersect_polygons(bounds,strip):
+				draw_colored_polygon(clipped,Color(0.91,0.95,1.0,0.035*(3-absi(i-2))))
 	draw_rect(art_rect,edge.darkened(0.4),false,1)
 	if size.x >= 100:
 		draw_rect(Rect2(art_rect.position+Vector2(2,2),Vector2(20,20)),Color(0.91,0.88,0.78,0.96))

@@ -2,7 +2,11 @@
 
 Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini adalah prototipe solo yang bisa dimainkan hingga menang atau kalah.
 
-## Versi 0.19 — Jejak Strategi
+## Animasi duel 2.5D
+
+Summon pertama Naga Bara, Noctis, dan Akar Purba kini memiliki panggung ilustrasi berperspektif dengan lapisan bara, gerhana, atau akar. Kartu mengantisipasi serangan, melesat saat benturan, dan target bereaksi; suara benturan mengikuti waktu impact. Trap muncul dari slotnya, foil mengikuti pointer pada ilustrasi kartu, dan serangan penentu mendapat gelombang arena. Cut-in berlangsung 1,9 detik pada 1x, mengikuti kecepatan animasi, dan dilewati pada mode Ringkas. [Rincian dan cara menguji](docs/cinematic-duel.md).
+
+## Versi 0.19 - Jejak Strategi
 
 Sembilan kartu baru langsung tersedia, total 34 jenis dengan ilustrasi unik. Deck builder aktif kembali; susun dan simpan deck untuk duel bebas. Pilih sendiri target Grave, coba tiga preset baru, serta temui gaya duel Nyx yang diperbarui di Buku I Bab 3. Efek baru didukung AI, Undo, dan mode Ringkas. Aturan, hasil 10.800 simulasi, serta batas keseimbangan: [Jejak Strategi](docs/duel-variety-v19.md).
 
