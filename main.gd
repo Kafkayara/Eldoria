@@ -625,6 +625,7 @@ func _render() -> void:
 		for index in range(3):
 			var view = zone_views[side][index]
 			view.data = duel.fields[side][index]
+			_set_field_pose(view)
 			view.action_hint = Hints.monster_status(duel,view.data) if side == 0 else ""
 			view.tooltip_text = Hints.stats(view.data)
 			view.selected = side == 0 and index == selected_zone
@@ -1161,6 +1162,12 @@ func _reset_visuals() -> void:
 	status_label.show()
 	combat_serial += 1
 
+func _set_field_pose(view: CardView) -> void:
+	var defending: bool = view.data.get("defending", false)
+	view.pivot_offset = view.size / 2.0
+	view.rotation = -PI / 2.0 if defending else 0.0
+	view.scale = Vector2.ONE * minf(1.0, view.size.y / view.size.x) if defending else Vector2.ONE
+
 func _animate_summon(side: int, zone: int) -> void:
 	var card: Dictionary = duel.fields[side][zone]
 	if not card.is_empty(): _show_ace_intro(card,side)
@@ -1177,6 +1184,9 @@ func _animate_summon(side: int, zone: int) -> void:
 	var target: Vector2 = _zone_center(side,zone)-Vector2(73,71)
 	_place(ghost,fx,Rect2(origin,Vector2(146,142)))
 	ghost.pivot_offset = ghost.size/2.0
+	_set_field_pose(ghost)
+	var landing_scale := ghost.scale
+	var landing_rotation := ghost.rotation
 	ghost.scale = Vector2(0.84,0.84)
 	ghost.rotation = -0.07 if side == 0 else 0.07
 	var view = zone_views[side][zone]
@@ -1184,8 +1194,8 @@ func _animate_summon(side: int, zone: int) -> void:
 	var tween := ghost.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(ghost,"position",target,_pace(0.42)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(ghost,"scale",Vector2.ONE,_pace(0.42)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(ghost,"rotation",0.0,_pace(0.42))
+	tween.tween_property(ghost,"scale",landing_scale,_pace(0.42)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(ghost,"rotation",landing_rotation,_pace(0.42))
 	tween.set_parallel(false)
 	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
 	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.12))
@@ -1326,6 +1336,8 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float, recoil: 
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ghost.set_meta("card_visual",true)
 	_place(ghost,fx,Rect2(_zone_center(side,zone)-Vector2(73,71),Vector2(146,142)))
+	_set_field_pose(ghost)
+	var resting_scale := ghost.scale
 	var view = zone_views[side][zone]
 	view.self_modulate.a = 0
 	var tween := ghost.create_tween()
@@ -1333,9 +1345,9 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float, recoil: 
 	if recoil != Vector2.ZERO:
 		ghost.pivot_offset = ghost.size/2.0
 		tween.tween_property(ghost,"position",ghost.position+recoil*10,_pace(0.065)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(ghost,"scale",Vector2(0.97,0.97),_pace(0.065))
+		tween.parallel().tween_property(ghost,"scale",resting_scale*0.97,_pace(0.065))
 		tween.tween_property(ghost,"position",ghost.position,_pace(0.10))
-		tween.parallel().tween_property(ghost,"scale",Vector2.ONE,_pace(0.10))
+		tween.parallel().tween_property(ghost,"scale",resting_scale,_pace(0.10))
 	tween.tween_property(ghost,"modulate:a",0.0,_pace(0.10))
 	tween.tween_callback(func(): view.self_modulate = Color.WHITE)
 	tween.tween_callback(ghost.queue_free)
