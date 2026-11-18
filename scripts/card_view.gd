@@ -3,6 +3,17 @@ const Catalog = preload("res://scripts/catalog.gd")
 const Art = preload("res://scripts/card_art.gd")
 const Sigils = preload("res://scripts/sigils.gd")
 const ATLAS = Art.ATLAS
+const FIELD_SIZE = Vector2(146,142)
+const FIELD_CENTER = Vector2(73,77)
+const FIELD_BODY = Vector2(68,94)
+var field_mode := false
+var field_angle := 0.0:
+	set(value):
+		field_angle = value
+		queue_redraw()
+var field_uid: int = -1
+var field_target := 0.0
+var field_tween: Tween
 signal inspect_requested(card_data: Dictionary)
 static var allow_art_motion: bool = true
 var art_offset := Vector2.ZERO
@@ -23,6 +34,64 @@ func _ready() -> void:
 	focus_exited.connect(queue_redraw)
 	resized.connect(queue_redraw)
 	gui_input.connect(_inspect_input)
+
+func set_field_pose(duration: float = 0.0) -> void:
+	field_mode = true
+	var uid: int = int(data.get("uid",-1))
+	var angle: float = -PI/2 if data.get("defending",false) else 0.0
+	if uid == field_uid and angle == field_target and duration > 0:
+		return
+	if field_tween and field_tween.is_valid(): field_tween.kill()
+	if duration > 0 and uid == field_uid and uid >= 0:
+		field_tween = create_tween()
+		field_tween.tween_property(self,"field_angle",angle,duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	else:
+		field_angle = angle
+	field_uid = uid
+	field_target = angle
+
+func _draw_field() -> void:
+	var defending: bool = data.get("defending",false)
+	var spent: bool = data.get("attacked",false)
+	var accent := Color("#a6d9de") if defending else Color("#f2dca9")
+	var focused: bool = selected or has_focus() or (is_hovered() and not disabled)
+	if focused:
+		_box(Rect2(Vector2.ZERO,size),Color(0.06,0.15,0.20,0.65),Color("#8defff"),2,4)
+	# Rotate only the card body; labels and the full zone hit area stay upright.
+	draw_set_transform(FIELD_CENTER,field_angle)
+	var body := Rect2(-FIELD_BODY/2,FIELD_BODY)
+	_box(body,Color("#e7dec7"),accent,2,3)
+	var art := body.grow(-4)
+	var region: Rect2 = Art.region_for(data)
+	var crop_width: float = region.size.y*art.size.x/art.size.y
+	region.position.x += (region.size.x-crop_width)/2
+	region.size.x = crop_width
+	if is_hovered() and allow_art_motion:
+		var margin: Vector2 = region.size*0.025
+		region.position += margin+art_offset*margin*0.7
+		region.size -= margin*2
+	draw_texture_rect_region(Art.texture_for(data),art,region,Color(0.65,0.67,0.68) if spent else Color.WHITE)
+	draw_set_transform(Vector2.ZERO)
+	_title(str(data["name"]),14,Color("#f7eccd"))
+	var state: String = "BERTAHAN" if defending else ("SELESAI" if spent else "SERANG")
+	if not action_hint.is_empty() and not defending and not spent:
+		state += " / "+action_hint
+	var badge_width: float = minf(size.x-8,font.get_string_size(state,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x+10)
+	draw_rect(Rect2((size.x-badge_width)/2,111,badge_width,14),Color("#102938"))
+	_text(state,122,10,accent)
+	var base: Dictionary = Catalog.card(data["id"])
+	for index in range(2):
+		var stat: String = "atk" if index == 0 else "def"
+		var value: String = "%s %d" % [stat.to_upper(),data[stat]]
+		var color := Color("#9ce3bb") if data[stat] > base[stat] else (Color("#ffa4a4") if data[stat] < base[stat] else Color("#f7eccd"))
+		var width: float = font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x
+		draw_string(font,Vector2(size.x*(0.25+index*0.5)-width/2,140),value,HORIZONTAL_ALIGNMENT_LEFT,-1,13,color)
+	if data.get("shield",false):
+		draw_rect(Rect2(43,35,60,15),Color("#102938"))
+		_text("PERISAI",47,10,Color("#a6d9de"))
+	if data.get("piercing",false):
+		draw_rect(Rect2(38,48,70,15),Color("#102938"))
+		_text("MENEMBUS",60,10,Color("#f2dca9"))
 
 func _inspect_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and allow_art_motion:
@@ -56,7 +125,7 @@ func _text(value: String, y: float, fs: int, color: Color, centered: bool = true
 func _title(value: String, fs: int, color: Color) -> void:
 	var width: float = size.x-16
 	if font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x <= width:
-		_text(value,25 if not large else 34,fs,color)
+		_text(value,21 if field_mode else (25 if not large else 34),fs,color)
 		return
 	var first: String = ""
 	var second: String = ""
@@ -68,10 +137,13 @@ func _title(value: String, fs: int, color: Color) -> void:
 			second = word if second.is_empty() else second+" "+word
 	if first.is_empty():
 		first = value
-	_text(first,18 if not large else 27,fs,color)
-	_text(second,35 if not large else 52,fs,color)
+	_text(first,13 if field_mode else (18 if not large else 27),fs,color)
+	_text(second,28 if field_mode else (35 if not large else 52),fs,color)
 
 func _draw() -> void:
+	if field_mode and not data.is_empty():
+		_draw_field()
+		return
 	var gold := Color("#9a8053")
 	var cyan := Color("#316d77")
 	var hover: bool = is_hovered() and not disabled

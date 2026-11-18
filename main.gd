@@ -279,7 +279,7 @@ func _build_ui() -> void:
 		for index in range(3):
 			var view := CardView.new()
 			view.empty_caption = "ZONA %s" % ["I","II","III"][index]
-			_place(view,self,Rect2(415+158*index,165 if side == 1 else 334,146,142))
+			_place(view,self,Rect2(Vector2(415+158*index,165 if side == 1 else 334),CardView.FIELD_SIZE))
 			view.pressed.connect(_zone_clicked.bind(side,index))
 			view.mouse_entered.connect(_zone_hover.bind(side,index))
 			view.mouse_exited.connect(_hide_hover)
@@ -299,6 +299,7 @@ func _build_ui() -> void:
 		grave_labels.append(grave_label)
 		var grave_button := _button(self,"GRAVE / LIHAT",Rect2(x,y+108,95,24),_open_grave.bind(side))
 		grave_button.add_theme_font_size_override("font_size",10)
+		grave_button.size = Vector2(95,24)
 		grave_button.tooltip_text = "Klik untuk melihat kartu di Grave."
 		grave_buttons.append(grave_button)
 	enemy_hand = HBoxContainer.new()
@@ -625,7 +626,7 @@ func _render() -> void:
 		for index in range(3):
 			var view = zone_views[side][index]
 			view.data = duel.fields[side][index]
-			_set_field_pose(view)
+			_set_field_pose(view,true)
 			view.action_hint = Hints.monster_status(duel,view.data) if side == 0 else ""
 			view.tooltip_text = Hints.stats(view.data)
 			view.selected = side == 0 and index == selected_zone
@@ -879,7 +880,7 @@ func _message(text_value: String) -> void:
 	status_label.text = text_value
 
 func _zone_center(side: int, zone: int) -> Vector2:
-	return Vector2(488+158*maxi(zone,0),236 if side == 1 else 405)
+	return zone_views[side][maxi(zone,0)].position+CardView.FIELD_CENTER
 
 func _visual(kind: String, side: int, zone: int, amount: int) -> void:
 	if starting:
@@ -1153,6 +1154,8 @@ func _reset_visuals() -> void:
 		_set_lp_value(4000.0,side)
 		for view in zone_views[side]:
 			view.self_modulate = Color.WHITE
+			view.set_field_pose()
+			view.field_uid = -1
 	for child in fx.get_children():
 		if child != combat_notice and child != fx.painter and child != fx.glow_painter:
 			fx.remove_child(child)
@@ -1162,11 +1165,9 @@ func _reset_visuals() -> void:
 	status_label.show()
 	combat_serial += 1
 
-func _set_field_pose(view: CardView) -> void:
-	var defending: bool = view.data.get("defending", false)
-	view.pivot_offset = view.size / 2.0
-	view.rotation = -PI / 2.0 if defending else 0.0
-	view.scale = Vector2.ONE * minf(1.0, view.size.y / view.size.x) if defending else Vector2.ONE
+func _set_field_pose(view: CardView, animate: bool = false) -> void:
+	view.pivot_offset = CardView.FIELD_CENTER
+	view.set_field_pose(_pace(0.24) if animate and not fx.reduced_motion else 0.0)
 
 func _animate_summon(side: int, zone: int) -> void:
 	var card: Dictionary = duel.fields[side][zone]
@@ -1181,8 +1182,8 @@ func _animate_summon(side: int, zone: int) -> void:
 	var origin := Vector2(800,143) if side == 1 else Vector2(302,352)
 	if side == 0 and selected_hand >= 0 and selected_hand < hand_box.get_child_count():
 		origin = hand_box.get_child(selected_hand).global_position
-	var target: Vector2 = _zone_center(side,zone)-Vector2(73,71)
-	_place(ghost,fx,Rect2(origin,Vector2(146,142)))
+	var target: Vector2 = _zone_center(side,zone)-CardView.FIELD_CENTER
+	_place(ghost,fx,Rect2(origin,CardView.FIELD_SIZE))
 	ghost.pivot_offset = ghost.size/2.0
 	_set_field_pose(ghost)
 	var landing_scale := ghost.scale
@@ -1253,9 +1254,9 @@ func _animate_attack(report: Dictionary) -> void:
 	ghost.disabled = true
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ghost.set_meta("card_visual",true)
-	var origin: Vector2 = source-Vector2(73,71)
-	_place(ghost,fx,Rect2(origin,Vector2(146,142)))
-	ghost.pivot_offset = ghost.size/2.0
+	var origin: Vector2 = source-CardView.FIELD_CENTER
+	_place(ghost,fx,Rect2(origin,CardView.FIELD_SIZE))
+	_set_field_pose(ghost)
 	var source_view = zone_views[side][zone]
 	source_view.self_modulate.a = 0
 	var direction: Vector2 = (target-source).normalized()
@@ -1335,7 +1336,7 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float, recoil: 
 	ghost.disabled = true
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ghost.set_meta("card_visual",true)
-	_place(ghost,fx,Rect2(_zone_center(side,zone)-Vector2(73,71),Vector2(146,142)))
+	_place(ghost,fx,Rect2(_zone_center(side,zone)-CardView.FIELD_CENTER,CardView.FIELD_SIZE))
 	_set_field_pose(ghost)
 	var resting_scale := ghost.scale
 	var view = zone_views[side][zone]
@@ -1343,7 +1344,7 @@ func _hold_target(card: Dictionary, side: int, zone: int, delay: float, recoil: 
 	var tween := ghost.create_tween()
 	tween.tween_interval(delay)
 	if recoil != Vector2.ZERO:
-		ghost.pivot_offset = ghost.size/2.0
+		ghost.pivot_offset = CardView.FIELD_CENTER
 		tween.tween_property(ghost,"position",ghost.position+recoil*10,_pace(0.065)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tween.parallel().tween_property(ghost,"scale",resting_scale*0.97,_pace(0.065))
 		tween.tween_property(ghost,"position",ghost.position,_pace(0.10))
@@ -1796,6 +1797,9 @@ func _apply_comfort_preferences() -> void:
 	fx.animation_speed = collection_store.animation_speed
 	fx.reduced_motion = collection_store.reduced_motion
 	CardView.allow_art_motion = not fx.reduced_motion
+	if fx.reduced_motion:
+		for side in zone_views:
+			for view in side: view.set_field_pose()
 	effects_button.text = "EFEK: RINGKAS" if fx.reduced_motion else "EFEK: NORMAL"
 	settings_music.set_value_no_signal(collection_store.music_gain*100)
 	music_value.text = "%d%%" % roundi(collection_store.music_gain*100)

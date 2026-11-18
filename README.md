@@ -2,6 +2,10 @@
 
 Game duel kartu anime orisinal untuk PC, dibuat dengan **Godot 4.7**. Versi ini adalah prototipe solo yang bisa dimainkan hingga menang atau kalah.
 
+## Arena dan posisi kartu
+
+Kartu arena kini memakai badan portrait 68×94 saat menyerang dan landscape 94×68 saat bertahan. Nama, statistik, indikator posisi, dan area klik tetap mendatar. Pergantian posisi mengikuti kecepatan animasi; mode Ringkas langsung menampilkan posisi akhir. Summon, snapshot serangan, dan Undo memakai geometri yang sama. [Hasil pemeriksaan tahap 1 dan cara mencoba](docs/arena-stage-one.md).
+
 ## Animasi duel 2.5D
 
 Summon pertama Naga Bara, Noctis, dan Akar Purba kini memiliki panggung ilustrasi berperspektif dengan lapisan bara, gerhana, atau akar. Kartu mengantisipasi serangan, melesat saat benturan, dan target bereaksi; suara benturan mengikuti waktu impact. Trap muncul dari slotnya, foil mengikuti pointer pada ilustrasi kartu, dan serangan penentu mendapat gelombang arena. Cut-in berlangsung 1,9 detik pada 1x, mengikuti kecepatan animasi, dan dilewati pada mode Ringkas. [Rincian dan cara menguji](docs/cinematic-duel.md).
